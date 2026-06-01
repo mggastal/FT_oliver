@@ -29,11 +29,11 @@ USAR_VENDAS      = False             # False = oculta menu Vendas (Hotmart)
 MOEDA            = "USD"
 
 # Metas do funil — define cores (verde/amarelo/vermelho)
-CPL_BOM          = 3.0    # Custo por Lead ≤ bom → verde | bom-medio → amarelo | acima → vermelho
-CPL_MEDIO        = 4.0
+CPL_BOM          = 10.0    # Custo por Lead ≤ bom → verde | bom-medio → amarelo | acima → vermelho
+CPL_MEDIO        = 13.0
 CTR_BOM          = 1.2    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
 CTR_MEDIO        = 1.0
-CR_BOM           = 65.0   # Connect Rate ≥ 65% → verde | 60-65% → amarelo | abaixo → vermelho
+CR_BOM           = 66.0   # Connect Rate ≥ 65% → verde | 60-65% → amarelo | abaixo → vermelho
 CR_MEDIO         = 60.0
 TX_CONV_BOM      = 25.0   # Taxa Conversão (Lead/PV) ≥ 25% → verde | 18-25% → amarelo | abaixo → vermelho
 TX_CONV_MEDIO    = 18.0
