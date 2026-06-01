@@ -9,7 +9,7 @@ from pathlib import Path
 # CONFIG
 # ══════════════════════════════════════════════════════
 
-SHEET_ID         = "14hAMhJxwTidYCidz6-JI4G4hwmMcnYNAIcaRYnez9rc"
+SHEET_ID         = "1aoaYI0MwB8VFy9h2-C8BJEV1H3BTohRDJ68NT0lFt5g"
 TEMPLATE_FILE    = "dashboard_lancamento_gratuito.html"
 OUTPUT_FILE      = "index.html"
 
