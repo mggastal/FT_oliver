@@ -5,10 +5,10 @@
   "lancamento": "SWING02",
   "moeda": "USD",
   "moeda_simbolo": "$",
-  "atualizado": "01/06/2026",
+  "atualizado": "02/06/2026",
   "kpis": {
-    "spend": 28278.34,
+    "spend": 28981.62,
     "leads": 3,
-    "cpl": 9426.11
+    "cpl": 9660.54
   }
 }
