@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gerador Dashboard Lançamento Gratuito v2 — leads = Action Omni Complete Registration"""
+"""Gerador Dashboard Lançamento Gratuito v2 — leads = Action FB Pixel Complete Registration (Offsite Conversion)"""
 
 import pandas as pd, json, re, hashlib, requests
 from datetime import date
@@ -88,8 +88,8 @@ def load_meta():
         "Impressions":"impressions",
         "Action Link Clicks":"link_clicks",
         "Action Landing Page View":"page_view",
-        # ← ALTERADO: leads agora vem de Action Omni Complete Registration
-        "Action Omni Complete Registration":"leads"
+        # ← leads = Action FB Pixel Complete Registration (Offsite Conversion)
+        "Action FB Pixel Complete Registration (Offsite Conversion)":"leads"
     })
     df["date"]=pd.to_datetime(df["date"],errors="coerce")
     for c in ["spend","impressions","link_clicks","page_view","leads"]:
@@ -252,8 +252,8 @@ def meta_breakdowns(df):
         df_ga=pd.read_csv(URL_GA)
         df_ga["date"]=pd.to_datetime(df_ga["Date"],errors="coerce")
         df_ga["spend"]=to_num(df_ga["Spend (Cost, Amount Spent)"])
-        # ← ALTERADO: breakdown também usa Action Omni Complete Registration
-        leads_col_ga = "Action Omni Complete Registration" if "Action Omni Complete Registration" in df_ga.columns else "Action Leads"
+        # ← breakdown usa Action FB Pixel Complete Registration (Offsite Conversion)
+        leads_col_ga = "Action FB Pixel Complete Registration (Offsite Conversion)" if "Action FB Pixel Complete Registration (Offsite Conversion)" in df_ga.columns else "Action Leads"
         df_ga["leads"]=to_num(df_ga[leads_col_ga])
         df_ga["age"]=df_ga["Age (Breakdown)"].astype(str)
         df_ga["gender"]=df_ga["Gender (Breakdown)"].astype(str)
@@ -267,8 +267,8 @@ def meta_breakdowns(df):
         df_pt=pd.read_csv(URL_PT)
         df_pt["date"]=pd.to_datetime(df_pt["Date"],errors="coerce")
         df_pt["spend"]=to_num(df_pt["Spend (Cost, Amount Spent)"])
-        # ← ALTERADO: breakdown também usa Action Omni Complete Registration
-        leads_col_pt = "Action Omni Complete Registration" if "Action Omni Complete Registration" in df_pt.columns else "Action Leads"
+        # ← breakdown usa Action FB Pixel Complete Registration (Offsite Conversion)
+        leads_col_pt = "Action FB Pixel Complete Registration (Offsite Conversion)" if "Action FB Pixel Complete Registration (Offsite Conversion)" in df_pt.columns else "Action Leads"
         df_pt["leads"]=to_num(df_pt[leads_col_pt])
         df_pt["platform"]=df_pt["Platform Position (Breakdown)"].astype(str)
         if "Campaign Name" in df_pt.columns and LANCAMENTO_COD:
@@ -338,8 +338,8 @@ def hotmart_data():
         try:
             df_m=pd.read_csv(URL_META)
             df_m["spend"]=to_num(df_m.get("Spend (Cost, Amount Spent)",pd.Series([0]*len(df_m))))
-            # ← ALTERADO: também usa Action Omni Complete Registration no cruzamento Hotmart
-            leads_col_hm = "Action Omni Complete Registration" if "Action Omni Complete Registration" in df_m.columns else "Action Leads"
+            # ← Hotmart cruzamento usa Action FB Pixel Complete Registration (Offsite Conversion)
+            leads_col_hm = "Action FB Pixel Complete Registration (Offsite Conversion)" if "Action FB Pixel Complete Registration (Offsite Conversion)" in df_m.columns else "Action Leads"
             df_m["leads"]=to_num(df_m.get(leads_col_hm, pd.Series([0]*len(df_m))))
             if LANCAMENTO_COD:
                 df_m=df_m[df_m.get("Campaign Name",pd.Series([""])).str.contains(LANCAMENTO_COD,na=False)]
@@ -542,7 +542,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, h
 def main():
     print("="*60)
     print(f"Dashboard — {NOME_CLIENTE} / {LANCAMENTO_COD or 'Todos'}")
-    print(f"Leads via: Action Omni Complete Registration")
+    print(f"Leads via: Action FB Pixel Complete Registration (Offsite Conversion)")
     print(f"Moeda: {MOEDA} ({MOEDA_SIMBOLO})")
     print("="*60)
     img_dir=Path("imgs"); img_dir.mkdir(exist_ok=True)
@@ -556,7 +556,7 @@ def main():
     m_t=meta_tables(df_meta,img_dir)
     m_bd=meta_breakdowns(df_meta)
     total_leads=m_k["lct"]["leads"] if LANCAMENTO_COD else m_k["all"]["leads"]
-    print(f"  ✓ {total_leads} leads (Omni Complete Reg.) | {MOEDA_SIMBOLO} {m_k['lct']['spend']:,.2f} invest.")
+    print(f"  ✓ {total_leads} leads (FB Pixel Offsite) | {MOEDA_SIMBOLO} {m_k['lct']['spend']:,.2f} invest.")
 
     print("\n[HOTMART]")
     if USAR_VENDAS:
