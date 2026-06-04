@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gerador Dashboard Lançamento Gratuito v2"""
+"""Gerador Dashboard Lançamento Gratuito v2 — leads = Action Omni Complete Registration"""
 
 import pandas as pd, json, re, hashlib, requests
 from datetime import date
@@ -18,30 +18,24 @@ LOGO_LETRA       = "OV"
 COR_ACENTO       = "#800080"
 
 LANCAMENTO_COD   = "SWING02"        # filtra campanhas; "" = ver tudo
-USAR_PESQUISA    = False          # False = oculta aba Pesquisa
-USAR_VENDAS      = False             # False = oculta menu Vendas (Hotmart)
+USAR_PESQUISA    = False
+USAR_VENDAS      = False
 
 # ══ MOEDA ══════════════════════════════════════════════
-# Escolha a moeda do cliente:
-#   "BRL"  → R$ (Real Brasileiro)
-#   "USD"  → $ (Dólar Americano)
-#   "EUR"  → € (Euro)
 MOEDA            = "USD"
 
-# Metas do funil — define cores (verde/amarelo/vermelho)
-CPL_BOM          = 10.0    # Custo por Lead ≤ bom → verde | bom-medio → amarelo | acima → vermelho
+# Metas do funil
+CPL_BOM          = 10.0
 CPL_MEDIO        = 13.0
-CTR_BOM          = 1.2    # CTR ≥ 1.2% → verde | 0.8-1.2% → amarelo | abaixo → vermelho
+CTR_BOM          = 1.2
 CTR_MEDIO        = 1.0
-CR_BOM           = 66.0   # Connect Rate ≥ 65% → verde | 60-65% → amarelo | abaixo → vermelho
+CR_BOM           = 66.0
 CR_MEDIO         = 60.0
-TX_CONV_BOM      = 25.0   # Taxa Conversão (Lead/PV) ≥ 25% → verde | 18-25% → amarelo | abaixo → vermelho
+TX_CONV_BOM      = 25.0
 TX_CONV_MEDIO    = 18.0
 CPM_BOM          = 5.0
 CPM_MEDIO        = 12.0
 
-# ══════════════════════════════════════════════════════
-# Mapeamento de moeda → símbolo e label
 MOEDA_MAP = {
     "BRL": {"simbolo": "R$", "label": "Real (R$)"},
     "USD": {"simbolo": "$",  "label": "Dólar ($)"},
@@ -57,7 +51,6 @@ URL_META = sheet_url("meta-ads")
 URL_PES  = sheet_url("Pesquisa")
 URL_GA   = sheet_url("breakdown-gender-age")
 URL_PT   = sheet_url("breakdown-platform")
-
 URL_HOTMART = sheet_url("hotmart")
 
 def to_num(s):
@@ -95,7 +88,8 @@ def load_meta():
         "Impressions":"impressions",
         "Action Link Clicks":"link_clicks",
         "Action Landing Page View":"page_view",
-        "Action Leads":"leads"
+        # ← ALTERADO: leads agora vem de Action Omni Complete Registration
+        "Action Omni Complete Registration":"leads"
     })
     df["date"]=pd.to_datetime(df["date"],errors="coerce")
     for c in ["spend","impressions","link_clicks","page_view","leads"]:
@@ -171,11 +165,9 @@ def meta_raw(df):
         })
     return rows
 
-# ══ STATUS (bolinha verde/cinza) ══════════════════════
 _STATUS_PRIORITY=["ACTIVE","WITH_ISSUES","PAUSED","ADSET_PAUSED","CAMPAIGN_PAUSED","ARCHIVED"]
 
 def _pick_status(group):
-    """Status atual: linha de data mais recente. Em empate, preferir ACTIVE; senão usar prioridade."""
     if "status" not in group.columns or group.empty: return ""
     g=group.dropna(subset=["date"])
     if g.empty: return ""
@@ -187,7 +179,6 @@ def _pick_status(group):
     return str(latest["status"].iloc[0])
 
 def build_status_maps(df):
-    """Retorna 3 dicts: camp_status, adset_status, ad_status."""
     camp_status={}; adset_status={}; ad_status={}
     if "status" not in df.columns: return camp_status, adset_status, ad_status
     for camp,g in df.groupby("campaign"):
@@ -261,7 +252,9 @@ def meta_breakdowns(df):
         df_ga=pd.read_csv(URL_GA)
         df_ga["date"]=pd.to_datetime(df_ga["Date"],errors="coerce")
         df_ga["spend"]=to_num(df_ga["Spend (Cost, Amount Spent)"])
-        df_ga["leads"]=to_num(df_ga["Action Leads"])
+        # ← ALTERADO: breakdown também usa Action Omni Complete Registration
+        leads_col_ga = "Action Omni Complete Registration" if "Action Omni Complete Registration" in df_ga.columns else "Action Leads"
+        df_ga["leads"]=to_num(df_ga[leads_col_ga])
         df_ga["age"]=df_ga["Age (Breakdown)"].astype(str)
         df_ga["gender"]=df_ga["Gender (Breakdown)"].astype(str)
         if "Campaign Name" in df_ga.columns and LANCAMENTO_COD:
@@ -274,7 +267,9 @@ def meta_breakdowns(df):
         df_pt=pd.read_csv(URL_PT)
         df_pt["date"]=pd.to_datetime(df_pt["Date"],errors="coerce")
         df_pt["spend"]=to_num(df_pt["Spend (Cost, Amount Spent)"])
-        df_pt["leads"]=to_num(df_pt["Action Leads"])
+        # ← ALTERADO: breakdown também usa Action Omni Complete Registration
+        leads_col_pt = "Action Omni Complete Registration" if "Action Omni Complete Registration" in df_pt.columns else "Action Leads"
+        df_pt["leads"]=to_num(df_pt[leads_col_pt])
         df_pt["platform"]=df_pt["Platform Position (Breakdown)"].astype(str)
         if "Campaign Name" in df_pt.columns and LANCAMENTO_COD:
             df_pt["is_lct"]=df_pt["Campaign Name"].str.contains(LANCAMENTO_COD,na=False,case=False)
@@ -339,12 +334,13 @@ def hotmart_data():
         df=df[df["status"].isin(["APPROVED","COMPLETE"])].dropna(subset=["date"])
         print(f"     {len(df)} vendas aprovadas | {MOEDA_SIMBOLO}{df['price'].sum():,.2f}")
 
-        # Investimento Meta (só LANCAMENTO_COD)
         df_meta_inv=None
         try:
             df_m=pd.read_csv(URL_META)
             df_m["spend"]=to_num(df_m.get("Spend (Cost, Amount Spent)",pd.Series([0]*len(df_m))))
-            df_m["leads"]=to_num(df_m.get("Action Leads",pd.Series([0]*len(df_m))))
+            # ← ALTERADO: também usa Action Omni Complete Registration no cruzamento Hotmart
+            leads_col_hm = "Action Omni Complete Registration" if "Action Omni Complete Registration" in df_m.columns else "Action Leads"
+            df_m["leads"]=to_num(df_m.get(leads_col_hm, pd.Series([0]*len(df_m))))
             if LANCAMENTO_COD:
                 df_m=df_m[df_m.get("Campaign Name",pd.Series([""])).str.contains(LANCAMENTO_COD,na=False)]
             df_meta_inv=df_m
@@ -358,42 +354,31 @@ def hotmart_data():
         ad_leads_d=df_meta_inv.groupby("Ad Name")["leads"].sum().to_dict() if df_meta_inv is not None else {}
         total_inv=df_meta_inv["spend"].sum() if df_meta_inv is not None else 0
 
-        # Diário
         dg=df.groupby(df["date"].dt.strftime("%d/%m")).agg(vendas=("price","count"),receita=("price","sum")).reset_index().sort_values("date")
         daily={"days":dg["date"].tolist(),"vendas":dg["vendas"].tolist(),"receita":[round(v,2) for v in dg["receita"]]}
 
-        # Canal SCK
         df["canal"]=df["sck"].astype(str).str.split("|").str[0].replace({"nan":"Sem rastreio","":"Sem rastreio"})
         cg=df.groupby("canal").agg(v=("price","count"),r=("price","sum")).reset_index().sort_values("v",ascending=False)
         canal=[{"n":str(r["canal"]),"v":int(r["v"]),"r":round(float(r["r"]),2)} for _,r in cg.iterrows()]
 
-        # SCK detalhado
         sg=df.groupby("sck").agg(v=("price","count"),r=("price","sum")).reset_index().sort_values("v",ascending=False)
         sck_data=[{"n":str(r["sck"]),"v":int(r["v"]),"r":round(float(r["r"]),2)} for _,r in sg.iterrows()]
 
-        # Temperatura
         camp_col=df["utm_camp"].fillna("").astype(str).str.upper()
         df["temp"]=camp_col.apply(lambda x:"Quente" if "TT" in x else("Frio" if "TF" in x else "Sem rastreio"))
         tg=df.groupby("temp").agg(v=("price","count"),r=("price","sum")).reset_index()
         tg["_o"]=tg["temp"].map({"Quente":0,"Frio":1,"Sem rastreio":2})
         temperatura=[{"n":str(r["temp"]),"v":int(r["v"]),"r":round(float(r["r"]),2)} for _,r in tg.sort_values("_o").iterrows()]
 
-        # Pagamentos
         def fmt_pgto(m):
             m2 = str(m).strip().lower()
             if 'parcel' in m2: return 'Parcelado'
             if 'complet' in m2: return 'Completo'
             return str(m).strip() if m and str(m)!='nan' else 'Outro'
-        def fmt_pgto_full(m):
-            m2 = str(m).strip().lower()
-            if 'parcel' in m2: return 'Parcelado'
-            if 'complet' in m2: return 'Completo'
-            return str(m).strip() if m and str(m)!='nan' else 'Outro' 
         df["tipo_pgto"]=df["pgto_raw"].fillna("").apply(fmt_pgto)
         pg=df.groupby("tipo_pgto").agg(v=("price","count"),r=("price","sum")).reset_index().sort_values("v",ascending=False)
         pagamentos=[{"n":str(r["tipo_pgto"]),"v":int(r["v"]),"r":round(float(r["r"]),2)} for _,r in pg.iterrows()]
 
-        # Cruzamento UTM x Meta
         def build_cruzamento(col,inv_d,leads_d,label_sem):
             df[col+"_c"]=df[col].fillna("").astype(str).str.strip()
             g=df.groupby(col+"_c").agg(v=("price","count"),r=("price","sum")).reset_index().sort_values("v",ascending=False)
@@ -420,7 +405,6 @@ def hotmart_data():
         criativos=build_cruzamento("utm_content",ad_inv,ad_leads_d,"Sem criativo")
         roas_geral=round(df["price"].sum()/total_inv,2) if total_inv>0 else None
 
-        # Raw para filtro de data no HTML
         raw_rows=[]
         for _,row in df.iterrows():
             sck_v=str(row["sck"]) if pd.notna(row["sck"]) else ""
@@ -433,7 +417,6 @@ def hotmart_data():
                 "sck":sck_v,"canal":canal_v,"camp":camp_v if camp_v not in("","nan","NaN") else "",
                 "temp":temp_v,"pgto":pgto_v})
 
-        # Vendas individuais (tabela detalhada + gráfico horário)
         vendas_raw=[]
         for _,row in df.sort_values("date",ascending=False).iterrows():
             vendas_raw.append({
@@ -443,7 +426,7 @@ def hotmart_data():
                 "nome":str(row.get("nome","")).title() if pd.notna(row.get("nome","")) else "—",
                 "email":str(row.get("email","")) if pd.notna(row.get("email","")) else "—",
                 "valor":round(float(row["price"]),2),
-                "pgto":fmt_pgto_full(row.get("pgto_raw","")),
+                "pgto":fmt_pgto(row.get("pgto_raw","")),
                 "sck":str(row.get("sck","—")) if pd.notna(row.get("sck","")) else "—",
                 "camp":str(row.get("utm_camp","—")) if pd.notna(row.get("utm_camp","")) else "—",
             })
@@ -529,18 +512,16 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, h
     html=replace_js_const(html,"HOTMART",           hotmart if USAR_VENDAS else False)
     html=replace_js_const(html,"DATA_GERACAO",     date.today().strftime("%Y-%m-%d"))
 
-    _cpl_bom   = globals().get("CPL_BOM",   globals().get("CPA_BOM",   5.0))
-    _cpl_medio = globals().get("CPL_MEDIO", globals().get("CPA_MEDIO", 10.0))
+    _cpl_bom   = globals().get("CPL_BOM",   5.0)
+    _cpl_medio = globals().get("CPL_MEDIO", 10.0)
 
     for k,v in [
         ("LANCAMENTO_COD", f"'{LANCAMENTO_COD}'"),
         ("NOME_CLIENTE",   f"'{NOME_CLIENTE}'"),
         ("LOGO_LETRA",     f"'{LOGO_LETRA}'"),
         ("COR_ACENTO",     f"'{COR_ACENTO}'"),
-        # Moeda
         ("MOEDA_SIMBOLO",  f"'{MOEDA_SIMBOLO}'"),
         ("MOEDA_COD",      f"'{MOEDA}'"),
-        # Thresholds
         ("CPL_BOM",        str(_cpl_bom)),
         ("CPL_MEDIO",      str(_cpl_medio)),
         ("CTR_BOM",        str(CTR_BOM)),
@@ -560,7 +541,8 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, h
 # ══ MAIN ═══════════════════════════════════════════════
 def main():
     print("="*60)
-    print(f"Dashboard Lançamento Gratuito — {NOME_CLIENTE} / {LANCAMENTO_COD or 'Todos'}")
+    print(f"Dashboard — {NOME_CLIENTE} / {LANCAMENTO_COD or 'Todos'}")
+    print(f"Leads via: Action Omni Complete Registration")
     print(f"Moeda: {MOEDA} ({MOEDA_SIMBOLO})")
     print("="*60)
     img_dir=Path("imgs"); img_dir.mkdir(exist_ok=True)
@@ -574,7 +556,7 @@ def main():
     m_t=meta_tables(df_meta,img_dir)
     m_bd=meta_breakdowns(df_meta)
     total_leads=m_k["lct"]["leads"] if LANCAMENTO_COD else m_k["all"]["leads"]
-    print(f"  ✓ {total_leads} leads | {MOEDA_SIMBOLO} {m_k['lct']['spend']:,.2f} invest.")
+    print(f"  ✓ {total_leads} leads (Omni Complete Reg.) | {MOEDA_SIMBOLO} {m_k['lct']['spend']:,.2f} invest.")
 
     print("\n[HOTMART]")
     if USAR_VENDAS:
