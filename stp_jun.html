@@ -186,6 +186,7 @@ ul.notes-list li b{color:var(--text);}
     <button class="sb-item" data-sec="paises" onclick="nav('paises',this)"><span class="dot"></span>Países</button>
     <button class="sb-item" data-sec="investimento" onclick="nav('investimento',this)"><span class="dot"></span>Investimento x Vendas</button>
     <button class="sb-item" data-sec="qualidade" onclick="nav('qualidade',this)"><span class="dot"></span>Qualidade dos Dados</button>
+    <button class="sb-item" data-sec="stpmar" onclick="nav('stpmar',this)"><span class="dot"></span>STP Marzo 2026</button>
   </nav>
 
   <div class="sb-footer">Fortraffic</div>
@@ -329,6 +330,53 @@ ul.notes-list li b{color:var(--text);}
       </div>
     </section>
 
+    <!-- ============ STP MARZO 2026 ============ -->
+    <section id="sec-stpmar" class="page-section">
+      <div class="sec-header">
+        <div class="sec-title">STP Marzo 2026</div>
+        <div class="sec-sub" id="stpMarSub">Lançamento anterior (21–31/03/2026) — mesma leitura de Canais &amp; Origem e Países, para comparação</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Receita por origem</div>
+        <div class="chart-wrap" style="height:260px;"><canvas id="chartOrigemMar"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Detalhamento por origem</div>
+        <div class="tbl-wrap">
+          <table id="tblOrigemMar">
+            <thead><tr><th>Origem</th><th class="num">Vendas</th><th class="num">Receita</th><th style="min-width:140px;">% da receita</th><th class="num">Ticket médio</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="footnote">Mesma classificação de origem usada no lançamento de junho. "Sem rastreamento" são vendas sem nenhum parâmetro de UTM.</div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Top países por receita</div>
+          <div class="chart-wrap" style="height:320px;"><canvas id="chartPaisesMar"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Por continente</div>
+          <div class="chart-wrap" style="height:240px;"><canvas id="chartContinenteMar"></canvas></div>
+          <div class="legend-row" id="legendContinenteMar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Todos os países</div>
+        <div class="tbl-wrap">
+          <table id="tblPaisesMar">
+            <thead><tr><th>País</th><th>Continente</th><th class="num">Vendas</th><th class="num">Receita</th><th style="min-width:140px;">% da receita</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="footnote">14 vendas em reais convertidas a ~R$&nbsp;5,31/US$ (cotação aproximada de 21/03/2026). 1 registro do export original foi excluído por não ter valor de venda preenchido.</div>
+      </div>
+    </section>
+
   </div>
 </div>
 </div>
@@ -378,6 +426,49 @@ const DATA = {
     {pais:"Hungary",        continente:"Europa",        vendas:1,  receita:997.00},
     {pais:"South Africa",   continente:"África",        vendas:1,  receita:997.00},
     {pais:"Austria",        continente:"Europa",        vendas:1,  receita:717.00},
+  ],
+
+  /* ===== STP Marzo 2026 (lançamento anterior, 21-31/03) ===== */
+  origemMar: [
+    {nome:"Sem rastreamento",                vendas:87, receita:135096.19},
+    {nome:"YouTube (Orgânico)",              vendas:25, receita:44729.89},
+    {nome:"WhatsApp (Orgânico)",             vendas:21, receita:31564.50},
+    {nome:"Meta Ads (Pago)",                 vendas:15, receita:27110.00},
+    {nome:"Site (Orgânico)",                 vendas:11, receita:15520.00},
+    {nome:"E-mail / CRM",                    vendas:10, receita:14547.00},
+    {nome:"Instagram / ManyChat (Orgânico)", vendas:3,  receita:7491.00},
+    {nome:"Facebook (Orgânico)",             vendas:1,  receita:500.00},
+  ],
+
+  paisesMar: [
+    {pais:"United States",        continente:"América",      vendas:92, receita:164098.09},
+    {pais:"Canada",                continente:"América",      vendas:14, receita:19750.00},
+    {pais:"Australia",             continente:"Oceania",       vendas:9,  receita:15973.00},
+    {pais:"United Kingdom",        continente:"Europa",        vendas:6,  receita:11584.00},
+    {pais:"Netherlands",           continente:"Europa",        vendas:4,  receita:8488.00},
+    {pais:"Não informado",         continente:"Não informado", vendas:6,  receita:8237.00},
+    {pais:"Brazil",                continente:"América",      vendas:12, receita:5562.19},
+    {pais:"Belgium",                continente:"Europa",        vendas:2,  receita:5078.16},
+    {pais:"South Africa",          continente:"África",        vendas:4,  receita:4743.00},
+    {pais:"Switzerland",           continente:"Europa",        vendas:2,  receita:4494.00},
+    {pais:"New Zealand",           continente:"Oceania",       vendas:2,  receita:4494.00},
+    {pais:"India",                 continente:"Ásia",          vendas:2,  receita:3494.00},
+    {pais:"Colombia",              continente:"América",      vendas:2,  receita:2942.40},
+    {pais:"Germany",               continente:"Europa",        vendas:1,  receita:2497.00},
+    {pais:"Bahamas",                continente:"América",      vendas:1,  receita:1997.00},
+    {pais:"Ireland",               continente:"Europa",        vendas:1,  receita:1997.00},
+    {pais:"Malaysia",              continente:"Ásia",          vendas:1,  receita:1997.00},
+    {pais:"Italy",                  continente:"Europa",        vendas:1,  receita:1597.00},
+    {pais:"Tanzania",              continente:"África",        vendas:1,  receita:1248.50},
+    {pais:"Singapore",             continente:"Ásia",          vendas:2,  receita:1044.00},
+    {pais:"Israel",                 continente:"Ásia",          vendas:1,  receita:997.00},
+    {pais:"Argentina",             continente:"América",      vendas:1,  receita:997.00},
+    {pais:"United Arab Emirates",  continente:"Ásia",          vendas:1,  receita:997.00},
+    {pais:"Trinidad and Tobago",   continente:"América",      vendas:1,  receita:997.00},
+    {pais:"Saudi Arabia",          continente:"Ásia",          vendas:1,  receita:897.00},
+    {pais:"Mexico",                 continente:"América",      vendas:1,  receita:210.65},
+    {pais:"Latvia",                 continente:"Europa",        vendas:1,  receita:100.00},
+    {pais:"Portugal",              continente:"Europa",        vendas:1,  receita:47.59},
   ],
 
   /* Investimento extraído dos prints do Gerenciador de Anúncios (06-15/06/2026) */
@@ -600,7 +691,97 @@ function renderPaises(){
   });
 }
 
-/* ================= RENDER: INVESTIMENTO x VENDAS ================= */
+/* ================= RENDER: STP MARZO 2026 ================= */
+let chartStpMarInit = false;
+function renderStpMar(){
+  const totalReceitaMar = sum(DATA.origemMar, 'receita');
+  const totalVendasMar = sum(DATA.origemMar, 'vendas');
+  document.getElementById('stpMarSub').textContent =
+    `Lançamento anterior · 21–31/03/2026 · ${fmtUSD(totalReceitaMar)} em ${totalVendasMar} vendas — mesma leitura de Canais & Origem e Países, para comparação`;
+
+  const sortedOrigem = [...DATA.origemMar].sort((a,b)=>b.receita-a.receita);
+  document.querySelector('#tblOrigemMar tbody').innerHTML = sortedOrigem.map(o=>`
+    <tr>
+      <td>${o.nome}</td>
+      <td class="num">${fmtNum(o.vendas)}</td>
+      <td class="num">${fmtUSD(o.receita)}</td>
+      <td>${pctBar(o.receita/totalReceitaMar*100)}</td>
+      <td class="num">${fmtUSD(o.receita/o.vendas)}</td>
+    </tr>`).join('');
+
+  const sortedPaises = [...DATA.paisesMar].sort((a,b)=>b.receita-a.receita);
+  document.querySelector('#tblPaisesMar tbody').innerHTML = sortedPaises.map(p=>`
+    <tr>
+      <td>${p.pais}</td>
+      <td style="color:var(--muted);">${p.continente}</td>
+      <td class="num">${fmtNum(p.vendas)}</td>
+      <td class="num">${fmtUSD(p.receita)}</td>
+      <td>${pctBar(p.receita/totalReceitaMar*100)}</td>
+    </tr>`).join('');
+
+  const continentesMar = {};
+  DATA.paisesMar.forEach(p=>{
+    if(!continentesMar[p.continente]) continentesMar[p.continente] = {vendas:0, receita:0};
+    continentesMar[p.continente].vendas += p.vendas;
+    continentesMar[p.continente].receita += p.receita;
+  });
+  const contNomesMar = Object.keys(continentesMar).sort((a,b)=>continentesMar[b].receita-continentesMar[a].receita);
+  document.getElementById('legendContinenteMar').innerHTML = contNomesMar.map((c,i)=>
+    `<span><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${c} — ${fmtUSD(continentesMar[c].receita)} (${continentesMar[c].vendas} vendas)</span>`
+  ).join('');
+
+  if(chartStpMarInit) return;
+  chartStpMarInit = true;
+
+  new Chart(document.getElementById('chartOrigemMar'), {
+    type:'bar',
+    data:{
+      labels: sortedOrigem.map(o=>o.nome),
+      datasets:[{ data: sortedOrigem.map(o=>o.receita), backgroundColor: sortedOrigem.map((_,i)=>COLORS[i % COLORS.length]), borderRadius:6, barThickness:24 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtUSD(c.parsed.x)}} },
+      scales:{
+        x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}, callback:(v)=>'$'+v/1000+'k'} },
+        y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+      }
+    }
+  });
+
+  const topMar = sortedPaises.slice(0,8);
+  const outrosReceitaMar = sum(sortedPaises.slice(8),'receita');
+  const outrosVendasMar = sum(sortedPaises.slice(8),'vendas');
+  const chartDataMar = outrosReceitaMar>0 ? [...topMar, {pais:`Outros (${sortedPaises.length-8})`, receita:outrosReceitaMar, vendas:outrosVendasMar}] : topMar;
+
+  new Chart(document.getElementById('chartPaisesMar'), {
+    type:'bar',
+    data:{
+      labels: chartDataMar.map(p=>p.pais),
+      datasets:[{ data: chartDataMar.map(p=>p.receita), backgroundColor:'#4f7cff', borderRadius:6, barThickness:18 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtUSD(c.parsed.x)}} },
+      scales:{
+        x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}, callback:(v)=>'$'+v/1000+'k'} },
+        y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartContinenteMar'), {
+    type:'doughnut',
+    data:{
+      labels: contNomesMar,
+      datasets:[{ data: contNomesMar.map(c=>continentesMar[c].receita), backgroundColor: contNomesMar.map((_,i)=>COLORS[i%COLORS.length]), borderWidth:0 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.label+': '+fmtUSD(c.parsed)}} }
+    }
+  });
+}
 let chartInvestimentoInit = false;
 function renderInvestimento(){
   // join ad sets with sales
@@ -689,9 +870,9 @@ function renderInvestimento(){
 /* ================= NAV / THEME ================= */
 const sectionTitles = {
   overview:"Visão Geral", canais:"Canais & Origem", paises:"Países",
-  investimento:"Investimento x Vendas", qualidade:"Qualidade dos Dados"
+  investimento:"Investimento x Vendas", qualidade:"Qualidade dos Dados", stpmar:"STP Marzo 2026"
 };
-const renderers = { canais:renderCanais, paises:renderPaises, investimento:renderInvestimento };
+const renderers = { canais:renderCanais, paises:renderPaises, investimento:renderInvestimento, stpmar:renderStpMar };
 
 function nav(id, btn){
   document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
