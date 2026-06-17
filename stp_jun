@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STP Jun/2026 — Vendas x Origem x Investimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';document.head.appendChild(s);"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0e1a; --surface:#11162a; --surface2:#171d36; --surface3:#1f2742;
+  --border:rgba(255,255,255,.08); --text:#eef1f8; --muted:#8d97b8; --muted2:#5b6580;
+  --blue:#4f7cff; --blue2:#7ea0ff; --blue-bg:rgba(79,124,255,.14);
+  --green:#22c55e; --green-bg:rgba(34,197,94,.14);
+  --red:#f43f5e; --red-bg:rgba(244,63,94,.14);
+  --amber:#f59e0b; --amber-bg:rgba(245,158,11,.14);
+  --purple:#a78bfa; --purple-bg:rgba(167,139,250,.14);
+  --cyan:#22d3ee;
+  --radius:14px; --radius-sm:9px;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.28);
+  --sb-w:268px;
+}
+[data-theme="light"]{
+  --bg:#eef1f8; --surface:#ffffff; --surface2:#f6f7fc; --surface3:#edeff8;
+  --border:rgba(20,25,50,.09); --text:#11162a; --muted:#5b6580; --muted2:#8d97b8;
+  --blue-bg:rgba(79,124,255,.10); --green-bg:rgba(22,163,74,.10); --red-bg:rgba(225,29,72,.10); --amber-bg:rgba(217,119,6,.10); --purple-bg:rgba(124,58,237,.10);
+  --shadow:0 1px 2px rgba(20,25,50,.05), 0 10px 24px rgba(20,25,50,.06);
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+.mono{font-family:'DM Mono',monospace;}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
+.app{display:grid;grid-template-columns:var(--sb-w) 1fr;min-height:100vh;}
+
+/* ===== SIDEBAR ===== */
+.sb{background:#070a14;border-right:1px solid var(--border);position:fixed;top:0;left:0;width:var(--sb-w);height:100vh;display:flex;flex-direction:column;z-index:50;}
+[data-theme="light"] .sb{background:#11162a;}
+.sb-logo{padding:22px 20px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);}
+.logo-badge{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:#06101f;flex-shrink:0;}
+.logo-name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:#eef1f8;}
+.logo-sub{font-size:11.5px;color:#7b88ac;margin-top:1px;}
+.sb-stats{padding:14px 16px 6px;display:flex;flex-direction:column;gap:8px;}
+.sb-stat{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius-sm);padding:10px 12px;}
+.sb-stat-lbl{font-size:10.5px;color:#7b88ac;text-transform:uppercase;letter-spacing:.04em;}
+.sb-stat-val{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;color:#eef1f8;margin-top:2px;}
+.sb-stat-sub{font-size:11px;color:#5d6a8c;margin-top:2px;}
+.sb-nav{padding:14px 10px;display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto;}
+.sb-section-lbl{font-size:10.5px;color:#4d5a7c;text-transform:uppercase;letter-spacing:.05em;padding:8px 12px 6px;}
+.sb-item{display:flex;align-items:center;gap:10px;background:none;border:none;color:#9aa5c4;font-family:'Inter',sans-serif;font-size:13.3px;font-weight:500;text-align:left;padding:9px 12px;border-radius:9px;cursor:pointer;transition:.15s;width:100%;}
+.sb-item:hover{background:rgba(255,255,255,.05);color:#eef1f8;}
+.sb-item.active{background:var(--blue-bg);color:#bcd0ff;}
+.sb-item .dot{width:6px;height:6px;border-radius:50%;background:#445;flex-shrink:0;}
+.sb-item.active .dot{background:var(--blue2);}
+.sb-footer{padding:14px 20px;border-top:1px solid rgba(255,255,255,.06);font-size:11px;color:#4d5a7c;}
+
+/* ===== MAIN ===== */
+.main{grid-column:2;margin-left:var(--sb-w);min-height:100vh;}
+.topbar{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;backdrop-filter:blur(6px);}
+.topbar-l{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.page-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;}
+.badge{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;}
+.badge-blue{background:var(--blue-bg);color:var(--blue2);}
+.badge-amber{background:var(--amber-bg);color:var(--amber);}
+.theme-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.theme-btn:hover{color:var(--text);}
+.content{padding:26px 32px 60px;max-width:1180px;}
+.page-section{display:none;}
+.page-section.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.sec-header{margin-bottom:18px;}
+.sec-title{font-size:20px;font-weight:600;}
+.sec-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+
+/* ===== CARDS / METRICS ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.kpi-lbl{font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;}
+.kpi-val{font-family:'DM Mono',monospace;font-size:25px;font-weight:500;margin-top:6px;}
+.kpi-sub{font-size:11.5px;color:var(--muted2);margin-top:4px;}
+.kpi.accent-green .kpi-val{color:var(--green);}
+.kpi.accent-red .kpi-val{color:var(--red);}
+.kpi.accent-blue .kpi-val{color:var(--blue2);}
+.kpi.accent-amber .kpi-val{color:var(--amber);}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:16px;}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.card-title .tag{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--muted);background:var(--surface3);padding:3px 8px;border-radius:6px;}
+
+.chart-wrap{position:relative;}
+
+.note{border-left:3px solid var(--blue);background:var(--blue-bg);border-radius:0 10px 10px 0;padding:13px 16px;font-size:13px;color:var(--text);margin-bottom:16px;line-height:1.6;}
+.note b{color:var(--blue2);}
+.note.warn{border-left-color:var(--amber);background:var(--amber-bg);}
+.note.warn b{color:var(--amber);}
+.note.bad{border-left-color:var(--red);background:var(--red-bg);}
+.note.bad b{color:var(--red);}
+.note.good{border-left-color:var(--green);background:var(--green-bg);}
+.note.good b{color:var(--green);}
+
+/* ===== TABLE ===== */
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:9px 12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr:hover td{background:var(--surface2);}
+td.num,th.num{text-align:right;font-family:'DM Mono',monospace;}
+tr.grp-head td{background:var(--surface3);font-weight:600;}
+tr.grp-head td.num{font-family:'DM Mono',monospace;}
+tr.subtotal td{border-top:1px solid var(--border);font-weight:600;background:var(--surface2);}
+.indent{padding-left:26px;color:var(--muted);}
+.pct-bar-wrap{display:flex;align-items:center;gap:8px;}
+.pct-bar{flex:1;height:6px;background:var(--surface3);border-radius:4px;overflow:hidden;min-width:40px;}
+.pct-bar i{display:block;height:100%;border-radius:4px;background:var(--blue);}
+
+.pill{display:inline-flex;align-items:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;padding:2px 9px;border-radius:20px;}
+.pill-green{background:var(--green-bg);color:var(--green);}
+.pill-amber{background:var(--amber-bg);color:var(--amber);}
+.pill-red{background:var(--red-bg);color:var(--red);}
+.pill-gray{background:var(--surface3);color:var(--muted);}
+
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;}
+.footnote{font-size:11.5px;color:var(--muted2);margin-top:6px;line-height:1.6;}
+.legend-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);}
+.legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;}
+
+ul.notes-list{padding-left:0;list-style:none;display:flex;flex-direction:column;gap:12px;}
+ul.notes-list li{font-size:13.5px;line-height:1.65;padding-left:18px;position:relative;}
+ul.notes-list li::before{content:"";position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--blue);}
+ul.notes-list li b{color:var(--text);}
+
+@media(max-width:980px){
+  .app{grid-template-columns:1fr;}
+  .sb{position:relative;width:100%;height:auto;flex-direction:row;align-items:center;overflow-x:auto;}
+  .sb-logo{border-bottom:none;border-right:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+  .sb-stats{display:none;}
+  .sb-nav{flex-direction:row;overflow-x:auto;padding:10px;}
+  .sb-footer{display:none;}
+  .main{margin-left:0;}
+  .topbar{padding:14px 18px;}
+  .content{padding:20px 18px 50px;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .grid2{grid-template-columns:1fr;}
+}
+@media(max-width:560px){
+  .kpi-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="logo-badge">STP</div>
+    <div>
+      <div class="logo-name">Swing Prop Trader</div>
+      <div class="logo-sub">Lançamento · Jun/2026</div>
+    </div>
+  </div>
+
+  <div class="sb-stats">
+    <div class="sb-stat">
+      <div class="sb-stat-lbl">Receita Total</div>
+      <div class="sb-stat-val" id="sbReceita">—</div>
+      <div class="sb-stat-sub" id="sbVendas">—</div>
+    </div>
+    <div class="sb-stat">
+      <div class="sb-stat-lbl">Investido em Meta Ads</div>
+      <div class="sb-stat-val" style="color:var(--amber);" id="sbInvestido">—</div>
+      <div class="sb-stat-sub">7 campanhas ativas</div>
+    </div>
+    <div class="sb-stat">
+      <div class="sb-stat-lbl">ROAS</div>
+      <div class="sb-stat-val" id="sbRoas" style="color:var(--blue2);">—</div>
+      <div class="sb-stat-sub" id="sbRoasSub">—</div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section-lbl">Relatório</div>
+    <button class="sb-item active" data-sec="overview" onclick="nav('overview',this)"><span class="dot"></span>Visão Geral</button>
+    <button class="sb-item" data-sec="canais" onclick="nav('canais',this)"><span class="dot"></span>Canais &amp; Origem</button>
+    <button class="sb-item" data-sec="paises" onclick="nav('paises',this)"><span class="dot"></span>Países</button>
+    <button class="sb-item" data-sec="investimento" onclick="nav('investimento',this)"><span class="dot"></span>Investimento x Vendas</button>
+    <button class="sb-item" data-sec="qualidade" onclick="nav('qualidade',this)"><span class="dot"></span>Qualidade dos Dados</button>
+  </nav>
+
+  <div class="sb-footer">Fortraffic</div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-l">
+      <span class="page-title" id="topTitle">Visão Geral</span>
+      <span class="badge badge-blue">06–15 jun/2026</span>
+      <span class="badge badge-amber">Dados parciais</span>
+    </div>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Alternar tema">🌙</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ============ OVERVIEW ============ -->
+    <section id="sec-overview" class="page-section active">
+      <div class="sec-header">
+        <div class="sec-title">Visão Geral</div>
+        <div class="sec-sub">Vendas (checkout) cruzadas com UTMs e investimento das campanhas Meta Ads — Swing Prop Trader, lançamento Jun/2026</div>
+      </div>
+
+      <div class="kpi-grid" id="kpiOverview"></div>
+
+      <div class="card">
+        <div class="card-title">Receita diária <span class="tag" id="diarioRange"></span></div>
+        <div class="chart-wrap" style="height:230px;"><canvas id="chartDiario"></canvas></div>
+      </div>
+
+      <div class="note" id="noteOverview"></div>
+    </section>
+
+    <!-- ============ CANAIS / ORIGEM ============ -->
+    <section id="sec-canais" class="page-section">
+      <div class="sec-header">
+        <div class="sec-title">Canais &amp; Origem</div>
+        <div class="sec-sub">Receita e vendas agrupadas por <span class="mono">utm_source</span> + <span class="mono">utm_medium</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Receita por origem</div>
+        <div class="chart-wrap" style="height:260px;"><canvas id="chartOrigem"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Detalhamento por origem</div>
+        <div class="tbl-wrap">
+          <table id="tblOrigem">
+            <thead><tr><th>Origem</th><th class="num">Vendas</th><th class="num">Receita</th><th style="min-width:140px;">% da receita</th><th class="num">Ticket médio</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="footnote">Origem derivada de <span class="mono">utm_source</span>/<span class="mono">utm_medium</span> no momento da compra. "Sem rastreamento" são vendas sem nenhum parâmetro de UTM — ver seção <i>Qualidade dos Dados</i>.</div>
+      </div>
+    </section>
+
+    <!-- ============ PAISES ============ -->
+    <section id="sec-paises" class="page-section">
+      <div class="sec-header">
+        <div class="sec-title">Países</div>
+        <div class="sec-sub">Distribuição geográfica da receita — campo "Pais" do checkout</div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="card-title">Top países por receita</div>
+          <div class="chart-wrap" style="height:320px;"><canvas id="chartPaises"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Por continente</div>
+          <div class="chart-wrap" style="height:240px;"><canvas id="chartContinente"></canvas></div>
+          <div class="legend-row" id="legendContinente"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Todos os países</div>
+        <div class="tbl-wrap">
+          <table id="tblPaises">
+            <thead><tr><th>País</th><th>Continente</th><th class="num">Vendas</th><th class="num">Receita</th><th style="min-width:140px;">% da receita</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INVESTIMENTO x VENDAS ============ -->
+    <section id="sec-investimento" class="page-section">
+      <div class="sec-header">
+        <div class="sec-title">Investimento x Vendas</div>
+        <div class="sec-sub">Cruzamento entre o investido em Meta Ads (por campanha/conjunto de anúncios) e as vendas atribuídas via UTM</div>
+      </div>
+
+      <div class="note" id="noteInvestimento"></div>
+
+      <div class="card">
+        <div class="card-title">Investido vs. receita atribuída — por campanha</div>
+        <div class="chart-wrap" style="height:280px;"><canvas id="chartInvestimento"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Por campanha <span class="tag">7 campanhas</span></div>
+        <div class="tbl-wrap">
+          <table id="tblCampanhas">
+            <thead><tr><th>Campanha</th><th class="num">Investido</th><th class="num">Resultados</th><th class="num">Custo/resultado</th><th class="num">Vendas</th><th class="num">Receita</th><th class="num">ROAS</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Por conjunto de anúncios <span class="tag">16 conjuntos</span></div>
+        <div class="tbl-wrap">
+          <table id="tblAdsets">
+            <thead><tr><th>Conjunto de anúncios</th><th class="num">Investido</th><th class="num">Resultados</th><th class="num">Custo/resultado</th><th class="num">Vendas</th><th class="num">Receita</th><th class="num">ROAS</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="footnote">"Resultados" segue o objetivo de cada campanha: Registro concluído no site (HOT/COLD) ou Visualizações da página de destino (RETARGETING). Vendas/Receita = cruzamento por <span class="mono">utm_campaign</span> + <span class="mono">utm_term</span> com a planilha de vendas.</div>
+      </div>
+    </section>
+
+    <!-- ============ QUALIDADE DOS DADOS ============ -->
+    <section id="sec-qualidade" class="page-section">
+      <div class="sec-header">
+        <div class="sec-title">Qualidade dos Dados</div>
+        <div class="sec-sub">Pontos de atenção identificados nesta exportação — vale revisar antes de tomar decisões de orçamento</div>
+      </div>
+
+      <div class="card">
+        <ul class="notes-list">
+          <li><b>~50% da receita está sem UTM.</b> 33 das 67 vendas (US$&nbsp;56.721, ~49,8% do total) não têm <span class="mono">utm_source</span>/<span class="mono">utm_campaign</span> registrados, sem padrão único de método de pagamento. Vale checar se é checkout direto, link antigo sem UTM, ou perda de parâmetro em algum ponto do funil.</li>
+          <li><b>Campanhas EUR/AFR e a RETARGETING aparecem com 0 vendas atribuídas</b> mesmo tendo gerado registros (78 a 2.002 cada) e consumido investimento. Pode ser só o lag natural entre registro e compra (lançamento em andamento) — mas como esse mesmo cliente (SWING02) já teve um problema de atribuição no pixel da Meta em junho/2026 (coluna de lead zerando a partir do dia 1º), vale confirmar se o pixel de compra está recebendo os eventos corretamente para essas campanhas antes de cortar orçamento.</li>
+          <li><b>1 venda em reais (Brasil), convertida para dólar.</b> R$&nbsp;12.985,00 → aproximadamente US$&nbsp;2.502, usando uma cotação aproximada de R$&nbsp;5,19/US$ (referente a 08/06/2026). Se você tiver a cotação exata usada no fechamento, é só ajustar essa linha nos dados.</li>
+          <li><b>O export mistura pacotes completos e pagamentos parciais/parcelados</b> (ex.: "reserve the price", "1/2 payment..."), o que reduz o ticket médio "real" — não foi feita separação entre venda completa e entrada/parcela neste relatório.</li>
+          <li><b>Investimento por campanha vem dos prints do Gerenciador de Anúncios</b> enviados (06–15/06, US$&nbsp;40.000,49 em 7 campanhas / 16 conjuntos). Quando a planilha de investimento detalhada chegar, essa seção pode ser recalculada com granularidade diária e por criativo.</li>
+          <li><b>2 vendas sem país/continente informado</b> no checkout — somam US$&nbsp;3.494 e aparecem como "Não informado" na seção Países.</li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+</div>
+</div>
+<script>
+/* ================= DADOS BASE ================= */
+const DATA = {
+  diario: [
+    {dia:"06/06", receita:37447.5, vendas:18},
+    {dia:"07/06", receita:4744.0,  vendas:4},
+    {dia:"08/06", receita:15053.93, vendas:9},
+    {dia:"09/06", receita:19970.0, vendas:11},
+    {dia:"10/06", receita:7541.0,  vendas:6},
+    {dia:"11/06", receita:5994.0,  vendas:3},
+    {dia:"12/06", receita:8985.0,  vendas:6},
+    {dia:"13/06", receita:6985.0,  vendas:5},
+    {dia:"14/06", receita:0,       vendas:0},
+    {dia:"15/06", receita:7235.0,  vendas:5},
+  ],
+
+  origem: [
+    {nome:"Sem rastreamento",    vendas:33, receita:56720.50},
+    {nome:"Meta Ads (Pago)",     vendas:11, receita:20570.00},
+    {nome:"YouTube (Orgânico)",  vendas:8,  receita:13733.93},
+    {nome:"E-mail / CRM",        vendas:6,  receita:10488.00},
+    {nome:"Site (Orgânico)",     vendas:7,  receita:9229.00},
+    {nome:"WhatsApp (Orgânico)", vendas:2,  receita:3214.00},
+  ],
+
+  paises: [
+    {pais:"United States",  continente:"América",      vendas:37, receita:64904.00},
+    {pais:"Canada",         continente:"América",      vendas:4,  receita:6241.00},
+    {pais:"Germany",        continente:"Europa",        vendas:2,  receita:4494.00},
+    {pais:"Australia",      continente:"Oceania",       vendas:4,  receita:3547.00},
+    {pais:"United Kingdom", continente:"Europa",        vendas:2,  receita:3494.00},
+    {pais:"Não informado",  continente:"Não informado", vendas:2,  receita:3494.00},
+    {pais:"Hong Kong",      continente:"Ásia",          vendas:2,  receita:3094.00},
+    {pais:"Brazil",         continente:"América",      vendas:1,  receita:2501.93},
+    {pais:"China",          continente:"Ásia",          vendas:1,  receita:2497.00},
+    {pais:"Bulgaria",       continente:"Europa",        vendas:1,  receita:2497.00},
+    {pais:"Costa Rica",     continente:"América",      vendas:1,  receita:2497.00},
+    {pais:"Cayman Islands", continente:"América",      vendas:1,  receita:2497.00},
+    {pais:"Uganda",         continente:"África",        vendas:1,  receita:2497.00},
+    {pais:"Slovakia",       continente:"Europa",        vendas:1,  receita:1997.00},
+    {pais:"Malta",          continente:"Europa",        vendas:1,  receita:1997.00},
+    {pais:"France",         continente:"Europa",        vendas:1,  receita:1997.00},
+    {pais:"India",          continente:"Ásia",          vendas:2,  receita:998.50},
+    {pais:"Hungary",        continente:"Europa",        vendas:1,  receita:997.00},
+    {pais:"South Africa",   continente:"África",        vendas:1,  receita:997.00},
+    {pais:"Austria",        continente:"Europa",        vendas:1,  receita:717.00},
+  ],
+
+  /* Investimento extraído dos prints do Gerenciador de Anúncios (06-15/06/2026) */
+  campanhas: [
+    {nome:"FTF-SWING02-RETARGETING",              regiao:"Global", tipoResultado:"Visualizações da página de destino", resultados:589,  investido:276.48},
+    {nome:"FTF-USA-SWING02-JUN26-CAPT-ABO-HOT",   regiao:"USA",    tipoResultado:"Registro concluído no site",          resultados:1112, investido:12140.92},
+    {nome:"FTF-USA-SWING02-JUN26-CAPT-ABO-COLD",  regiao:"USA",    tipoResultado:"Registro concluído no site",          resultados:1870, investido:18528.41},
+    {nome:"FTF-EUR-SWING02-JUN26-CAPT-ABO-HOT",   regiao:"EUR",    tipoResultado:"Registro concluído no site",          resultados:78,   investido:927.51},
+    {nome:"FTF-EUR-SWING02-JUN26-CAPT-ABO-COLD",  regiao:"EUR",    tipoResultado:"Registro concluído no site",          resultados:752,  investido:5395.48},
+    {nome:"FTF-AFR-SWING02-JUN26-CAPT-ABO-HOT",   regiao:"AFR",    tipoResultado:"Registro concluído no site",          resultados:460,  investido:667.69},
+    {nome:"FTF-AFR-SWING02-JUN26-CAPT-ABO-COLD",  regiao:"AFR",    tipoResultado:"Registro concluído no site",          resultados:2002, investido:2064.00},
+  ],
+
+  adsets: [
+    {campanha:"FTF-SWING02-RETARGETING",             nome:"LEADS",                           resultados:589,  investido:276.48},
+    {campanha:"FTF-USA-SWING02-JUN26-CAPT-ABO-HOT",  nome:"USA-MIX-SEGUIDORES_PV_LISTA",      resultados:1112, investido:12140.92},
+    {campanha:"FTF-USA-SWING02-JUN26-CAPT-ABO-COLD", nome:"USA-ADVANTAGE_FINANCE_BUSINESS",   resultados:537,  investido:5903.56},
+    {campanha:"FTF-USA-SWING02-JUN26-CAPT-ABO-COLD", nome:"USA-ADVANTAGE_INVEST",             resultados:324,  investido:3388.48},
+    {campanha:"FTF-USA-SWING02-JUN26-CAPT-ABO-COLD", nome:"USA-ADVANTAGE_TRADING",            resultados:274,  investido:3291.85},
+    {campanha:"FTF-USA-SWING02-JUN26-CAPT-ABO-COLD", nome:"USA-ADVANTAGE_ADVANTAGE",          resultados:735,  investido:5944.52},
+    {campanha:"FTF-EUR-SWING02-JUN26-CAPT-ABO-HOT",  nome:"EUR-MIX-SEGUIDORES_PV_LISTA",      resultados:78,   investido:927.51},
+    {campanha:"FTF-EUR-SWING02-JUN26-CAPT-ABO-COLD", nome:"EUR-ADVANTAGE_FINANCE_BUSINESS",   resultados:222,  investido:1600.03},
+    {campanha:"FTF-EUR-SWING02-JUN26-CAPT-ABO-COLD", nome:"EUR-ADVANTAGE_INVEST",             resultados:116,  investido:864.85},
+    {campanha:"FTF-EUR-SWING02-JUN26-CAPT-ABO-COLD", nome:"EUR-ADVANTAGE_TRADING",            resultados:121,  investido:888.04},
+    {campanha:"FTF-EUR-SWING02-JUN26-CAPT-ABO-COLD", nome:"EUR-ADVANTAGE_ADVANTAGE",          resultados:293,  investido:2042.56},
+    {campanha:"FTF-AFR-SWING02-JUN26-CAPT-ABO-HOT",  nome:"AFR-MIX-SEGUIDORES_PV_LISTA",      resultados:460,  investido:667.69},
+    {campanha:"FTF-AFR-SWING02-JUN26-CAPT-ABO-COLD", nome:"AFR-ADVANTAGE_INVEST",             resultados:362,  investido:373.22},
+    {campanha:"FTF-AFR-SWING02-JUN26-CAPT-ABO-COLD", nome:"AFR-ADVANTAGE_ADVANTAGE",          resultados:720,  investido:659.72},
+    {campanha:"FTF-AFR-SWING02-JUN26-CAPT-ABO-COLD", nome:"AFR-ADVANTAGE_TRADING",            resultados:311,  investido:363.18},
+    {campanha:"FTF-AFR-SWING02-JUN26-CAPT-ABO-COLD", nome:"AFR-ADVANTAGE_FINANCE_BUSINESS",   resultados:609,  investido:667.88},
+  ],
+
+  /* Vendas cruzadas por utm_campaign + utm_term (chave = nome do conjunto de anúncios) */
+  vendasPorAdset: {
+    "USA-MIX-SEGUIDORES_PV_LISTA": {vendas:8, receita:15079.00},
+    "USA-ADVANTAGE_ADVANTAGE":     {vendas:2, receita:4494.00},
+    "USA-ADVANTAGE_TRADING":       {vendas:1, receita:997.00},
+  },
+};
+
+/* ================= HELPERS ================= */
+function fmtUSD(n, dec=0){
+  return "US$ " + Number(n).toLocaleString('pt-BR', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+}
+function fmtNum(n){ return Number(n).toLocaleString('pt-BR'); }
+function fmtPct(n, dec=1){ return Number(n).toLocaleString('pt-BR', {minimumFractionDigits:dec, maximumFractionDigits:dec}) + "%"; }
+function sum(arr, key){ return arr.reduce((a,b)=>a+b[key], 0); }
+function roasPill(roas, vendas){
+  if(vendas===0) return '<span class="pill pill-gray">sem venda</span>';
+  let cls = roas>=1 ? 'pill-green' : (roas>0 ? 'pill-amber' : 'pill-red');
+  return `<span class="pill ${cls}">${roas.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}x</span>`;
+}
+function pctBar(pct){
+  return `<div class="pct-bar-wrap"><div class="pct-bar"><i style="width:${Math.min(pct,100)}%"></i></div><span class="mono" style="font-size:12px;min-width:42px;">${fmtPct(pct)}</span></div>`;
+}
+const COLORS = ['#4f7cff','#22c55e','#f59e0b','#a78bfa','#22d3ee','#f43f5e','#84cc16','#fb923c'];
+
+/* ================= TOTAIS DERIVADOS ================= */
+const totalReceita   = sum(DATA.origem, 'receita');
+const totalVendas    = sum(DATA.origem, 'vendas');
+const ticketMedio    = totalReceita / totalVendas;
+const totalInvestido = sum(DATA.campanhas, 'investido');
+const origemPaga     = DATA.origem.find(o=>o.nome==="Meta Ads (Pago)");
+const receitaPaga    = origemPaga.receita;
+const vendasPaga     = origemPaga.vendas;
+const roasBlended    = receitaPaga / totalInvestido;
+const roasTotal      = totalReceita / totalInvestido;
+const origemSemUtm   = DATA.origem.find(o=>o.nome==="Sem rastreamento");
+
+/* ================= RENDER: SIDEBAR ================= */
+document.getElementById('sbReceita').textContent = fmtUSD(totalReceita);
+document.getElementById('sbVendas').textContent = totalVendas + " vendas · ticket " + fmtUSD(ticketMedio);
+document.getElementById('sbInvestido').textContent = fmtUSD(totalInvestido);
+document.getElementById('sbRoas').textContent = roasTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + "x";
+document.getElementById('sbRoasSub').textContent = fmtUSD(totalReceita) + " / " + fmtUSD(totalInvestido);
+
+/* ================= RENDER: OVERVIEW ================= */
+function renderOverview(){
+  const kpis = [
+    {lbl:"Receita Total", val:fmtUSD(totalReceita), sub: totalVendas + " vendas no período", accent:""},
+    {lbl:"Ticket Médio",  val:fmtUSD(ticketMedio),   sub:"considerando parcelas/entradas", accent:""},
+    {lbl:"Investido em Meta Ads", val:fmtUSD(totalInvestido), sub:"7 campanhas · 16 conjuntos", accent:"amber"},
+    {lbl:"ROAS", val:roasTotal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+"x", sub: fmtUSD(totalReceita)+" / "+fmtUSD(totalInvestido)+" investidos", accent: roasTotal>=1?"green":"red"},
+    {lbl:"Vendas via Meta Ads", val:fmtNum(vendasPaga), sub: fmtPct(vendasPaga/totalVendas*100)+" do total de vendas", accent:"blue"},
+    {lbl:"Receita sem rastreamento", val:fmtUSD(origemSemUtm.receita), sub: fmtPct(origemSemUtm.receita/totalReceita*100)+" da receita · "+origemSemUtm.vendas+" vendas", accent:"red"},
+  ];
+  document.getElementById('kpiOverview').innerHTML = kpis.map(k=>`
+    <div class="kpi ${k.accent?('accent-'+k.accent):''}">
+      <div class="kpi-lbl">${k.lbl}</div>
+      <div class="kpi-val">${k.val}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+  document.getElementById('diarioRange').textContent = DATA.diario[0].dia + " – " + DATA.diario[DATA.diario.length-1].dia;
+
+  const semVendaDias = DATA.diario.filter(d=>d.vendas===0).length;
+  document.getElementById('noteOverview').innerHTML =
+    `<b>Resumo do período:</b> ${fmtUSD(totalReceita)} em receita, ${totalVendas} vendas, ticket médio de ${fmtUSD(ticketMedio)}. `+
+    `Do total investido em Meta Ads (${fmtUSD(totalInvestido)}), ${fmtPct(receitaPaga/totalInvestido*100)} retornou como receita atribuída via UTM — `+
+    `mas quase metade da receita (${fmtPct(origemSemUtm.receita/totalReceita*100)}) não tem origem identificada. Veja as seções <i>Canais</i> e <i>Qualidade dos Dados</i> para mais detalhes.`;
+
+  const ctx = document.getElementById('chartDiario');
+  new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: DATA.diario.map(d=>d.dia),
+      datasets:[{
+        label:'Receita',
+        data: DATA.diario.map(d=>d.receita),
+        borderColor:'#4f7cff', backgroundColor:'rgba(79,124,255,.15)',
+        fill:true, tension:.35, pointRadius:3, pointBackgroundColor:'#4f7cff', borderWidth:2,
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtUSD(c.parsed.y)}} },
+      scales:{
+        y:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}, callback:(v)=>'$'+v/1000+'k'} },
+        x:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}} }
+      }
+    }
+  });
+}
+
+/* ================= RENDER: CANAIS / ORIGEM ================= */
+let chartOrigemInit = false;
+function renderCanais(){
+  const sorted = [...DATA.origem].sort((a,b)=>b.receita-a.receita);
+
+  document.querySelector('#tblOrigem tbody').innerHTML = sorted.map(o=>`
+    <tr>
+      <td>${o.nome}</td>
+      <td class="num">${fmtNum(o.vendas)}</td>
+      <td class="num">${fmtUSD(o.receita)}</td>
+      <td>${pctBar(o.receita/totalReceita*100)}</td>
+      <td class="num">${fmtUSD(o.receita/o.vendas)}</td>
+    </tr>`).join('');
+
+  if(chartOrigemInit) return;
+  chartOrigemInit = true;
+  new Chart(document.getElementById('chartOrigem'), {
+    type:'bar',
+    data:{
+      labels: sorted.map(o=>o.nome),
+      datasets:[{
+        data: sorted.map(o=>o.receita),
+        backgroundColor: sorted.map((_,i)=>COLORS[i % COLORS.length]),
+        borderRadius:6, barThickness:26,
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtUSD(c.parsed.x)}} },
+      scales:{
+        x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}, callback:(v)=>'$'+v/1000+'k'} },
+        y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+      }
+    }
+  });
+}
+
+/* ================= RENDER: PAISES ================= */
+let chartPaisesInit = false;
+function renderPaises(){
+  const sorted = [...DATA.paises].sort((a,b)=>b.receita-a.receita);
+  const top = sorted.slice(0,8);
+  const outrosReceita = sum(sorted.slice(8),'receita');
+  const outrosVendas = sum(sorted.slice(8),'vendas');
+  const chartData = outrosReceita>0 ? [...top, {pais:`Outros (${sorted.length-8})`, receita:outrosReceita, vendas:outrosVendas}] : top;
+
+  document.querySelector('#tblPaises tbody').innerHTML = sorted.map(p=>`
+    <tr>
+      <td>${p.pais}</td>
+      <td style="color:var(--muted);">${p.continente}</td>
+      <td class="num">${fmtNum(p.vendas)}</td>
+      <td class="num">${fmtUSD(p.receita)}</td>
+      <td>${pctBar(p.receita/totalReceita*100)}</td>
+    </tr>`).join('');
+
+  const continentes = {};
+  DATA.paises.forEach(p=>{
+    if(!continentes[p.continente]) continentes[p.continente] = {vendas:0, receita:0};
+    continentes[p.continente].vendas += p.vendas;
+    continentes[p.continente].receita += p.receita;
+  });
+  const contNomes = Object.keys(continentes).sort((a,b)=>continentes[b].receita-continentes[a].receita);
+  document.getElementById('legendContinente').innerHTML = contNomes.map((c,i)=>
+    `<span><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${c} — ${fmtUSD(continentes[c].receita)} (${continentes[c].vendas} vendas)</span>`
+  ).join('');
+
+  if(chartPaisesInit) return;
+  chartPaisesInit = true;
+
+  new Chart(document.getElementById('chartPaises'), {
+    type:'bar',
+    data:{
+      labels: chartData.map(p=>p.pais),
+      datasets:[{ data: chartData.map(p=>p.receita), backgroundColor:'#4f7cff', borderRadius:6, barThickness:18 }]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtUSD(c.parsed.x)}} },
+      scales:{
+        x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}, callback:(v)=>'$'+v/1000+'k'} },
+        y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartContinente'), {
+    type:'doughnut',
+    data:{
+      labels: contNomes,
+      datasets:[{ data: contNomes.map(c=>continentes[c].receita), backgroundColor: contNomes.map((_,i)=>COLORS[i%COLORS.length]), borderWidth:0 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>c.label+': '+fmtUSD(c.parsed)}} }
+    }
+  });
+}
+
+/* ================= RENDER: INVESTIMENTO x VENDAS ================= */
+let chartInvestimentoInit = false;
+function renderInvestimento(){
+  // join ad sets with sales
+  const adsetsJoined = DATA.adsets.map(a=>{
+    const v = DATA.vendasPorAdset[a.nome] || {vendas:0, receita:0};
+    return {...a, vendas:v.vendas, receitaVendas:v.receita, roas: a.investido>0 ? v.receita/a.investido : 0, custoResultado: a.investido/a.resultados};
+  });
+
+  // aggregate by campaign
+  const campJoined = DATA.campanhas.map(c=>{
+    const adsetsDaCamp = adsetsJoined.filter(a=>a.campanha===c.nome);
+    const vendas = sum(adsetsDaCamp,'vendas');
+    const receitaVendas = sum(adsetsDaCamp,'receitaVendas');
+    return {...c, vendas, receitaVendas, roas: c.investido>0 ? receitaVendas/c.investido : 0, custoResultado: c.investido/c.resultados};
+  }).sort((a,b)=>b.investido-a.investido);
+
+  const totalVendasPagas = sum(campJoined,'vendas');
+  const totalReceitaPagas = sum(campJoined,'receitaVendas');
+
+  document.getElementById('noteInvestimento').innerHTML =
+    `<b>US$ ${fmtNum(totalInvestido.toFixed(0))}</b> investidos em 7 campanhas Meta Ads (06–15/06) geraram <b>${totalVendasPagas} vendas</b> atribuídas via UTM, `+
+    `totalizando ${fmtUSD(totalReceitaPagas)} em receita rastreada — ROAS combinado de <b>${(totalReceitaPagas/totalInvestido).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}x</b>. `+
+    `Hoje, só as campanhas USA (HOT e COLD) têm vendas atribuídas; EUR, AFR e a RETARGETING ainda não converteram nesta exportação — ver nota em <i>Qualidade dos Dados</i>.`;
+
+  document.querySelector('#tblCampanhas tbody').innerHTML = campJoined.map(c=>`
+    <tr>
+      <td>${c.nome}<br><span style="font-size:11px;color:var(--muted2);">${c.regiao} · ${c.tipoResultado}</span></td>
+      <td class="num">${fmtUSD(c.investido)}</td>
+      <td class="num">${fmtNum(c.resultados)}</td>
+      <td class="num">${fmtUSD(c.custoResultado,2)}</td>
+      <td class="num">${fmtNum(c.vendas)}</td>
+      <td class="num">${fmtUSD(c.receitaVendas)}</td>
+      <td class="num">${roasPill(c.roas, c.vendas)}</td>
+    </tr>`).join('') + `
+    <tr class="subtotal">
+      <td>Total</td>
+      <td class="num">${fmtUSD(totalInvestido)}</td>
+      <td class="num">${fmtNum(sum(campJoined,'resultados'))}</td>
+      <td class="num">—</td>
+      <td class="num">${fmtNum(totalVendasPagas)}</td>
+      <td class="num">${fmtUSD(totalReceitaPagas)}</td>
+      <td class="num">${roasPill(totalReceitaPagas/totalInvestido, totalVendasPagas)}</td>
+    </tr>`;
+
+  // ad sets grouped under campaign, ordered by campaign investido desc, adset investido desc within group
+  let adsetRows = '';
+  campJoined.forEach(c=>{
+    const adsetsDaCamp = adsetsJoined.filter(a=>a.campanha===c.nome).sort((a,b)=>b.investido-a.investido);
+    adsetRows += `<tr class="grp-head"><td colspan="7">${c.nome}</td></tr>`;
+    adsetsDaCamp.forEach(a=>{
+      adsetRows += `<tr>
+        <td class="indent">${a.nome}</td>
+        <td class="num">${fmtUSD(a.investido)}</td>
+        <td class="num">${fmtNum(a.resultados)}</td>
+        <td class="num">${fmtUSD(a.custoResultado,2)}</td>
+        <td class="num">${fmtNum(a.vendas)}</td>
+        <td class="num">${fmtUSD(a.receitaVendas)}</td>
+        <td class="num">${roasPill(a.roas, a.vendas)}</td>
+      </tr>`;
+    });
+  });
+  document.querySelector('#tblAdsets tbody').innerHTML = adsetRows;
+
+  if(chartInvestimentoInit) return;
+  chartInvestimentoInit = true;
+  new Chart(document.getElementById('chartInvestimento'), {
+    type:'bar',
+    data:{
+      labels: campJoined.map(c=>c.nome.replace('FTF-','').replace('-JUN26-CAPT-ABO','')),
+      datasets:[
+        { label:'Investido', data: campJoined.map(c=>c.investido), backgroundColor:'#f59e0b', borderRadius:5, barThickness:14 },
+        { label:'Receita atribuída', data: campJoined.map(c=>c.receitaVendas), backgroundColor:'#22c55e', borderRadius:5, barThickness:14 },
+      ]
+    },
+    options:{
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'top', labels:{color:'#8d97b8', font:{family:'Inter'}}}, tooltip:{callbacks:{label:(c)=>c.dataset.label+': '+fmtUSD(c.parsed.x)}} },
+      scales:{
+        x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}, callback:(v)=>'$'+v/1000+'k'} },
+        y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'DM Mono', size:11}} }
+      }
+    }
+  });
+}
+
+/* ================= NAV / THEME ================= */
+const sectionTitles = {
+  overview:"Visão Geral", canais:"Canais & Origem", paises:"Países",
+  investimento:"Investimento x Vendas", qualidade:"Qualidade dos Dados"
+};
+const renderers = { canais:renderCanais, paises:renderPaises, investimento:renderInvestimento };
+
+function nav(id, btn){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('topTitle').textContent = sectionTitles[id];
+  if(renderers[id]) renderers[id]();
+}
+
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') !== 'light';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('stp_theme', isDark ? 'light' : 'dark');
+}
+
+(function initTheme(){
+  const saved = localStorage.getItem('stp_theme');
+  if(saved === 'light'){
+    document.documentElement.setAttribute('data-theme','light');
+    document.getElementById('themeBtn').textContent = '☀️';
+  }
+})();
+
+renderOverview();
+</script>
+</body>
+</html>
