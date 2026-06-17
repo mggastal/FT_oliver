@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C1 — Crescimento de Seguidores (IG)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';document.head.appendChild(s);"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0e1a; --surface:#11162a; --surface2:#171d36; --surface3:#1f2742;
+  --border:rgba(255,255,255,.08); --text:#eef1f8; --muted:#8d97b8; --muted2:#5b6580;
+  --blue:#4f7cff; --blue2:#7ea0ff; --blue-bg:rgba(79,124,255,.14);
+  --green:#22c55e; --green-bg:rgba(34,197,94,.14);
+  --amber:#f59e0b; --amber-bg:rgba(245,158,11,.14);
+  --red:#f43f5e; --red-bg:rgba(244,63,94,.14);
+  --purple:#a78bfa;
+  --radius:14px;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.28);
+}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+.mono{font-family:'DM Mono',monospace;}
+h1,h2,h3{font-family:'Space Grotesk',sans-serif;}
+.page{max-width:920px;margin:0 auto;padding:28px 24px 70px;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border);}
+.brand{display:flex;align-items:center;gap:12px;}
+.logo-badge{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:#06101f;flex-shrink:0;}
+.brand-title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:18px;}
+.brand-sub{font-size:12.5px;color:var(--muted);margin-top:1px;}
+.badge{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--blue-bg);color:var(--blue2);}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.kpi-lbl{font-size:12px;color:var(--muted);}
+.kpi-val{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;margin-top:6px;}
+.kpi-sub{font-size:11.5px;color:var(--muted2);margin-top:4px;}
+
+.block{margin-bottom:30px;}
+.block-title{font-size:17px;font-weight:600;margin-bottom:4px;}
+.block-sub{font-size:12.5px;color:var(--muted);margin-bottom:14px;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);margin-bottom:14px;}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;margin-bottom:12px;}
+.chart-wrap{position:relative;}
+
+.note{border-left:3px solid var(--blue);background:var(--blue-bg);border-radius:0 10px 10px 0;padding:12px 16px;font-size:13px;line-height:1.6;margin-bottom:14px;}
+.note b{color:var(--blue2);}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:9px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+tbody tr:hover td{background:var(--surface2);}
+td.num,th.num{text-align:right;font-family:'DM Mono',monospace;}
+tr.subtotal td{border-top:1px solid var(--border);font-weight:600;background:var(--surface2);}
+.tbl-wrap{overflow-x:auto;}
+
+.footnote{font-size:11.5px;color:var(--muted2);margin-top:6px;line-height:1.6;}
+footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
+
+.funnel{display:flex;flex-direction:column;gap:2px;max-width:620px;margin:0 auto;}
+.f-step{display:grid;grid-template-columns:128px 1fr 64px 56px;align-items:center;gap:12px;}
+.f-bar-lbl{font-size:12.5px;color:var(--text);}
+.f-bar-track{height:34px;background:var(--surface3);border-radius:8px;overflow:hidden;}
+.f-bar{height:100%;border-radius:8px;transition:width .3s;}
+.f-bar-val{font-family:'DM Mono',monospace;font-size:13px;text-align:right;}
+.f-pct{text-align:right;font-family:'DM Mono',monospace;font-size:12.5px;color:var(--muted);}
+.f-between{padding:4px 0 4px 140px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted2);}
+.f-arrow{color:var(--muted2);}
+.f-rate{font-weight:700;color:var(--blue2);}
+
+@media(max-width:760px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo-badge">C1</div>
+      <div>
+        <div class="brand-title">Crescimento de Seguidores — Instagram</div>
+        <div class="brand-sub">Respaldo · Oliver Velez · Fortraffic</div>
+      </div>
+    </div>
+    <span class="badge">18 mai – 16 jun 2026</span>
+  </div>
+
+  <div class="kpi-grid" id="kpiRow"></div>
+
+  <div class="note" id="noteResumo"></div>
+
+  <div class="block">
+    <div class="block-title">Por conjunto de anúncios</div>
+    <div class="block-sub">C1 - ADVANTAGE vs. C1 - ADVANTAGE + INT (públicos com interesse adicional)</div>
+    <div class="card">
+      <div class="card-title">Seguidores por conjunto</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chartAdsets"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table id="tblAdsets">
+          <thead><tr><th>Conjunto</th><th class="num">Investido</th><th class="num">Impressões</th><th class="num">Visitas ao perfil</th><th class="num">Seguidores</th><th class="num">Custo/seguidor</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-title">Por criativo</div>
+    <div class="block-sub">DISTVD01 e DISTVD02 (vídeo) e DISTEST01 (estático) — somando os 2 conjuntos de anúncios</div>
+    <div class="card">
+      <div class="card-title">Seguidores por criativo</div>
+      <div class="chart-wrap" style="height:180px;"><canvas id="chartCriativos"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="tbl-wrap">
+        <table id="tblCriativos">
+          <thead><tr><th>Criativo</th><th>Tipo</th><th class="num">Investido</th><th class="num">Impressões</th><th class="num">Visitas ao perfil</th><th class="num">Seguidores</th><th class="num">Custo/seguidor</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
+    <div class="block-title">Funil de visualização — DISTVD02</div>
+    <div class="block-sub">Único criativo em vídeo com volume suficiente para o funil de reprodução (DISTVD01 teve só 13 impressões)</div>
+    <div class="card">
+      <div class="funnel" id="funnelVideo"></div>
+    </div>
+  </div>
+
+  <footer>Dados extraídos manualmente dos prints do Gerenciador de Anúncios Meta (conta "Respaldo - Oliver Velez") · 17/06/2026</footer>
+
+</div>
+<script>
+/* ===== DADOS extraídos dos prints (Gerenciador de Anúncios) ===== */
+const adsets = [
+  {nome:"C1 - ADVANTAGE",        investido:103.70, impressoes:9661,  visitasPerfil:527, seguidores:84},
+  {nome:"C1 - ADVANTAGE + INT",  investido:103.25, impressoes:9609,  visitasPerfil:431, seguidores:67},
+];
+
+/* Por criativo = soma dos 2 conjuntos (mesmos 3 anúncios rodam nos dois) */
+const criativos = [
+  {nome:"DISTVD01",  tipo:"Vídeo",    investido:0.16,   impressoes:13,    visitasPerfil:0,   seguidores:0,  repro75:0,  repro50:0,  repro25:0},
+  {nome:"DISTVD02",  tipo:"Vídeo",    investido:27.90,  impressoes:1710,  visitasPerfil:123, seguidores:55, repro75:89, repro50:116, repro25:196},
+  {nome:"DISTEST01", tipo:"Estático", investido:178.89, impressoes:17547, visitasPerfil:835, seguidores:96, repro75:0,  repro50:0,  repro25:0},
+];
+
+const totalAlcance = 14294; /* alcance deduplicado por conta — não é soma simples dos conjuntos */
+
+function fmtUSD(n, dec=2){ return "US$ " + Number(n).toLocaleString('pt-BR', {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
+function fmtNum(n){ return Number(n).toLocaleString('pt-BR'); }
+function fmtPct(n, dec=1){ return Number(n).toLocaleString('pt-BR', {minimumFractionDigits:dec, maximumFractionDigits:dec}) + "%"; }
+function custoPorSeguidor(inv, seg){ return seg>0 ? fmtUSD(inv/seg) : "—"; }
+function sum(arr,k){ return arr.reduce((a,b)=>a+b[k],0); }
+
+const totalInvestido = sum(adsets,'investido');
+const totalSeguidores = sum(adsets,'seguidores');
+const totalVisitasPerfil = sum(adsets,'visitasPerfil');
+const totalImpressoes = sum(adsets,'impressoes');
+const custoSeguidorMedio = totalInvestido/totalSeguidores;
+
+/* ===== KPIs ===== */
+document.getElementById('kpiRow').innerHTML = [
+  {lbl:"Investimento Total", val:fmtUSD(totalInvestido), sub:"2 conjuntos de anúncios"},
+  {lbl:"Seguidores Ganhos", val:fmtNum(totalSeguidores), sub:"atribuídos no período"},
+  {lbl:"Custo por Seguidor", val:fmtUSD(custoSeguidorMedio), sub:"médio entre os 2 conjuntos"},
+  {lbl:"Alcance Total", val:fmtNum(totalAlcance), sub: fmtNum(totalImpressoes)+" impressões"},
+].map(k=>`
+  <div class="kpi">
+    <div class="kpi-lbl">${k.lbl}</div>
+    <div class="kpi-val">${k.val}</div>
+    <div class="kpi-sub">${k.sub}</div>
+  </div>`).join('');
+
+document.getElementById('noteResumo').innerHTML =
+  `<b>${fmtUSD(totalInvestido)}</b> investidos geraram <b>${fmtNum(totalVisitasPerfil)} visitas ao perfil</b> e <b>${fmtNum(totalSeguidores)} novos seguidores</b> — `+
+  `ou seja, ${fmtPct(totalSeguidores/totalVisitasPerfil*100)} de quem visitou o perfil passou a seguir. Custo médio de ${fmtUSD(custoSeguidorMedio)} por seguidor.`;
+
+/* ===== TABELA + GRÁFICO: POR CONJUNTO ===== */
+document.querySelector('#tblAdsets tbody').innerHTML = adsets.map(a=>`
+  <tr>
+    <td>${a.nome}</td>
+    <td class="num">${fmtUSD(a.investido)}</td>
+    <td class="num">${fmtNum(a.impressoes)}</td>
+    <td class="num">${fmtNum(a.visitasPerfil)}</td>
+    <td class="num">${fmtNum(a.seguidores)}</td>
+    <td class="num">${custoPorSeguidor(a.investido,a.seguidores)}</td>
+  </tr>`).join('') + `
+  <tr class="subtotal">
+    <td>Total</td>
+    <td class="num">${fmtUSD(totalInvestido)}</td>
+    <td class="num">${fmtNum(totalImpressoes)}</td>
+    <td class="num">${fmtNum(totalVisitasPerfil)}</td>
+    <td class="num">${fmtNum(totalSeguidores)}</td>
+    <td class="num">${custoPorSeguidor(totalInvestido,totalSeguidores)}</td>
+  </tr>`;
+
+new Chart(document.getElementById('chartAdsets'), {
+  type:'bar',
+  data:{
+    labels: adsets.map(a=>a.nome),
+    datasets:[{ data: adsets.map(a=>a.seguidores), backgroundColor:['#4f7cff','#a78bfa'], borderRadius:6, barThickness:34 }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtNum(c.parsed.x)+' seguidores'}} },
+    scales:{
+      x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}} },
+      y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+    }
+  }
+});
+
+/* ===== TABELA + GRÁFICO: POR CRIATIVO ===== */
+document.querySelector('#tblCriativos tbody').innerHTML = criativos.map(c=>`
+  <tr>
+    <td>${c.nome}</td>
+    <td style="color:var(--muted);">${c.tipo}</td>
+    <td class="num">${fmtUSD(c.investido)}</td>
+    <td class="num">${fmtNum(c.impressoes)}</td>
+    <td class="num">${fmtNum(c.visitasPerfil)}</td>
+    <td class="num">${fmtNum(c.seguidores)}</td>
+    <td class="num">${custoPorSeguidor(c.investido,c.seguidores)}</td>
+  </tr>`).join('') + `
+  <tr class="subtotal">
+    <td>Total</td><td></td>
+    <td class="num">${fmtUSD(sum(criativos,'investido'))}</td>
+    <td class="num">${fmtNum(sum(criativos,'impressoes'))}</td>
+    <td class="num">${fmtNum(sum(criativos,'visitasPerfil'))}</td>
+    <td class="num">${fmtNum(sum(criativos,'seguidores'))}</td>
+    <td class="num">${custoPorSeguidor(sum(criativos,'investido'),sum(criativos,'seguidores'))}</td>
+  </tr>`;
+
+new Chart(document.getElementById('chartCriativos'), {
+  type:'bar',
+  data:{
+    labels: criativos.map(c=>c.nome+' ('+c.tipo+')'),
+    datasets:[{ data: criativos.map(c=>c.seguidores), backgroundColor:['#5b6580','#22c55e','#f59e0b'], borderRadius:6, barThickness:28 }]
+  },
+  options:{
+    indexAxis:'y', responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtNum(c.parsed.x)+' seguidores'}} },
+    scales:{
+      x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}} },
+      y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+    }
+  }
+});
+
+/* ===== FUNIL DE VISUALIZAÇÃO — DISTVD02 ===== */
+const vd02 = criativos.find(c=>c.nome==="DISTVD02");
+const funilSteps = [
+  {lbl:"Impressões",          val: vd02.impressoes, color:"#4f7cff"},
+  {lbl:"Assistiram 25%",      val: vd02.repro25,     color:"#7c9bff"},
+  {lbl:"Assistiram 50%",      val: vd02.repro50,     color:"#a78bfa"},
+  {lbl:"Assistiram 75%",      val: vd02.repro75,     color:"#c9b8fb"},
+];
+const maxVal = funilSteps[0].val;
+let funilHtml = '';
+funilSteps.forEach((s,i)=>{
+  const pctOfTop = s.val/maxVal*100;
+  const widthPct = Math.max(pctOfTop, 4); // largura mínima visível na track
+  funilHtml += `<div class="f-step">
+    <span class="f-bar-lbl">${s.lbl}</span>
+    <div class="f-bar-track"><div class="f-bar" style="width:${widthPct}%; background:${s.color};"></div></div>
+    <span class="f-bar-val">${fmtNum(s.val)}</span>
+    <span class="f-pct">${fmtPct(pctOfTop)}</span>
+  </div>`;
+  if(i < funilSteps.length-1){
+    const next = funilSteps[i+1];
+    const retencao = next.val/s.val*100;
+    funilHtml += `<div class="f-between"><span class="f-arrow">↓</span> <span class="f-rate">${fmtPct(retencao)}</span> de retenção</div>`;
+  }
+});
+document.getElementById('funnelVideo').innerHTML = funilHtml;
+</script>
+</body>
+</html>
