@@ -2,13 +2,13 @@
   "cliente": "Oliver",
   "cor": "#800080",
   "letra": "OV",
-  "lancamento": "BLACKFRIDAY",
+  "lancamento": "",
   "moeda": "USD",
   "moeda_simbolo": "$",
   "atualizado": "18/06/2026",
   "kpis": {
-    "spend": 0.0,
-    "leads": 0,
-    "cpl": null
+    "spend": 76393.42,
+    "leads": 29378,
+    "cpl": 2.6
   }
 }
