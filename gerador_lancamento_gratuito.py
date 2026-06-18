@@ -17,7 +17,7 @@ NOME_CLIENTE     = "Oliver"
 LOGO_LETRA       = "OV"
 COR_ACENTO       = "#800080"
 
-LANCAMENTO_COD   = "SWING02"        # filtra campanhas; "" = ver tudo
+LANCAMENTO_COD   = "BLACKFRIDAY"        # filtra campanhas; "" = ver tudo
 USAR_PESQUISA    = False
 USAR_VENDAS      = False
 
