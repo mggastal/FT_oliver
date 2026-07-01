@@ -11,15 +11,15 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
-  --bg:#0a0e1a; --surface:#11162a; --surface2:#171d36; --surface3:#1f2742;
-  --border:rgba(255,255,255,.08); --text:#eef1f8; --muted:#8d97b8; --muted2:#5b6580;
-  --blue:#4f7cff; --blue2:#7ea0ff; --blue-bg:rgba(79,124,255,.14);
-  --green:#22c55e; --green-bg:rgba(34,197,94,.14);
-  --amber:#f59e0b; --amber-bg:rgba(245,158,11,.14);
-  --red:#f43f5e; --red-bg:rgba(244,63,94,.14);
-  --purple:#a78bfa;
+  --bg:#f5f6fa; --surface:#ffffff; --surface2:#f0f2f8; --surface3:#e6e9f4;
+  --border:rgba(20,25,60,.10); --text:#0f1528; --muted:#5b6580; --muted2:#9aa5c4;
+  --blue:#3b68f0; --blue2:#2d55d0; --blue-bg:rgba(59,104,240,.10);
+  --green:#16a34a; --green-bg:rgba(22,163,74,.10);
+  --amber:#b45309; --amber-bg:rgba(180,83,9,.10);
+  --red:#dc2626; --red-bg:rgba(220,38,38,.10);
+  --purple:#7c3aed;
   --radius:14px;
-  --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 28px rgba(0,0,0,.28);
+  --shadow:0 1px 2px rgba(20,25,60,.06), 0 6px 20px rgba(20,25,60,.07);
 }
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
 .mono{font-family:'DM Mono',monospace;}
@@ -88,7 +88,7 @@ footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
         <div class="brand-sub">Respaldo · Oliver Velez · Fortraffic</div>
       </div>
     </div>
-    <span class="badge">18 mai – 16 jun 2026</span>
+    <span class="badge">1 jun – 30 jun 2026</span>
   </div>
 
   <div class="kpi-grid" id="kpiRow"></div>
@@ -114,7 +114,7 @@ footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
 
   <div class="block">
     <div class="block-title">Por criativo</div>
-    <div class="block-sub">DISTVD01 e DISTVD02 (vídeo) e DISTEST01 (estático) — somando os 2 conjuntos de anúncios</div>
+    <div class="block-sub">DISTVD03, DISTVD01 e DISTVD02 (vídeo) e DISTESTO1 (estático) — somando os 2 conjuntos de anúncios</div>
     <div class="card">
       <div class="card-title">Seguidores por criativo</div>
       <div class="chart-wrap" style="height:180px;"><canvas id="chartCriativos"></canvas></div>
@@ -131,30 +131,31 @@ footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
 
   <div class="block">
     <div class="block-title">Funil de visualização — DISTVD02</div>
-    <div class="block-sub">Único criativo em vídeo com volume suficiente para o funil de reprodução (DISTVD01 teve só 13 impressões)</div>
+    <div class="block-sub">DISTVD02 (vídeo) — único criativo com dados de reprodução suficientes. DISTVD03 e DISTVD01 tiveram apenas 55 e 50 impressões respectivamente no período.</div>
     <div class="card">
       <div class="funnel" id="funnelVideo"></div>
     </div>
   </div>
 
-  <footer>Dados extraídos manualmente dos prints do Gerenciador de Anúncios Meta (conta "Respaldo - Oliver Velez") · 17/06/2026</footer>
+  <footer>Dados extraídos manualmente dos prints do Gerenciador de Anúncios Meta (conta "Respaldo - Oliver Velez") · 01/07/2026</footer>
 
 </div>
 <script>
 /* ===== DADOS extraídos dos prints (Gerenciador de Anúncios) ===== */
 const adsets = [
-  {nome:"C1 - ADVANTAGE",        investido:103.70, impressoes:9661,  visitasPerfil:527, seguidores:84},
-  {nome:"C1 - ADVANTAGE + INT",  investido:103.25, impressoes:9609,  visitasPerfil:431, seguidores:67},
+  {nome:"C1 - ADVANTAGE",        investido:311.61, impressoes:21371, visitasPerfil:1006, seguidores:249},
+  {nome:"C1 - ADVANTAGE + INT",  investido:272.20, impressoes:19262, visitasPerfil:799,  seguidores:216},
 ];
 
-/* Por criativo = soma dos 2 conjuntos (mesmos 3 anúncios rodam nos dois) */
+/* Por criativo = soma dos 2 conjuntos */
 const criativos = [
-  {nome:"DISTVD01",  tipo:"Vídeo",    investido:0.16,   impressoes:13,    visitasPerfil:0,   seguidores:0,  repro75:0,  repro50:0,  repro25:0},
-  {nome:"DISTVD02",  tipo:"Vídeo",    investido:27.90,  impressoes:1710,  visitasPerfil:123, seguidores:55, repro75:89, repro50:116, repro25:196},
-  {nome:"DISTEST01", tipo:"Estático", investido:178.89, impressoes:17547, visitasPerfil:835, seguidores:96, repro75:0,  repro50:0,  repro25:0},
+  {nome:"DISTVD03",  tipo:"Vídeo",    investido:1.61,   impressoes:55,    visitasPerfil:0,    seguidores:0,   repro75:0,    repro50:0,    repro25:0},
+  {nome:"DISTVD01",  tipo:"Vídeo",    investido:0.65,   impressoes:50,    visitasPerfil:5,    seguidores:1,   repro75:3,    repro50:4,    repro25:6},
+  {nome:"DISTVD02",  tipo:"Vídeo",    investido:402.66, impressoes:22981, visitasPerfil:965,  seguidores:368, repro75:938,  repro50:1291, repro25:2203},
+  {nome:"DISTESTO1", tipo:"Estático", investido:178.89, impressoes:17547, visitasPerfil:835,  seguidores:96,  repro75:0,    repro50:0,    repro25:0},
 ];
 
-const totalAlcance = 14294; /* alcance deduplicado por conta — não é soma simples dos conjuntos */
+const totalAlcance = 26248; /* alcance deduplicado por conta */
 
 function fmtUSD(n, dec=2){ return "US$ " + Number(n).toLocaleString('pt-BR', {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
 function fmtNum(n){ return Number(n).toLocaleString('pt-BR'); }
@@ -208,14 +209,14 @@ new Chart(document.getElementById('chartAdsets'), {
   type:'bar',
   data:{
     labels: adsets.map(a=>a.nome),
-    datasets:[{ data: adsets.map(a=>a.seguidores), backgroundColor:['#4f7cff','#a78bfa'], borderRadius:6, barThickness:34 }]
+    datasets:[{ data: adsets.map(a=>a.seguidores), backgroundColor:['#3b68f0','#7c3aed'], borderRadius:6, barThickness:34 }]
   },
   options:{
     indexAxis:'y', responsive:true, maintainAspectRatio:false,
     plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtNum(c.parsed.x)+' seguidores'}} },
     scales:{
-      x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}} },
-      y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+      x:{ grid:{color:'rgba(20,25,60,.07)'}, ticks:{color:'#5b6580', font:{family:'DM Mono'}} },
+      y:{ grid:{display:false}, ticks:{color:'#0f1528', font:{family:'Inter', size:12}} }
     }
   }
 });
@@ -244,14 +245,14 @@ new Chart(document.getElementById('chartCriativos'), {
   type:'bar',
   data:{
     labels: criativos.map(c=>c.nome+' ('+c.tipo+')'),
-    datasets:[{ data: criativos.map(c=>c.seguidores), backgroundColor:['#5b6580','#22c55e','#f59e0b'], borderRadius:6, barThickness:28 }]
+    datasets:[{ data: criativos.map(c=>c.seguidores), backgroundColor:['#9aa5c4','#5b6580','#3b68f0','#16a34a'], borderRadius:6, barThickness:26 }]
   },
   options:{
     indexAxis:'y', responsive:true, maintainAspectRatio:false,
     plugins:{ legend:{display:false}, tooltip:{callbacks:{label:(c)=>fmtNum(c.parsed.x)+' seguidores'}} },
     scales:{
-      x:{ grid:{color:'rgba(140,150,180,.12)'}, ticks:{color:'#8d97b8', font:{family:'DM Mono'}} },
-      y:{ grid:{display:false}, ticks:{color:'#8d97b8', font:{family:'Inter', size:12}} }
+      x:{ grid:{color:'rgba(20,25,60,.07)'}, ticks:{color:'#5b6580', font:{family:'DM Mono'}} },
+      y:{ grid:{display:false}, ticks:{color:'#0f1528', font:{family:'Inter', size:12}} }
     }
   }
 });
