@@ -1,21 +1,21 @@
 {
   "cliente": "Oliver",
-  "cor": "#000080",
+  "cor": "#800080",
   "letra": "OV",
   "lancamentos": [
+    "BLACKJUL26",
     "SWING02",
     "CTP02",
     "SWING01",
     "CTPBRA01",
-    "CTP01",
-    "BLACKJUL26"
+    "CTP01"
   ],
   "moeda": "USD",
   "moeda_simbolo": "$",
   "atualizado": "06/07/2026",
   "kpis": {
-    "spend": 40000.49,
-    "leads": 6243,
-    "cpl": 6.41
+    "spend": 4345.32,
+    "leads": 606,
+    "cpl": 7.17
   }
 }
