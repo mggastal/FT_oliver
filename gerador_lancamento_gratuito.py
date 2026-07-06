@@ -28,7 +28,7 @@ OUTPUT_FILE      = "index.html"
 
 NOME_CLIENTE     = "Oliver"
 LOGO_LETRA       = "OV"
-COR_ACENTO       = "#000080"
+COR_ACENTO       = "#800080"
 
 # ← MUDANÇA: lista de códigos em vez de string única.
 #   [] (lista vazia) = ver tudo, sem botões de lançamento
@@ -36,12 +36,12 @@ COR_ACENTO       = "#000080"
 #   Cada item pode ser uma string (label = termo de busca) ou uma tupla (label, termo_busca)
 #   quando você quer que o botão mostre um nome diferente do texto realmente buscado.
 LANCAMENTO_CODS  = [
+    ("BLACKJUL26", "BLACKJUL26"),
     ("SWING02",  "SWING02"),
     ("CTP02",    "CTPMAY26"),
     ("SWING01",  "SWING-21MAR26"),
     ("CTPBRA01", "IFTBRA01"),
     ("CTP01",    "21FEB26"),
-    ("BLACKJUL26",    "BLACKJUL26"),
 ]
 
 USAR_PESQUISA    = False
@@ -191,7 +191,7 @@ def build_daily(p):
     for _,r in agg.iterrows():
         sp=float(r["spend"]); imp=float(r["impressions"]); lc=float(r["link_clicks"])
         pv=float(r["page_view"]); ld=float(r["leads"])
-        out["days"].append(r["date"].strftime("%d/%m"))
+        out["days"].append(r["date"].strftime("%d/%m/%y"))
         out["spend"].append(round(sp,2)); out["impressions"].append(int(imp))
         out["link_clicks"].append(int(lc)); out["page_view"].append(int(pv))
         out["leads"].append(int(ld))
@@ -228,7 +228,7 @@ def meta_raw(df):
         key=(r["date"],r["campaign"],r["adset"])
         codes = codes_map.get(key, [])
         rows.append({
-            "d":r["date"].strftime("%d/%m"),"c":str(r["campaign"]),"a":str(r["adset"]),
+            "d":r["date"].strftime("%d/%m/%y"),"c":str(r["campaign"]),"a":str(r["adset"]),
             "codes":codes,"sp":round(float(r["spend"]),2),
             "ld":int(r["leads"]),"imp":int(r["impressions"]),
             "lc":int(r["link_clicks"]),"pv":int(r["page_view"])
@@ -384,12 +384,12 @@ def meta_breakdowns(df):
     if len(df_ga)>0:
         for _,r in df_ga.iterrows():
             if pd.isna(r['date']): continue
-            raw_ga.append({'d':r['date'].strftime('%d/%m'),'age':str(r['age']),'gen':str(r['gender']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'codes':r['lct_codes'],'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
+            raw_ga.append({'d':r['date'].strftime('%d/%m/%y'),'age':str(r['age']),'gen':str(r['gender']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'codes':r['lct_codes'],'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
     raw_pt=[]
     if len(df_pt)>0:
         for _,r in df_pt.iterrows():
             if pd.isna(r['date']): continue
-            raw_pt.append({'d':r['date'].strftime('%d/%m'),'plat':str(r['platform']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'codes':r['lct_codes'],'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
+            raw_pt.append({'d':r['date'].strftime('%d/%m/%y'),'plat':str(r['platform']),'sp':round(float(r['spend']),2),'ld':int(r['leads']),'codes':r['lct_codes'],'camp':str(r['Campaign Name']) if 'Campaign Name' in r.index else ''})
     result['_raw_ga']=raw_ga; result['_raw_pt']=raw_pt
     return result
 
@@ -432,7 +432,7 @@ def hotmart_data():
         ad_leads_d=df_meta_inv.groupby("Ad Name")["leads"].sum().to_dict() if df_meta_inv is not None else {}
         total_inv=df_meta_inv["spend"].sum() if df_meta_inv is not None else 0
 
-        dg=df.groupby(df["date"].dt.strftime("%d/%m")).agg(vendas=("price","count"),receita=("price","sum")).reset_index().sort_values("date")
+        dg=df.groupby(df["date"].dt.strftime("%d/%m/%y")).agg(vendas=("price","count"),receita=("price","sum")).reset_index().sort_values("date")
         daily={"days":dg["date"].tolist(),"vendas":dg["vendas"].tolist(),"receita":[round(v,2) for v in dg["receita"]]}
 
         df["canal"]=df["sck"].astype(str).str.split("|").str[0].replace({"nan":"Sem rastreio","":"Sem rastreio"})
@@ -491,7 +491,7 @@ def hotmart_data():
             camp_v=str(row.get("utm_camp","")) if pd.notna(row.get("utm_camp","")) else ""
             pgto_v=fmt_pgto(row.get("pgto_raw",""))
             temp_v="Quente" if "TT" in camp_v.upper() else("Frio" if "TF" in camp_v.upper() else "Sem rastreio")
-            raw_rows.append({"d":row["date"].strftime("%d/%m"),"r":round(float(row["price"]),2),
+            raw_rows.append({"d":row["date"].strftime("%d/%m/%y"),"r":round(float(row["price"]),2),
                 "sck":sck_v,"canal":canal_v,"camp":camp_v if camp_v not in("","nan","NaN") else "",
                 "temp":temp_v,"pgto":pgto_v})
 
@@ -499,7 +499,7 @@ def hotmart_data():
         for _,row in df.sort_values("date",ascending=False).iterrows():
             vendas_raw.append({
                 "d":row["date"].strftime("%d/%m/%Y %H:%M"),
-                "dia":row["date"].strftime("%d/%m"),
+                "dia":row["date"].strftime("%d/%m/%y"),
                 "hora":int(row["date"].strftime("%H")),
                 "nome":str(row.get("nome","")).title() if pd.notna(row.get("nome","")) else "—",
                 "email":str(row.get("email","")) if pd.notna(row.get("email","")) else "—",
