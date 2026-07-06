@@ -41,6 +41,7 @@ LANCAMENTO_CODS  = [
     ("SWING01",  "SWING-21MAR26"),
     ("CTPBRA01", "IFTBRA01"),
     ("CTP01",    "21FEB26"),
+    ("BLACKJUL26",    "BLACKJUL26"),
 ]
 
 USAR_PESQUISA    = False
