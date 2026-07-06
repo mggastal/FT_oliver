@@ -28,7 +28,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 /* SIDEBAR */
 .sb{background:#0f1523;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
 .sb-logo{display:flex;align-items:center;gap:10px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
-.logo-box{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;}
+.logo-box{min-width:34px;height:34px;padding:0 8px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff;flex-shrink:0;white-space:nowrap;}
 .logo-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:#fff;}
 .logo-sub{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.5px;}
 .sb-nav{padding:10px 8px;flex:1;}
@@ -218,7 +218,7 @@ details.desk-only{display:block!important;}
 <aside class="sb" id="sidebar">
   <div class="sb-logo">
     <div class="logo-box" id="logoBox">C</div>
-    <div><div class="logo-name" id="sbNome">Dashboard</div><div class="logo-sub" data-i18n="launch">Lançamento</div></div>
+    <div><div class="logo-name" id="sbNome">Dashboard</div></div>
   </div>
   <nav class="sb-nav">
     <button class="sb-item active" onclick="goPage('meta',this)"><span class="ico">🎯</span><span data-i18n="nav_meta">Meta Ads</span></button>
@@ -229,7 +229,6 @@ details.desk-only{display:block!important;}
       <button class="sb-item" onclick="goPage('vendas',this)"><span class="ico">💰</span><span data-i18n="nav_vendas">Visão Geral</span></button>
     </div>
   </nav>
-  <div class="sb-lct"><div class="sb-lct-lbl" data-i18n="launch">Lançamento</div><div class="sb-lct-val" id="sbLct">—</div></div>
   <div class="sb-footer"><span id="sbAtual">--/--/---- · via planilha</span></div>
 </aside>
 
@@ -747,13 +746,20 @@ function getHoje(){
 }
 
 function parseDayStr(s){
-  const[dd,mm]=s.split('/');
+  // Formato esperado: dd/mm/yy (ex: "05/07/26") — ano explícito, sem inferência.
+  // Mantém compatibilidade com dd/mm antigo caso alguém rode HTML de versão anterior.
+  const parts=s.split('/');
+  const dd=parseInt(parts[0]), mm=parseInt(parts[1]);
+  if(parts.length>=3){
+    const yy=parseInt(parts[2]);
+    const year=yy<70?2000+yy:1900+yy;
+    return new Date(year, mm-1, dd);
+  }
+  // fallback legado: sem ano no string, infere pelo ano atual
   const hoje=getHoje();
   let year=hoje.getFullYear();
-  const mesStr=parseInt(mm);
-  const mesHoje=hoje.getMonth()+1;
-  if(mesStr > mesHoje + 1) year--;
-  return new Date(year, mesStr-1, parseInt(dd));
+  if(mm > hoje.getMonth()+2) year--;
+  return new Date(year, mm-1, dd);
 }
 
 function applyPeriod(daily){
@@ -1889,7 +1895,6 @@ window.addEventListener('resize', ajustarPaddingContent);
   if(lb){lb.textContent=LOGO_LETRA;lb.style.background=`linear-gradient(135deg,${COR_ACENTO},${COR_ACENTO}cc)`;}
   document.getElementById('sbNome').textContent=NOME_CLIENTE;
   document.getElementById('pageTab').textContent=`${NOME_CLIENTE} — Dashboard`;
-  document.getElementById('sbLct').textContent=(LANCAMENTO_CODS&&LANCAMENTO_CODS.length)?LANCAMENTO_CODS.join(' / '):t('lct_tudo');
   document.documentElement.style.setProperty('--accent',COR_ACENTO);
   const badge=document.getElementById('liveBadge');
   badge.style.cssText=`background:${COR_ACENTO}15;border:1px solid ${COR_ACENTO}44;color:${COR_ACENTO};`;
