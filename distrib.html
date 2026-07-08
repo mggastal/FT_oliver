@@ -75,6 +75,15 @@ footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
 @media(max-width:760px){
   .kpi-grid{grid-template-columns:repeat(2,1fr);}
 }
+
+.tabbar{display:flex;gap:6px;margin-bottom:24px;background:var(--surface2);border-radius:12px;padding:4px;width:fit-content;}
+.tabbtn{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--muted);background:transparent;border:none;padding:9px 18px;border-radius:9px;cursor:pointer;transition:all .15s;}
+.tabbtn.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow);}
+.tabbtn:not(.active):hover{color:var(--text);}
+.tabpanel{display:none;}
+.tabpanel.active{display:block;}
+.yt-video-thumb{display:flex;align-items:center;gap:8px;}
+.yt-video-dur{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);}
 </style>
 </head>
 <body>
@@ -84,12 +93,19 @@ footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
     <div class="brand">
       <div class="logo-badge">C1</div>
       <div>
-        <div class="brand-title">Crescimento de Seguidores — Instagram</div>
+        <div class="brand-title" id="brandTitle">Crescimento de Seguidores — Instagram</div>
         <div class="brand-sub">Respaldo · Oliver Velez · Fortraffic</div>
       </div>
     </div>
-    <span class="badge">1 jun – 30 jun 2026</span>
+    <span class="badge" id="periodBadge">1 jun – 30 jun 2026</span>
   </div>
+
+  <div class="tabbar">
+    <button class="tabbtn active" id="tabBtnIG" onclick="switchTab('ig')">Instagram · Seguidores</button>
+    <button class="tabbtn" id="tabBtnYT" onclick="switchTab('yt')">YouTube · Inscritos</button>
+  </div>
+
+  <div class="tabpanel active" id="tabIG">
 
   <div class="kpi-grid" id="kpiRow"></div>
 
@@ -114,7 +130,7 @@ footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
 
   <div class="block">
     <div class="block-title">Por criativo</div>
-    <div class="block-sub">DISTVD03, DISTVD01 e DISTVD02 (vídeo) e DISTESTO1 (estático) — somando os 2 conjuntos de anúncios</div>
+    <div class="block-sub">DISTVD05, DISTVD04, DISTVD03, DISTVD01 e DISTVD02 (vídeo) e DISTEST01 (estático) — somando os 2 conjuntos de anúncios</div>
     <div class="card">
       <div class="card-title">Seguidores por criativo</div>
       <div class="chart-wrap" style="height:180px;"><canvas id="chartCriativos"></canvas></div>
@@ -131,31 +147,65 @@ footer{font-size:11.5px;color:var(--muted2);text-align:center;margin-top:30px;}
 
   <div class="block">
     <div class="block-title">Funil de visualização — DISTVD02</div>
-    <div class="block-sub">DISTVD02 (vídeo) — único criativo com dados de reprodução suficientes. DISTVD03 e DISTVD01 tiveram apenas 55 e 50 impressões respectivamente no período.</div>
+    <div class="block-sub">DISTVD02 (vídeo) — criativo com maior volume de dados de reprodução. DISTVD03 segue com pouco volume (104 impressões no período).</div>
     <div class="card">
       <div class="funnel" id="funnelVideo"></div>
     </div>
   </div>
 
-  <footer>Dados extraídos manualmente dos prints do Gerenciador de Anúncios Meta (conta "Respaldo - Oliver Velez") · 01/07/2026</footer>
+  </div><!-- /tabIG -->
+
+  <div class="tabpanel" id="tabYT">
+
+    <div class="kpi-grid" id="kpiRowYT"></div>
+
+    <div class="note" id="noteResumoYT"></div>
+
+    <div class="block">
+      <div class="block-title">Vídeo assistido (funil TrueView)</div>
+      <div class="block-sub">Campanha FTF-TESTE01-YOUTUBE — % de quem viu o anúncio que assistiu até cada marca</div>
+      <div class="card">
+        <div class="funnel" id="funnelYoutube"></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">Por vídeo (criativo)</div>
+      <div class="block-sub">Recursos de vídeo com veiculação no período — os prints enviados mostram esses 5 vídeos; se houver mais ativos rodando, me envie a tabela completa que eu atualizo.</div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table id="tblYoutube">
+            <thead><tr><th>Vídeo</th><th class="num">Impressões</th><th class="num">Cliques</th><th class="num">CTR</th><th class="num">Custo</th><th class="num">CPV médio</th><th class="num">Taxa visualização</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="footnote" id="footnoteYT"></div>
+      </div>
+    </div>
+
+  </div><!-- /tabYT -->
+
+  <footer>Dados extraídos manualmente dos prints do Gerenciador de Anúncios Meta (conta "Respaldo - Oliver Velez") e Google Ads (campanha FTF-TESTE01-YOUTUBE) · 08/07/2026</footer>
 
 </div>
 <script>
 /* ===== DADOS extraídos dos prints (Gerenciador de Anúncios) ===== */
 const adsets = [
-  {nome:"C1 - ADVANTAGE",        investido:311.61, impressoes:21371, visitasPerfil:1006, seguidores:249},
-  {nome:"C1 - ADVANTAGE + INT",  investido:272.20, impressoes:19262, visitasPerfil:799,  seguidores:216},
+  {nome:"C1 - ADVANTAGE",        investido:407.64, impressoes:25984, visitasPerfil:1160, seguidores:291},
+  {nome:"C1 - ADVANTAGE + INT",  investido:349.43, impressoes:22912, visitasPerfil:916,  seguidores:252},
 ];
 
 /* Por criativo = soma dos 2 conjuntos */
 const criativos = [
-  {nome:"DISTVD03",  tipo:"Vídeo",    investido:1.61,   impressoes:55,    visitasPerfil:0,    seguidores:0,   repro75:0,    repro50:0,    repro25:0},
-  {nome:"DISTVD01",  tipo:"Vídeo",    investido:0.65,   impressoes:50,    visitasPerfil:5,    seguidores:1,   repro75:3,    repro50:4,    repro25:6},
-  {nome:"DISTVD02",  tipo:"Vídeo",    investido:402.66, impressoes:22981, visitasPerfil:965,  seguidores:368, repro75:938,  repro50:1291, repro25:2203},
-  {nome:"DISTESTO1", tipo:"Estático", investido:178.89, impressoes:17547, visitasPerfil:835,  seguidores:96,  repro75:0,    repro50:0,    repro25:0},
+  {nome:"DISTVD05",  tipo:"Vídeo",    investido:41.74,  impressoes:1813,  visitasPerfil:42,   seguidores:7,   repro75:46,   repro50:74,   repro25:163},
+  {nome:"DISTVD04",  tipo:"Vídeo",    investido:33.66,  impressoes:1248,  visitasPerfil:33,   seguidores:11,  repro75:57,   repro50:76,   repro25:119},
+  {nome:"DISTVD03",  tipo:"Vídeo",    investido:3.35,   impressoes:104,   visitasPerfil:0,    seguidores:0,   repro75:3,    repro50:13,   repro25:20},
+  {nome:"DISTVD01",  tipo:"Vídeo",    investido:57.52,  impressoes:3086,  visitasPerfil:125,  seguidores:36,  repro75:92,   repro50:194,  repro25:348},
+  {nome:"DISTVD02",  tipo:"Vídeo",    investido:441.91, impressoes:25098, visitasPerfil:1041, seguidores:393, repro75:1006, repro50:1397, repro25:2431},
+  {nome:"DISTEST01", tipo:"Estático", investido:178.89, impressoes:17547, visitasPerfil:835,  seguidores:96,  repro75:0,    repro50:0,    repro25:0},
 ];
 
-const totalAlcance = 26248; /* alcance deduplicado por conta */
+const totalAlcance = 29421; /* alcance deduplicado por conta */
 
 function fmtUSD(n, dec=2){ return "US$ " + Number(n).toLocaleString('pt-BR', {minimumFractionDigits:dec, maximumFractionDigits:dec}); }
 function fmtNum(n){ return Number(n).toLocaleString('pt-BR'); }
@@ -283,6 +333,101 @@ funilSteps.forEach((s,i)=>{
   }
 });
 document.getElementById('funnelVideo').innerHTML = funilHtml;
+
+/* ===== YOUTUBE ADS — FTF-TESTE01-YOUTUBE (Google Ads) ===== */
+const ytCampanha = {
+  cliques:201, impressoes:4047, ctr:4.97, custo:140.82, cpmMedio:34.80,
+  inscritos:57, custoPorInscrito:2.47,
+  reproVista:79,
+  assistido25:20.46, assistido50:14.35, assistido75:11.42, assistido100:9.56
+};
+
+/* Vídeos visíveis no print (pode haver outros ativos fora do recorte) */
+const ytVideos = [
+  {nome:"THIS IS WHY YOU LOSE",     duracao:"9:36", impressoes:295,  cliques:12,  ctr:4.07, custo:7.97,  cpv:0.068, taxaVisualizacao:39.66},
+  {nome:"READ THE MOVE",            duracao:"6:41", impressoes:2363, cliques:108, ctr:4.57, custo:61.31, cpv:0.066, taxaVisualizacao:39.44},
+  {nome:"NEWS DON'T MATTER",        duracao:"5:27", impressoes:0,    cliques:0,   ctr:null, custo:0.00,  cpv:null,  taxaVisualizacao:null},
+  {nome:"YOUR PROFITS ARE HERE",    duracao:"9:24", impressoes:15,   cliques:0,   ctr:0.00, custo:0.69,  cpv:0.173, taxaVisualizacao:26.67},
+  {nome:"DON'T WASTE 5 YEARS",      duracao:"9:56", impressoes:502,  cliques:32,  ctr:6.37, custo:18.26, cpv:0.086, taxaVisualizacao:42.43},
+];
+
+document.getElementById('kpiRowYT').innerHTML = [
+  {lbl:"Investimento Total", val:fmtUSD(ytCampanha.custo), sub:"campanha FTF-TESTE01-YOUTUBE"},
+  {lbl:"Inscritos Ganhos", val:fmtNum(ytCampanha.inscritos), sub:"conversão = novo inscrito no canal"},
+  {lbl:"Custo por Inscrito", val:fmtUSD(ytCampanha.custoPorInscrito), sub:"médio da campanha"},
+  {lbl:"Impressões", val:fmtNum(ytCampanha.impressoes), sub:fmtNum(ytCampanha.cliques)+" cliques · CTR "+fmtPct(ytCampanha.ctr)},
+].map(k=>`
+  <div class="kpi">
+    <div class="kpi-lbl">${k.lbl}</div>
+    <div class="kpi-val">${k.val}</div>
+    <div class="kpi-sub">${k.sub}</div>
+  </div>`).join('');
+
+document.getElementById('noteResumoYT').innerHTML =
+  `<b>${fmtUSD(ytCampanha.custo)}</b> investidos em anúncios em vídeo no YouTube geraram <b>${fmtNum(ytCampanha.inscritos)} novos inscritos</b> no canal — `+
+  `custo médio de <b>${fmtUSD(ytCampanha.custoPorInscrito)}</b> por inscrito. A campanha teve ${fmtNum(ytCampanha.impressoes)} impressões e CTR de ${fmtPct(ytCampanha.ctr)}.`;
+
+/* Funil TrueView (nível campanha) */
+const ytFunilSteps = [
+  {lbl:"Impressões",       val:100,                        color:"#4f7cff"},
+  {lbl:"Assistiram 25%",   val:ytCampanha.assistido25,      color:"#7c9bff"},
+  {lbl:"Assistiram 50%",   val:ytCampanha.assistido50,      color:"#a78bfa"},
+  {lbl:"Assistiram 75%",   val:ytCampanha.assistido75,      color:"#c9b8fb"},
+  {lbl:"Assistiram 100%",  val:ytCampanha.assistido100,     color:"#e0d3fc"},
+];
+let ytFunilHtml = '';
+ytFunilSteps.forEach((s,i)=>{
+  const widthPct = Math.max(s.val, 4);
+  ytFunilHtml += `<div class="f-step">
+    <span class="f-bar-lbl">${s.lbl}</span>
+    <div class="f-bar-track"><div class="f-bar" style="width:${widthPct}%; background:${s.color};"></div></div>
+    <span class="f-bar-val">${fmtPct(s.val)}</span>
+    <span class="f-pct"></span>
+  </div>`;
+  if(i < ytFunilSteps.length-1){
+    const next = ytFunilSteps[i+1];
+    const retencao = next.val/s.val*100;
+    ytFunilHtml += `<div class="f-between"><span class="f-arrow">↓</span> <span class="f-rate">${fmtPct(retencao)}</span> de retenção</div>`;
+  }
+});
+document.getElementById('funnelYoutube').innerHTML = ytFunilHtml;
+
+/* Tabela por vídeo */
+function fmtOrTraco(v, fmt){ return (v===null || v===undefined) ? "—" : fmt(v); }
+document.querySelector('#tblYoutube tbody').innerHTML = ytVideos.map(v=>`
+  <tr>
+    <td><div class="yt-video-thumb">${v.nome} <span class="yt-video-dur">${v.duracao}</span></div></td>
+    <td class="num">${fmtNum(v.impressoes)}</td>
+    <td class="num">${fmtNum(v.cliques)}</td>
+    <td class="num">${fmtOrTraco(v.ctr, x=>fmtPct(x,2))}</td>
+    <td class="num">${fmtUSD(v.custo)}</td>
+    <td class="num">${fmtOrTraco(v.cpv, x=>fmtUSD(x,3))}</td>
+    <td class="num">${fmtOrTraco(v.taxaVisualizacao, x=>fmtPct(x,2))}</td>
+  </tr>`).join('') + `
+  <tr class="subtotal">
+    <td>Total (vídeos visíveis)</td>
+    <td class="num">${fmtNum(sum(ytVideos,'impressoes'))}</td>
+    <td class="num">${fmtNum(sum(ytVideos,'cliques'))}</td>
+    <td class="num"></td>
+    <td class="num">${fmtUSD(sum(ytVideos,'custo'))}</td>
+    <td class="num"></td>
+    <td class="num"></td>
+  </tr>`;
+
+document.getElementById('footnoteYT').innerHTML =
+  `A soma de impressões destes 5 vídeos (${fmtNum(sum(ytVideos,'impressoes'))}) é menor que o total da campanha (${fmtNum(ytCampanha.impressoes)}) — `+
+  `indício de que existem outros vídeos ativos não capturados neste print. Envie a tabela completa que eu atualizo.`;
+
+/* ===== TROCA DE ABAS ===== */
+function switchTab(tab){
+  const ig = tab==='ig';
+  document.getElementById('tabIG').classList.toggle('active', ig);
+  document.getElementById('tabYT').classList.toggle('active', !ig);
+  document.getElementById('tabBtnIG').classList.toggle('active', ig);
+  document.getElementById('tabBtnYT').classList.toggle('active', !ig);
+  document.getElementById('brandTitle').textContent = ig ? 'Crescimento de Seguidores — Instagram' : 'Aquisição de Inscritos — YouTube Ads';
+  document.getElementById('periodBadge').textContent = ig ? '1 jun – 30 jun 2026' : 'período a confirmar';
+}
 </script>
 </body>
 </html>
