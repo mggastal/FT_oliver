@@ -36,7 +36,8 @@ COR_ACENTO       = "#800080"
 #   Cada item pode ser uma string (label = termo de busca) ou uma tupla (label, termo_busca)
 #   quando você quer que o botão mostre um nome diferente do texto realmente buscado.
 LANCAMENTO_CODS  = [
-    ("VIPCLUP01", "VIPCLUP01"),
+    ("CTP03",    "CTPSEPT26"),
+    ("VIPCLUB01", "VIPCLUB01"),
     ("BLACKJUL26", "BLACKJUL26"),
     ("SWING02",  "SWING02"),
     ("CTP02",    "CTPMAY26"),
