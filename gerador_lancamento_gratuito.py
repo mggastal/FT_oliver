@@ -23,7 +23,7 @@ from pathlib import Path
 # ══════════════════════════════════════════════════════
 
 SHEET_ID         = "1aoaYI0MwB8VFy9h2-C8BJEV1H3BTohRDJ68NT0lFt5g"
-TEMPLATE_FILE    = "dashboard_lancamento_gratuito.html"
+TEMPLATE_FILE    = "dashboard_ctpsept26.html"
 OUTPUT_FILE      = "index.html"
 
 NOME_CLIENTE     = "Oliver"
@@ -138,10 +138,10 @@ _CRIT_COD_RE = re.compile(r"^BL(\d{2})_(IMG|VC)(\d+)CAPT(\w+)$")
 
 def load_criativos():
     """Le a aba Criativos e monta 2 dicionarios de cruzamento:
-       - img: (idioma, bl, num, sufixo) -> drive_id   [sufixo importa: FEED != STORY]
-       - vid: (idioma, bl, num)          -> drive_id   [sufixo NAO importa - os videos da
-         campanha sao sempre ...CAPTFEED, mas na planilha estao catalogados como
-         CAPTSTORY/CAPTREEL; o proprio cliente confirmou que e o mesmo material]
+       - img: (idioma, bl, num, sufixo) -> drive_id   [varia por idioma/pais e por sufixo FEED/STORY]
+       - vid: (bl, num_VC)               -> drive_id   [SEM idioma: o cliente confirmou que o
+         mesmo vídeo roda para todos os países. O "num" aqui é o número VC da planilha, não o
+         VD do anúncio — a correspondência VD->VC não é 1:1, é feita à parte em VD_PARA_VC]
     """
     print("  Lendo Criativos...")
     img, vid = {}, {}
@@ -164,8 +164,8 @@ def load_criativos():
         num = int(num_s)  # desconsidera zeros a esquerda (01 == 1)
         if kind == "IMG":
             img[(idioma, bl, num, suf)] = did
-        else:  # VC
-            vid.setdefault((idioma, bl, num), did)
+        else:  # VC — sem idioma na chave, primeiro que aparecer vale
+            vid.setdefault((bl, num), did)
         n_ok += 1
     print(f"     {n_ok} criativos carregados ({len(img)} imagens, {len(vid)} videos)")
     return img, vid
@@ -173,6 +173,13 @@ def load_criativos():
 _AD_IMG_RE = re.compile(r"^BL(\d{2})_IMG(\d+)CAPT(\w+)$")
 _AD_VID_RE = re.compile(r"^VD(\d+)CAPT(\w+)$")
 _BL_RE     = re.compile(r"BL(\d{2})\b")
+
+# Correspondência VD (nome do anúncio) -> VC (código na aba Criativos), confirmada pelo
+# cliente — NÃO é 1:1 pelo número. Vale para o bloco BL01, único com vídeo até agora.
+# Se surgir vídeo em outro BL (02, 03...) com correspondência diferente, adicionar aqui.
+VD_PARA_VC = {
+    "01": {1: 1, 2: 4, 3: 5, 4: 6, 5: 7, 6: 8, 7: 9},
+}
 
 def criativo_do_anuncio(campaign, adset, ad, crit_img, crit_vid):
     """Retorna (drive_id, is_video) para um anuncio, ou (None, False) se nao cadastrado."""
@@ -189,11 +196,13 @@ def criativo_do_anuncio(campaign, adset, ad, crit_img, crit_vid):
 
     m = _AD_VID_RE.match(ad_name)
     if m:
-        num_s, _suf = m.groups()
+        vd_num = int(m.group(1))
         mb = _BL_RE.search(campaign.upper()) or _BL_RE.search(str(adset).upper())
         if not mb: return None, True
         bl = mb.group(1)
-        return crit_vid.get((idioma, bl, int(num_s))), True
+        vc_num = VD_PARA_VC.get(bl, {}).get(vd_num)
+        if vc_num is None: return None, True
+        return crit_vid.get((bl, vc_num)), True
 
     return None, False
 
