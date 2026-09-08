@@ -23,28 +23,33 @@ from pathlib import Path
 # ══════════════════════════════════════════════════════
 
 SHEET_ID         = "1aoaYI0MwB8VFy9h2-C8BJEV1H3BTohRDJ68NT0lFt5g"
-TEMPLATE_FILE    = "dashboard_lancamento_gratuito.html"
+TEMPLATE_FILE    = "dashboard_ctpsept26.html"
 OUTPUT_FILE      = "index.html"
 
 NOME_CLIENTE     = "Oliver"
 LOGO_LETRA       = "OV"
 COR_ACENTO       = "#800080"
 
-# ← MUDANÇA: lista de códigos em vez de string única.
-#   [] (lista vazia) = ver tudo, sem botões de lançamento
-#   ["CTP01"]         = comportamento idêntico ao antigo LANCAMENTO_COD="CTP01"
-#   Cada item pode ser uma string (label = termo de busca) ou uma tupla (label, termo_busca)
-#   quando você quer que o botão mostre um nome diferente do texto realmente buscado.
+# Versão dedicada exclusivamente ao lançamento CTPSEPT26 — único código ativo.
+# Os lançamentos anteriores (BLACKJUL26, SWING02 etc.) ficam no gerador/dashboard
+# antigo, mantido como histórico (sem galeria de criativos via Drive).
 LANCAMENTO_CODS  = [
-    ("CTP03",    "CTPSEPT26"),
-    ("VIPCLUB01", "VIPCLUB01"),
-    ("BLACKJUL26", "BLACKJUL26"),
-    ("SWING02",  "SWING02"),
-    ("CTP02",    "CTPMAY26"),
-    ("SWING01",  "SWING-21MAR26"),
-    ("CTPBRA01", "IFTBRA01"),
-    ("CTP01",    "21FEB26"),
+    ("CTPSEPT26", "CTPSEPT26"),
 ]
+
+# ══ GALERIA DE CRIATIVOS (Google Drive) ═══════════════
+# Aba "Criativos" da planilha: IDIOMA | Código | Link
+# Cruza com o nome do anúncio no Meta Ads para exibir a arte/vídeo direto do
+# Drive (sem baixar/armazenar nada localmente) — resolve o storage cheio e
+# permite assistir o vídeo clicando no próprio card.
+USAR_CRIATIVOS   = True
+
+# País (2º token do nome da campanha, ex: FTF-USA-...) -> IDIOMA da aba Criativos
+IDIOMA_POR_PAIS = {
+    "USA": "ENG", "EUR": "ENG", "IND": "ENG", "SOUTH_AFRICA": "ENG",
+    "BRA": "PT",
+    "LATAM": "ESP", "ESPANHA": "ESP", "ESP": "ESP",
+}
 
 USAR_PESQUISA    = False
 USAR_VENDAS      = False
@@ -95,6 +100,7 @@ URL_PES  = sheet_url("Pesquisa")
 URL_GA   = sheet_url("breakdown-gender-age")
 URL_PT   = sheet_url("breakdown-platform")
 URL_HOTMART = sheet_url("hotmart")
+URL_CRIATIVOS = sheet_url("Criativos")
 
 def to_num(s):
     if pd.api.types.is_numeric_dtype(s): return s.fillna(0)
@@ -119,6 +125,77 @@ def download_thumb(url, d):
             else: return ""
         return "imgs/"+fname
     except: return ""
+
+_DRIVE_ID_RE = re.compile(r"/d/([a-zA-Z0-9_-]+)")
+
+def _drive_id(link):
+    if not isinstance(link, str): return None
+    m = _DRIVE_ID_RE.search(link)
+    return m.group(1) if m else None
+
+# Codigo na planilha: BL01_IMG01CAPTFEED / BL01_VC1CAPTSTORY / BL01_VC4CAPTREEL...
+_CRIT_COD_RE = re.compile(r"^BL(\d{2})_(IMG|VC)(\d+)CAPT(\w+)$")
+
+def load_criativos():
+    """Le a aba Criativos e monta 2 dicionarios de cruzamento:
+       - img: (idioma, bl, num, sufixo) -> drive_id   [sufixo importa: FEED != STORY]
+       - vid: (idioma, bl, num)          -> drive_id   [sufixo NAO importa - os videos da
+         campanha sao sempre ...CAPTFEED, mas na planilha estao catalogados como
+         CAPTSTORY/CAPTREEL; o proprio cliente confirmou que e o mesmo material]
+    """
+    print("  Lendo Criativos...")
+    img, vid = {}, {}
+    try:
+        df = pd.read_csv(URL_CRIATIVOS)
+    except Exception as e:
+        print(f"     (falha ao ler aba Criativos: {e})")
+        return img, vid
+    df.columns = [str(c).strip() for c in df.columns]
+    n_ok = 0
+    for _, r in df.iterrows():
+        idioma = str(r.get("IDIOMA", "")).strip().upper()
+        cod = str(r.get("Codigo", r.get("Código", ""))).strip().upper()
+        link = r.get("Link", "")
+        did = _drive_id(link)
+        if not did: continue
+        m = _CRIT_COD_RE.match(cod)
+        if not m: continue
+        bl, kind, num_s, suf = m.groups()
+        num = int(num_s)  # desconsidera zeros a esquerda (01 == 1)
+        if kind == "IMG":
+            img[(idioma, bl, num, suf)] = did
+        else:  # VC
+            vid.setdefault((idioma, bl, num), did)
+        n_ok += 1
+    print(f"     {n_ok} criativos carregados ({len(img)} imagens, {len(vid)} videos)")
+    return img, vid
+
+_AD_IMG_RE = re.compile(r"^BL(\d{2})_IMG(\d+)CAPT(\w+)$")
+_AD_VID_RE = re.compile(r"^VD(\d+)CAPT(\w+)$")
+_BL_RE     = re.compile(r"BL(\d{2})\b")
+
+def criativo_do_anuncio(campaign, adset, ad, crit_img, crit_vid):
+    """Retorna (drive_id, is_video) para um anuncio, ou (None, False) se nao cadastrado."""
+    campaign = str(campaign); ad_name = str(ad).strip().upper()
+    partes = campaign.split("-")
+    pais = partes[1] if len(partes) > 1 else None
+    idioma = IDIOMA_POR_PAIS.get(pais)
+    if not idioma: return None, False
+
+    m = _AD_IMG_RE.match(ad_name)
+    if m:
+        bl, num_s, suf = m.groups()
+        return crit_img.get((idioma, bl, int(num_s), suf)), False
+
+    m = _AD_VID_RE.match(ad_name)
+    if m:
+        num_s, _suf = m.groups()
+        mb = _BL_RE.search(campaign.upper()) or _BL_RE.search(str(adset).upper())
+        if not mb: return None, True
+        bl = mb.group(1)
+        return crit_vid.get((idioma, bl, int(num_s))), True
+
+    return None, False
 
 def matched_codes(campaign_name):
     """Retorna a lista de labels de LANCAMENTO_CODS cujo termo de busca aparece (case-insensitive)
@@ -261,7 +338,7 @@ def build_status_maps(df):
                 ad_status[(str(camp),str(adset),str(ad))]=_pick_status(g3)
     return camp_status, adset_status, ad_status
 
-def meta_tables_period(df, p, img_dir, camp_status=None, adset_status=None, ad_status=None):
+def meta_tables_period(df, p, img_dir, camp_status=None, adset_status=None, ad_status=None, crit_img=None, crit_vid=None):
     camp_status=camp_status or {}; adset_status=adset_status or {}; ad_status=ad_status or {}
     def ag(sub,cols): return sub.groupby(cols).agg(spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),page_view=("page_view","sum"),leads=("leads","sum")).reset_index()
 
@@ -283,25 +360,42 @@ def meta_tables_period(df, p, img_dir, camp_status=None, adset_status=None, ad_s
              "status":adset_status.get((str(r["campaign"]),str(r["adset"])),""),
              **calc_row(r)} for _,r in adsets_agg.sort_values("leads",ascending=False).iterrows()]
 
+    crit_img = crit_img or {}; crit_vid = crit_vid or {}
+
+    # Cruzamento com a galeria de criativos (Drive) por (ad,adset,campaign) — sem
+    # baixar nada. Só cai no download do thumbnail do Meta quando o criativo não
+    # está cadastrado na aba Criativos (fallback combinado com o cliente).
+    ad_keys = p[["ad","adset","campaign"]].drop_duplicates()
+    crit_map = {}
+    for _,r in ad_keys.iterrows():
+        k=(str(r["ad"]),str(r["adset"]),str(r["campaign"]))
+        did, is_video = criativo_do_anuncio(r["campaign"], r["adset"], r["ad"], crit_img, crit_vid)
+        crit_map[k] = (did, is_video)
+
     df_full_thumb=df[df["thumb"].notna()&(df["thumb"].astype(str)!="nan")] if "thumb" in df.columns else pd.DataFrame()
     thumb_map={}
     for _,r in df_full_thumb.iterrows():
         k=(str(r["ad"]),str(r["adset"]),str(r["campaign"]))
-        if k not in thumb_map: thumb_map[k]=download_thumb(str(r["thumb"]),img_dir)
+        if k in thumb_map: continue
+        did,_=crit_map.get(k,(None,False))
+        if did: continue  # já tem no Drive, não precisa baixar do Meta
+        thumb_map[k]=download_thumb(str(r["thumb"]),img_dir)
 
     ads_agg=p.groupby(["ad","adset","campaign"]).agg(spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),leads=("leads","sum")).reset_index().sort_values("leads",ascending=False)
     ads=[]
     for _,r in ads_agg.iterrows():
         sp=round(float(r["spend"]),2); imp=int(r["impressions"]); lc=int(r["link_clicks"]); ld=int(r["leads"])
         k=(str(r["ad"]),str(r["adset"]),str(r["campaign"]))
+        did,is_video=crit_map.get(k,(None,False))
         ads.append({"n":str(r["ad"]),"adset":str(r["adset"]),"camp":str(r["campaign"]),
             "status":ad_status.get((str(r["campaign"]),str(r["adset"]),str(r["ad"])),""),
-            "thumb":thumb_map.get(k,""),"spend":sp,"imp":imp,"lc":lc,"ld":ld,
+            "thumb":thumb_map.get(k,""),"driveId":did or "","isVideo":bool(is_video),
+            "spend":sp,"imp":imp,"lc":lc,"ld":ld,
             "ctr":round(lc/imp*100,2) if imp>0 else None,
             "cpl":round(sp/ld,2) if ld>0 else None})
     return {"camps":camps,"adsets":adsets,"ads":ads}
 
-def meta_tables(df, img_dir):
+def meta_tables(df, img_dir, crit_img=None, crit_vid=None):
     hoje=pd.Timestamp(date.today())
     camp_status, adset_status, ad_status = build_status_maps(df)
     # ← MUDANÇA: um dicionário por grupo (cada código + "all"), cada um com os períodos 1/7/14/30/all
@@ -311,7 +405,7 @@ def meta_tables(df, img_dir):
         result[g]={}
         for pname,n in [("1",1),("7",7),("14",14),("30",30),("all",0)]:
             p=subset[subset["date"]>=hoje-pd.Timedelta(days=n-1)] if n>0 else subset
-            result[g][pname]=meta_tables_period(df,p,img_dir,camp_status,adset_status,ad_status)
+            result[g][pname]=meta_tables_period(df,p,img_dir,camp_status,adset_status,ad_status,crit_img,crit_vid)
             print(f"     [{g}][{pname}]: {len(result[g][pname]['camps'])} camps | {len(result[g][pname]['ads'])} ads")
     return result
 
@@ -628,13 +722,20 @@ def main():
     print("="*60)
     img_dir=Path("imgs"); img_dir.mkdir(exist_ok=True)
 
+    print("\n[CRIATIVOS]")
+    if USAR_CRIATIVOS:
+        crit_img, crit_vid = load_criativos()
+    else:
+        crit_img, crit_vid = {}, {}
+        print("  (desativado)")
+
     print("\n[META ADS]")
     df_meta=load_meta()
     m_k=meta_kpis(df_meta)
     m_d=meta_daily(df_meta)
     m_dc=meta_daily_camps(df_meta)
     m_raw=meta_raw(df_meta)
-    m_t=meta_tables(df_meta,img_dir)
+    m_t=meta_tables(df_meta,img_dir,crit_img,crit_vid)
     m_bd=meta_breakdowns(df_meta)
     # ← MUDANÇA: total_leads usa o primeiro código (ou "all" se não houver nenhum) só para o log
     primeiro_grupo = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else "all"
