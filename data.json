@@ -3,20 +3,14 @@
   "cor": "#800080",
   "letra": "OV",
   "lancamentos": [
-    "VIPCLUP01",
-    "BLACKJUL26",
-    "SWING02",
-    "CTP02",
-    "SWING01",
-    "CTPBRA01",
-    "CTP01"
+    "CTPSEPT26"
   ],
   "moeda": "USD",
   "moeda_simbolo": "$",
   "atualizado": "08/09/2026",
   "kpis": {
-    "spend": 0.0,
-    "leads": 0,
-    "cpl": null
+    "spend": 918.5,
+    "leads": 163,
+    "cpl": 5.63
   }
 }
