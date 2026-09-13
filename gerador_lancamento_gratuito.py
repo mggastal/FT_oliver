@@ -51,6 +51,25 @@ IDIOMA_POR_PAIS = {
     "LATAM": "ESP", "ESPANHA": "ESP", "ESP": "ESP",
 }
 
+# ══ META DE INVESTIMENTO POR REGIÃO ═══════════════════
+# Editar aqui a cada lançamento novo (datas, meta total e distribuição por
+# região). O card "Meta de Investimento" aparece ao lado do funil, com uma
+# barra por região + comparação "% do período decorrido" x "% já investido".
+# "pais" = 2º token do nome da campanha (ex: FTF-USA-... -> "USA").
+USAR_META_INVESTIMENTO = True
+META_INVEST_DATA_INICIO = "2026-09-07"
+META_INVEST_DATA_FIM    = "2026-09-26"
+META_INVEST_TOTAL       = 40000
+META_INVEST_REGIOES = [
+    # (pais_na_campanha,  label_exibido,          meta_em_dolar)
+    ("USA",          "ENG (USA)",           28000),
+    ("EUR",          "ENG (EUR)",            6400),
+    ("BRA",          "PT",                   1600),
+    ("LATAM",        "ESP",                  1600),
+    ("IND",          "ENG (IND)",            1200),
+    ("SOUTH_AFRICA", "ENG (South Africa)",   1200),
+]
+
 USAR_PESQUISA    = False
 USAR_VENDAS      = False
 
@@ -250,6 +269,46 @@ def subset_for_group(df, grupo):
     if grupo == "all":
         return df
     return df[df["lct_codes"].apply(lambda codes: grupo in codes)]
+
+def build_meta_investimento(df_meta):
+    """Cruza o gasto real (por país extraído do nome da campanha) com as metas
+    configuradas em META_INVEST_REGIOES, e calcula o ritmo (% do período
+    decorrido x % já investido)."""
+    if not USAR_META_INVESTIMENTO:
+        return None
+    grupo = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else "all"
+    subset = subset_for_group(df_meta, grupo)
+    pais_series = subset["campaign"].astype(str).str.split("-").str[1].str.upper()
+    gasto_por_pais = subset.groupby(pais_series)["spend"].sum().to_dict()
+
+    regioes = []
+    for pais, label, meta in META_INVEST_REGIOES:
+        gasto = round(float(gasto_por_pais.get(pais, 0.0)), 2)
+        regioes.append({
+            "pais": pais, "label": label, "meta": meta,
+            "pct_meta": round(meta/META_INVEST_TOTAL*100, 1) if META_INVEST_TOTAL else None,
+            "gasto": gasto,
+            "pct_atingido": round(gasto/meta*100, 1) if meta else None,
+        })
+    total_gasto = round(sum(r["gasto"] for r in regioes), 2)
+
+    di = pd.Timestamp(META_INVEST_DATA_INICIO)
+    dfim = pd.Timestamp(META_INVEST_DATA_FIM)
+    hoje = pd.Timestamp(date.today())
+    dias_totais = (dfim - di).days + 1
+    dias_passados = max(0, min(dias_totais, (hoje - di).days + 1))
+
+    return {
+        "total_meta": META_INVEST_TOTAL,
+        "total_gasto": total_gasto,
+        "pct_investido": round(total_gasto/META_INVEST_TOTAL*100, 1) if META_INVEST_TOTAL else None,
+        "data_inicio": META_INVEST_DATA_INICIO,
+        "data_fim": META_INVEST_DATA_FIM,
+        "dias_totais": dias_totais,
+        "dias_passados": dias_passados,
+        "pct_tempo": round(dias_passados/dias_totais*100, 1) if dias_totais else None,
+        "regioes": regioes,
+    }
 
 def calc_kpis(p):
     sp=float(p["spend"].sum()); imp=float(p["impressions"].sum())
@@ -683,7 +742,7 @@ def replace_js_const(html, name, value):
     html = html[:start] + replacement + html[end:]
     return html
 
-def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, hotmart):
+def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, hotmart, meta_inv=None):
     html=Path(tpl).read_text(encoding="utf-8")
     html=replace_js_const(html,"META_KPIS",       meta_k)
     html=replace_js_const(html,"META_DAILY",       meta_d)
@@ -691,6 +750,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, h
     html=replace_js_const(html,"META_RAW_CAMP",    meta_raw_c)
     html=replace_js_const(html,"META_TABLES",      meta_t)
     html=replace_js_const(html,"META_BD",          meta_bd)
+    html=replace_js_const(html,"META_INVEST",      meta_inv)
     html=replace_js_const(html,"PESQUISA",         pes if USAR_PESQUISA else False)
     html=replace_js_const(html,"HOTMART",           hotmart if USAR_VENDAS else False)
     html=replace_js_const(html,"DATA_GERACAO",     date.today().strftime("%Y-%m-%d"))
@@ -746,6 +806,7 @@ def main():
     m_raw=meta_raw(df_meta)
     m_t=meta_tables(df_meta,img_dir,crit_img,crit_vid)
     m_bd=meta_breakdowns(df_meta)
+    m_inv=build_meta_investimento(df_meta)
     # ← MUDANÇA: total_leads usa o primeiro código (ou "all" se não houver nenhum) só para o log
     primeiro_grupo = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else "all"
     total_leads=m_k[primeiro_grupo]["leads"]
@@ -770,7 +831,7 @@ def main():
     print("\n[HTML]")
     if not Path(TEMPLATE_FILE).exists():
         print(f"  ERRO: {TEMPLATE_FILE} não encontrado"); return
-    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,hotmart)
+    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,hotmart,m_inv)
     Path(OUTPUT_FILE).write_text(html,encoding="utf-8")
     print(f"  ✓ {OUTPUT_FILE} ({len(html)//1024}KB)")
 
