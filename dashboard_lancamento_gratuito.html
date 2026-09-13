@@ -86,6 +86,23 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .funnel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;margin-bottom:14px;box-shadow:var(--sh);}
 .funnel-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:16px;}
 .funnel-steps{display:flex;flex-direction:column;gap:0;}
+.funnel-row{display:flex;gap:14px;align-items:stretch;}
+.funnel-row .funnel-card{flex:1 1 70%;margin-bottom:0;min-width:0;}
+.invest-card{flex:1 1 30%;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);display:flex;flex-direction:column;}
+.invest-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px;}
+.invest-sub{font-size:10px;color:var(--muted2);margin-bottom:12px;}
+.invest-total-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:var(--muted);margin-bottom:2px;}
+.invest-total-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;color:var(--txt);}
+.invest-pace{font-size:10px;margin:8px 0 14px;padding:6px 8px;border-radius:6px;background:var(--surface2);}
+.invest-region{margin-bottom:10px;}
+.invest-region:last-child{margin-bottom:0;}
+.invest-region-hd{display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:3px;}
+.invest-region-hd b{color:var(--txt);font-weight:600;}
+.invest-region-hd span{color:var(--muted2);font-family:'DM Mono',monospace;}
+.invest-bar-bg{width:100%;height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;}
+.invest-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent));transition:width .6s ease;}
+.invest-bar-fill.over{background:linear-gradient(90deg,#059669,#059669);}
+@media(max-width:820px){.funnel-row{flex-direction:column;}.funnel-row .funnel-card,.invest-card{flex:1 1 auto;}}
 .f-step{display:flex;flex-direction:column;}
 .f-bar{height:40px;border-radius:7px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;transition:width .4s;min-width:110px;}
 .f-bar-lbl{font-size:12px;font-weight:600;color:#fff;}
@@ -292,7 +309,10 @@ details.desk-only{display:block!important;}
         <div style="padding:0 14px 12px;" id="metaCampFilter"></div>
       </details>
       <div class="krow k3 mb14" id="metaKpis"></div>
-      <div class="funnel-card mb14"><div class="funnel-title" data-i18n="funil_ttl">Funil de Captação</div><div class="funnel-steps" id="funnelSteps"></div></div>
+      <div class="funnel-row mb14" id="funnelRow">
+        <div class="funnel-card" id="funnelCardBox"><div class="funnel-title" data-i18n="funil_ttl">Funil de Captação</div><div class="funnel-steps" id="funnelSteps"></div></div>
+        <div class="invest-card" id="investCard" style="display:none"></div>
+      </div>
       <div class="cc mb14">
         <div class="cc-t" data-i18n="chart_leads_ttl">Leads Diários &amp; Investimento</div>
         <div class="cc-s" data-i18n="chart_leads_sub">Leads (barras azuis) · Invest. (linha verde) · CPL (linha preta tracejada)</div>
@@ -420,6 +440,7 @@ const META_RAW_CAMP     = null;
 const META_TABLES       = null;
 const DATA_GERACAO      = null;
 const META_BD           = null;
+const META_INVEST       = null;
 const PESQUISA          = null;
 const HOTMART           = null;
 
@@ -451,6 +472,13 @@ const TRANSLATIONS = {
     filtrar_camp:     'Filtrar por campanha',
     filtrar_origem:   'Filtrar respostas por origem',
     funil_ttl:        'Funil de Captação',
+    invest_ttl:       'Meta de Investimento',
+    invest_sub:       'por região',
+    invest_total:     'Investido',
+    invest_tempo:     'Período decorrido',
+    invest_adiantado: 'Ritmo à frente do previsto',
+    invest_atrasado:  'Ritmo atrás do previsto',
+    invest_alinhado:  'Ritmo alinhado ao previsto',
     chart_leads_ttl:  'Leads Diários & Investimento',
     chart_leads_sub:  'Leads (barras azuis) · Invest. (linha verde) · CPL (linha preta tracejada)',
     campanhas:        'Campanhas',
@@ -567,6 +595,13 @@ const TRANSLATIONS = {
     filtrar_camp:     'Filtrar por campaña',
     filtrar_origem:   'Filtrar respuestas por origen',
     funil_ttl:        'Embudo de Captación',
+    invest_ttl:       'Meta de Inversión',
+    invest_sub:       'por región',
+    invest_total:     'Invertido',
+    invest_tempo:     'Período transcurrido',
+    invest_adiantado: 'Ritmo adelantado a lo previsto',
+    invest_atrasado:  'Ritmo por detrás de lo previsto',
+    invest_alinhado:  'Ritmo alineado con lo previsto',
     chart_leads_ttl:  'Leads Diarios & Inversión',
     chart_leads_sub:  'Leads (barras azules) · Inversión (línea verde) · CPL (línea negra punteada)',
     campanhas:        'Campañas',
@@ -906,10 +941,45 @@ function buildFunnel(mk){
   el.innerHTML=html;
 }
 
+// ═══ META DE INVESTIMENTO (por região) ═══
+function renderInvestCard(){
+  const card=document.getElementById('investCard');
+  if(!card) return;
+  // só mostra na visão do lançamento específico, não em "Tudo"
+  if(!META_INVEST || filtroAtivo==='all'){ card.style.display='none'; return; }
+  card.style.display='flex';
+
+  const fMoney=v=>MOEDA_SIMBOLO+fN(Math.round(v||0));
+  const pctTempo=META_INVEST.pct_tempo, pctInv=META_INVEST.pct_investido;
+  let paceKey='invest_alinhado', paceIcon='●';
+  if(pctInv!=null && pctTempo!=null){
+    if(pctInv - pctTempo > 5){ paceKey='invest_adiantado'; paceIcon='▲'; }
+    else if(pctTempo - pctInv > 5){ paceKey='invest_atrasado'; paceIcon='▼'; }
+  }
+
+  const regioesHTML=(META_INVEST.regioes||[]).map(r=>{
+    const pct=r.pct_atingido==null?0:r.pct_atingido;
+    const over=pct>=100;
+    return `<div class="invest-region">
+      <div class="invest-region-hd"><b>${r.label}</b><span>${fMoney(r.gasto)} / ${fMoney(r.meta)}</span></div>
+      <div class="invest-bar-bg"><div class="invest-bar-fill${over?' over':''}" style="width:${Math.min(pct,100)}%"></div></div>
+    </div>`;
+  }).join('');
+
+  card.innerHTML=`
+    <div class="invest-title">${t('invest_ttl')}</div>
+    <div class="invest-sub">${META_INVEST.data_inicio.split('-').reverse().join('/')} → ${META_INVEST.data_fim.split('-').reverse().join('/')} · ${t('invest_sub')}</div>
+    <div class="invest-total-row"><span>${t('invest_total')}</span><span>${pctInv!=null?fP(pctInv):'—'}</span></div>
+    <div class="invest-total-val">${fMoney(META_INVEST.total_gasto)} <span style="font-size:11px;color:var(--muted2);font-weight:400">/ ${fMoney(META_INVEST.total_meta)}</span></div>
+    <div class="invest-pace">${paceIcon} ${t(paceKey)} — ${t('invest_tempo')}: ${pctTempo!=null?fP(pctTempo):'—'} (${META_INVEST.dias_passados}/${META_INVEST.dias_totais}d)</div>
+    ${regioesHTML}`;
+}
+
 // ═══ META ADS ═══
 function renderMeta(){
   const mk=getMK(); const mt=getMT();
   buildMetaCampFilter();
+  renderInvestCard();
   const md=getMDforMeta();
   if(!mk||!md) return;
 
