@@ -62,12 +62,12 @@ META_INVEST_DATA_FIM    = "2026-09-26"
 META_INVEST_TOTAL       = 40000
 META_INVEST_REGIOES = [
     # (pais_na_campanha,  label_exibido,          meta_em_dolar)
-    ("USA",          "ENG (USA)",           28000),
-    ("EUR",          "ENG (EUR)",            6400),
-    ("BRA",          "PT",                   1600),
-    ("LATAM",        "ESP",                  1600),
-    ("IND",          "ENG (IND)",            1200),
-    ("SOUTH_AFRICA", "ENG (South Africa)",   1200),
+    ("USA",          "ENG (USA)",           28200),
+    ("EUR",          "ENG (EUR)",            6000),
+    ("BRA",          "PT",                   1900),
+    ("LATAM",        "ESP",                  1900),
+    ("IND",          "ENG (IND)",            1000),
+    ("SOUTH_AFRICA", "ENG (South Africa)",   1000),
 ]
 
 USAR_PESQUISA    = False
