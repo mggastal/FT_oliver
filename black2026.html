@@ -137,13 +137,20 @@ table.compact tr td:first-child{font-weight:600}
   <div class="sec-head"><span class="num" data-i="n4"></span><h2 data-i="h_cal"></h2></div>
   <div class="chart"><h3 data-i="ch_week"></h3><div id="ch-week"></div>
     <div class="legend" data-i="lg_week"></div></div>
-  <div class="tbl-wrap"><table id="t-week"></table></div>
+  <div class="tbl-wrap"><table id="t-week" class="compact"></table></div>
   <ul class="insights" data-i="cal_ins"></ul>
 </section>
 
 
 
 
+
+<section id="rt">
+  <div class="sec-head"><span class="num" data-i="n_rt"></span><h2 data-i="h_rt"></h2><p class="lede" data-i="rt_lede"></p></div>
+  <div class="charts"><div class="chart"><h3 data-i="ch_rt"></h3><div id="ch-rt"></div></div><div class="chart"><h3 data-i="ch_rt2"></h3><div class="tiles" id="rt-tiles" style="grid-template-columns:1fr 1fr"></div></div></div>
+  <div class="tbl-wrap"><table id="t-rt"></table></div>
+  <ul class="insights" data-i="rt_ins"></ul>
+</section>
 <section id="temp">
   <div class="sec-head"><span class="num" data-i="n6"></span><h2 data-i="h_temp"></h2><p class="lede" data-i="temp_lede"></p></div>
   <div class="tiles" id="temp-tiles"></div>
@@ -155,8 +162,18 @@ table.compact tr td:first-child{font-weight:600}
 const SW=c=>`<i class="sw" style="background:${c}"></i>`;
 const I18N={
 pt:{
- n6:'06 · RESUMO',h_temp:'Quanto vai para público quente e para público frio',
- temp_lede:'Na Black Friday, a ideia é investir o máximo possível em público quente: quem já é lead, já viu a masterclass ou já interagiu com o Oliver conhece a oferta e reconhece o desconto na hora. O frio existe para encher essa base durante a captação. Na janela de venda, 100% da verba vai para o quente.',
+ n_rt:'06 · RETARGETING',h_rt:'Retargeting por capas: da descarga à compra',
+ rt_lede:'Cada lead magnet baixado cria uma audiência. Outubro constrói as capas, novembro converte em registro e a janela vende. Em novembro a verba migra para essas audiências próprias, longe da disputa de CPM frio com o varejo.',
+ ch_rt:'Verba de retargeting por momento',ch_rt2:'Retargeting no total',
+ rt_tiles:[['Antes','US$ 5 mil','6,7% · só na janela de venda'],['Agora','US$ 14 mil','18,7% · nos três momentos']],
+ th_rt:['Momento','Capa','Audiência','O que recebe','Verba'],
+ mom:[['M1 · Antecipação','agora → 31/out'],['M2 · Registro na masterclass','26/out → 20/nov'],['M3 · Janela de venda','21 → 30/nov']],
+ caps:[[0,'A1','Baixou um lead magnet','Nutrição do LM + conteúdo que leva ao canal do YouTube',1200],[0,'A2','Visitou a landing do LM e não baixou','1 anúncio lembrete por lead magnet',800],[0,'A3','Engajamento vídeo/IG (90 dias)','Conteúdo de autoridade + lead magnet da semana',500],
+  [1,'B1','Todas as capas de outubro','Vídeo do anúncio do Oliver (26/out) → lista de espera e grupos. Desde 9/nov, registro só para quem não entrou',2800],[1,'B2','Visitou o registro e não se registrou','Lembrete com autoridade (40 anos, 8 crises) + data',1000],[1,'B3','Registrado fora do grupo de WhatsApp','"Seu lugar está guardado, os lembretes chegam pelo WhatsApp"',700],
+  [2,'C1','Registrado que não assistiu','Próximo evento ao vivo (são 4 na janela) + replay',1800],[2,'C2','Assistiu e não comprou','Oferta + 1 peça de objeção por dia + peça de honestidade',2400],[2,'C3','Iniciou checkout e abandonou','Urgência: preço BF acaba em 30/nov + abordagem do comercial',1600],[2,'C4','"Estou ao vivo"','Burst de alta verba no minuto de cada um dos 4 eventos',1200]],
+ rt_ins:'<li>Não pede verba nova: sai US$ 2,5 mil da captação fria de outubro, US$ 4,5 mil da de novembro e US$ 2 mil de novembro para a janela de venda (de US$ 5 mil para US$ 7 mil).</li><li>Dois motores sem custo de mídia completam o sistema: o link único dos vídeos do YouTube, que muda de destino a cada fase, e os grupos de WhatsApp.</li><li>Pré-requisito técnico: pixel em todas as landings e exclusões configuradas (quem já está na lista de espera ou nos grupos não recebe o convite de registro).</li>',
+ n6:'07 · RESUMO',h_temp:'Quanto vai para público quente e para público frio',
+ temp_lede:'Na Black Friday, a ideia é investir o máximo possível em público quente: quem já é lead, já viu a masterclass ou já interagiu com o Oliver conhece a oferta e reconhece o desconto na hora. O frio existe para encher essa base durante a captação. Com o retargeting por capas, a mistura passa de 70/30 para ~60/40, e na janela de venda 100% da verba vai para o quente.',
  ch_temp:'Frio x quente por fase',
  lg_temp:`<span>${SW('var(--ink)')}Frio</span><span>${SW('var(--red)')}Quente</span>`,
  temp_tiles:(f,q,fp,qp)=>[['Total frio',f,fp+' do investimento · captação de leads novos'],['Total quente',q,qp+' do investimento · base, engajados e remarketing'],['Investimento total','US$ 75 mil','Frio + quente']],
@@ -167,30 +184,30 @@ pt:{
  ch_cpl:'CPL projetado por país',lg_avg:'Linha = CPL médio Meta',ch_lang:'Leads pagos por idioma',
  th_cpl:['País','Idioma','% investimento','Investimento','CPL projetado','Leads','% dos leads'],
  th_lang:['Idioma','Investimento','Leads','% leads','CPL'],
- cpl_ins:(avg,us,eu,ind,sa)=>`<li>O CPL médio de <b>${avg}</b> é a mistura: EUA (${us}) e Europa (${eu}) ficam acima da média, Índia (${ind}) e África do Sul (${sa}) bem abaixo. Brasil e LATAM ficam perto de US$ 4,50.</li><li>Para segurar esse CPL médio, cada país precisa ficar no seu CPL. Se os EUA subirem 10%, o CPL médio sobe ~5%, porque eles têm 70% da verba.</li><li>Índia e África do Sul têm a mesma verba (US$ 1.800 cada). A Índia gera mais que o dobro de leads pelo mesmo valor.</li>`,
+ cpl_ins:(avg,us,eu,ind,sa)=>`<li>O CPL médio de <b>${avg}</b> é a mistura: EUA (${us}) e Europa (${eu}) ficam acima da média, Índia (${ind}) e África do Sul (${sa}) bem abaixo. Brasil e LATAM ficam perto de US$ 4,50.</li><li>Para segurar esse CPL médio, cada país precisa ficar no seu CPL. Se os EUA subirem 10%, o CPL médio sobe ~5%, porque eles têm 65% da verba.</li><li>Índia e África do Sul têm a mesma verba (US$ 1.800 cada). A Índia gera mais que o dobro de leads pelo mesmo valor.</li>`,
  eyebrow:'Oliver Velez · Black Friday 2026 · projeção de mídia paga',
  h1:'Black Friday 2026 - <span class="r">Oliver Velez</span>',
  lede:'Os três cenários de receita do blueprint, quantos leads cada um exige e quantos leads os US$ 75 mil de mídia compram com o custo por lead de setembro.',
  meta:'<span>Verba e metas: BF Plan de Marketing 2026</span><span>CPL de referência: Meta Ads set/26</span>',
  n1:'01 · CENÁRIOS',h_scen:'O que é preciso para bater cada meta de receita',
- scen_lede:'Ticket de US$ 1.775 nos três cenários (meio da faixa do blueprint). Muda só a conversão de lead em venda. O CPL máximo é o CPL que a mídia pode ter para entregar os leads pagos necessários com os US$ 65 mil de Meta.',
+ scen_lede:'Ticket de US$ 1.775 nos três cenários (meio da faixa do blueprint). Muda só a conversão de lead em venda. O CPL máximo é o CPL que a mídia pode ter para entregar os leads pagos necessários com os US$ 56 mil de captação no Meta.',
  n2:'02 · MÍDIA PAGA',h_paid:'O que os US$ 75 mil entregam',
  n3:'03 · VERBA E LEADS POR MERCADO',h_inv:'Onde entram os US$ 75 mil',
- ch_mix:'Captação Meta por mercado (US$ 65 mil)',ch_leads:'Leads projetados vs meta do blueprint',lg_mark:'Marca = meta de leads pagos do blueprint',
- inv_ins:'<li>US$ 5 mil de teste no YouTube em outubro, US$ 65 mil de captação no Meta (5/out a 20/nov, 70% frio e 30% quente) e US$ 5 mil de remarketing na venda (21 a 30/nov).</li><li>Os EUA ficam com 70% da captação porque é onde está a venda. Brasil, LATAM, Europa, Índia e África do Sul têm verba e meta próprias.</li>',
+ ch_mix:'Captação Meta por mercado (US$ 56 mil)',ch_leads:'Leads projetados vs meta do blueprint',lg_mark:'Marca = meta de leads pagos do blueprint',
+ inv_ins:'<li>US$ 56 mil de captação no Meta (5/out a 20/nov, 70% frio e 30% quente), US$ 5 mil de teste no YouTube em outubro e US$ 14 mil de retargeting por capas (seção 06).</li><li>Os EUA ficam com 65% da captação porque é onde está a venda. Brasil, LATAM, Europa, Índia e África do Sul mantêm a mesma verba, para seguir batendo as metas de leads.</li>',
  n4:'05 · CALENDÁRIO',h_cal:'Investimento semanal e leads pagos acumulados',
  ch_week:'Verba por semana e leads pagos acumulados vs cadência paga do blueprint',
- lg_week:`<span>${SW('var(--ink)')}Meta frio</span><span>${SW('var(--red)')}Meta quente / remarketing</span><span>${SW('var(--c4)')}YouTube (teste)</span><span>${SW('var(--good)')}Leads pagos acumulados</span><span>${SW('var(--muted)')}Cadência paga do blueprint (tracejado)</span>`,
- cal_ins:'<li>Outubro: ~US$ 1.170/dia, sem escalar enquanto as campanhas aprendem.</li><li>Novembro com rampa: US$ 1.375/dia até 8/nov, US$ 2.000/dia a partir da abertura do registro da masterclass (9/nov) e US$ 2.700/dia de 16 a 20/nov.</li><li>Venda (21 a 30/nov): US$ 500/dia em remarketing, para quem visitou a página de venda, iniciou checkout ou se registrou na masterclass.</li>',
+ lg_week:`<span>${SW('var(--ink)')}Meta frio</span><span>${SW('var(--red)')}Captação quente</span><span>${SW('var(--c6)')}Retargeting por capas</span><span>${SW('var(--c4)')}YouTube (teste)</span><span>${SW('var(--good)')}Leads pagos acumulados</span><span>${SW('var(--muted)')}Cadência paga do blueprint (tracejado)</span>`,
+ cal_ins:'<li>Outubro: ~US$ 1.170/dia (US$ 29 mil de captação + US$ 2,5 mil de retargeting), sem escalar enquanto as campanhas aprendem.</li><li>Novembro com rampa: US$ 1.300/dia até 8/nov, US$ 1.900/dia a partir da abertura do registro da masterclass (9/nov) e US$ 2.560/dia de 16 a 20/nov (US$ 32 mil de captação + US$ 4,5 mil de retargeting).</li><li>Venda (21 a 30/nov): US$ 7 mil, só retargeting por capas.</li>',
  n5:'06 · EXECUÇÃO',h_exec:'O papel de cada mercado',
  foot:'<span>Como a conta é feita: leads = verba do mercado ÷ CPL de setembro. YouTube: US$ 5 mil ÷ US$ 47,53 (CPL do teste na BF25, citado no blueprint). Cenários: vendas necessárias = receita alvo ÷ US$ 1.775 (ticket do blueprint, faixa US$ 1.750 a 1.800); leads necessários = vendas ÷ conversão do cenário (1,50%, 1,75% e 2,09%, do blueprint). Leads projetados = pagos + 13.900 orgânicos do blueprint. ROAS = receita ÷ US$ 75 mil.</span><span>CPL de setembro: EUA US$ 8,55 · Europa US$ 9,59 · Brasil US$ 3,70 · ESP US$ 3,78 · Índia US$ 0,74 · África do Sul US$ 1,57.</span>',
  scn:[['Piso','igualar a Summer'],['Meta','objetivo'],['Stretch','cenário otimista']],
  sc_conv:'Conversão lead → venda',sc_sales:'Vendas necessárias',sc_need:'Leads necessários',sc_proj:'Leads projetados',sc_org:'Orgânicos (blueprint)',sc_paidneed:'Pagos necessários',sc_paidproj:'Pagos projetados',sc_cplmax:'CPL máximo Meta',sc_cplproj:'CPL projetado Meta',sc_roas:'ROAS sobre US$ 75 mil',sc_ok:'Leads suficientes',sc_miss:n=>`Faltam ${n} leads pagos`,
- tiles:(paid,blend,tot)=>[['Investimento','US$ 75 mil','Meta US$ 65 mil · YouTube US$ 5 mil · remarketing US$ 5 mil'],['Leads pagos',paid,'Meta do blueprint: 7.500'],['CPL médio Meta',blend,'CPL de setembro + 20% por país'],['Leads totais',tot,'Pagos + 13.900 orgânicos do blueprint']],
+ tiles:(paid,blend,tot)=>[['Investimento','US$ 75 mil','Captação Meta US$ 56 mil · YouTube US$ 5 mil · retargeting US$ 14 mil'],['Leads pagos',paid,'Meta do blueprint: 7.500'],['CPL médio Meta',blend,'CPL de setembro + 20% por país'],['Leads totais',tot,'Pagos + 13.900 orgânicos do blueprint']],
  res_ins:(paid,up,tot,l15)=>`<li>Com o CPL de setembro + 20% (CPM mais alto na Black Friday), os US$ 75 mil compram <b>${paid} leads pagos</b>, ${up} acima dos 7.500 do blueprint. Somando o orgânico do blueprint, são ${tot} leads, acima dos ~20–21 mil que os três cenários pedem.</li><li>Com volume de lead suficiente nos três cenários, o que separa piso de stretch é a conversão: masterclass, WhatsApp, e-mail e a oferta.</li>`,
- th_mkt:['Mercado','% captação','Verba captação','Por dia','Remarketing venda','CPL projetado','Leads projetados','Meta blueprint'],
+ th_mkt:['Mercado','% captação','Verba captação','Por dia','CPL projetado','Leads projetados','Meta blueprint'],
  yt:'YouTube (teste)',total:'Total',
- th_week:['Semana','Datas','Verba','Por dia','EUA / dia','Meta frio','Meta quente','YouTube','Leads pagos','Acumulado','Blueprint (pago)'],
+ th_week:['Semana','Datas','Verba','Por dia','Captação frio','Captação quente','Retargeting','YouTube','Leads pagos','Acumulado','Blueprint (pago)'],
  remk:'remarketing',sale:'Venda',period:'5/out–30/nov',
  wk:['5–11/out','12–18/out','19–25/out','26/out–1/nov','2–8/nov','9–15/nov','16–20/nov','21–30/nov'],
  aria_mix:'Verba por mercado',aria_leads:'Leads por mercado',aria_week:'Verba semanal e leads pagos acumulados',
@@ -203,8 +220,18 @@ pt:{
   'SA':['África do Sul','Volume com CPL baixo.',['Campanha própria com verba fixa.','Verba fixa diária (US$ 1.800, igual à Índia).']]}
 },
 es:{
- n6:'06 · RESUMEN',h_temp:'Cuánto va a público tibio y a público frío',
- temp_lede:'En Black Friday, la idea es invertir lo máximo posible en público tibio: quien ya es lead, ya vio la masterclass o ya interactuó con Oliver conoce la oferta y reconoce el descuento al instante. El frío sirve para llenar esa base durante la captación. En la ventana de venta, el 100% del presupuesto va al tibio.',
+ n_rt:'06 · RETARGETING',h_rt:'Retargeting por capas: de la descarga a la compra',
+ rt_lede:'Cada lead magnet descargado crea una audiencia. Octubre construye las capas, noviembre las convierte en registro y la ventana vende. En noviembre la pauta migra hacia esas audiencias propias, lejos de la subasta de CPM frío con el retail.',
+ ch_rt:'Presupuesto de retargeting por momento',ch_rt2:'Retargeting en el total',
+ rt_tiles:[['Antes','US$ 5 mil','6,7% · solo en la ventana de venta'],['Ahora','US$ 14 mil','18,7% · en los tres momentos']],
+ th_rt:['Momento','Capa','Audiencia','Qué recibe','Presupuesto'],
+ mom:[['M1 · Anticipación','ahora → 31/oct'],['M2 · Registro a la masterclass','26/oct → 20/nov'],['M3 · Ventana de venta','21 → 30/nov']],
+ caps:[[0,'A1','Descargó un lead magnet','Nutrición del LM + contenido que lleva al canal de YouTube',1200],[0,'A2','Visitó la landing del LM y no descargó','1 ad recordatorio por lead magnet',800],[0,'A3','Engagement de video/IG (90 días)','Contenido de autoridad + lead magnet de la semana',500],
+  [1,'B1','Todas las capas de octubre','Video del anuncio de Oliver (26/oct) → lista de espera y grupos. Desde el 9/nov, registro solo para quien no entró',2800],[1,'B2','Visitó el registro y no se registró','Recordatorio con autoridad (40 años, 8 crisis) + fecha',1000],[1,'B3','Registrado sin grupo de WhatsApp','"Tu lugar está guardado, los recordatorios llegan por WhatsApp"',700],
+  [2,'C1','Registrado que no asistió','Próximo evento en vivo (hay 4 en la ventana) + replay',1800],[2,'C2','Asistió y no compró','Oferta + 1 pieza de objeción por día + pieza de honestidad',2400],[2,'C3','Inició checkout y abandonó','Urgencia: el precio BF termina el 30/nov + abordaje del comercial',1600],[2,'C4','"Estoy en vivo"','Burst de alta inversión en el minuto de cada uno de los 4 eventos',1200]],
+ rt_ins:'<li>No pide presupuesto nuevo: salen US$ 2,5 mil de la captación fría de octubre, US$ 4,5 mil de la de noviembre y US$ 2 mil de noviembre para la ventana de venta (de US$ 5 mil a US$ 7 mil).</li><li>Dos motores sin costo de pauta completan el sistema: el link único de los videos de YouTube, que cambia de destino en cada fase, y los grupos de WhatsApp.</li><li>Requisito técnico: pixel en todas las landings y exclusiones configuradas (quien ya está en la lista de espera o en los grupos no recibe la invitación a registrarse).</li>',
+ n6:'07 · RESUMEN',h_temp:'Cuánto va a público tibio y a público frío',
+ temp_lede:'En Black Friday, la idea es invertir lo máximo posible en público tibio: quien ya es lead, ya vio la masterclass o ya interactuó con Oliver conoce la oferta y reconoce el descuento al instante. El frío sirve para llenar esa base durante la captación. Con el retargeting por capas, la mezcla pasa de 70/30 a ~60/40, y en la ventana de venta el 100% del presupuesto va al tibio.',
  ch_temp:'Frío vs tibio por fase',
  lg_temp:`<span>${SW('var(--ink)')}Frío</span><span>${SW('var(--red)')}Tibio</span>`,
  temp_tiles:(f,q,fp,qp)=>[['Total frío',f,fp+' de la inversión · captación de leads nuevos'],['Total tibio',q,qp+' de la inversión · base, interacciones y retargeting'],['Inversión total','US$ 75 mil','Frío + tibio']],
@@ -215,30 +242,30 @@ es:{
  ch_cpl:'CPL proyectado por país',lg_avg:'Línea = CPL promedio Meta',ch_lang:'Leads pagos por idioma',
  th_cpl:['País','Idioma','% inversión','Inversión','CPL proyectado','Leads','% de los leads'],
  th_lang:['Idioma','Inversión','Leads','% leads','CPL'],
- cpl_ins:(avg,us,eu,ind,sa)=>`<li>El CPL promedio de <b>${avg}</b> es la mezcla: EE. UU. (${us}) y Europa (${eu}) quedan por encima, India (${ind}) y Sudáfrica (${sa}) muy por debajo. Brasil y LATAM quedan cerca de US$ 4,50.</li><li>Para sostener ese CPL promedio, cada país tiene que quedarse en su CPL. Si EE. UU. sube 10%, el CPL promedio sube ~5%, porque tiene el 70% del presupuesto.</li><li>India y Sudáfrica tienen el mismo presupuesto (US$ 1.800 cada uno). India genera más del doble de leads por el mismo monto.</li>`,
+ cpl_ins:(avg,us,eu,ind,sa)=>`<li>El CPL promedio de <b>${avg}</b> es la mezcla: EE. UU. (${us}) y Europa (${eu}) quedan por encima, India (${ind}) y Sudáfrica (${sa}) muy por debajo. Brasil y LATAM quedan cerca de US$ 4,50.</li><li>Para sostener ese CPL promedio, cada país tiene que quedarse en su CPL. Si EE. UU. sube 10%, el CPL promedio sube ~5%, porque tiene el 65% del presupuesto.</li><li>India y Sudáfrica tienen el mismo presupuesto (US$ 1.800 cada uno). India genera más del doble de leads por el mismo monto.</li>`,
  eyebrow:'Oliver Velez · Black Friday 2026 · proyección de pauta',
  h1:'Black Friday 2026 - <span class="r">Oliver Velez</span>',
  lede:'Los tres escenarios de ingresos del blueprint, cuántos leads exige cada uno y cuántos leads compran los US$ 75 mil de pauta con el costo por lead de septiembre.',
  meta:'<span>Presupuesto y metas: BF Plan de Marketing 2026</span><span>CPL de referencia: Meta Ads sep/26</span>',
  n1:'01 · ESCENARIOS',h_scen:'Qué se necesita para alcanzar cada meta de ingresos',
- scen_lede:'Ticket de US$ 1.775 en los tres escenarios (punto medio del rango del blueprint). Solo cambia la conversión de lead a venta. El CPL máximo es el CPL que puede tener la pauta para entregar los leads pagos necesarios con los US$ 65 mil de Meta.',
+ scen_lede:'Ticket de US$ 1.775 en los tres escenarios (punto medio del rango del blueprint). Solo cambia la conversión de lead a venta. El CPL máximo es el CPL que puede tener la pauta para entregar los leads pagos necesarios con los US$ 56 mil de captación en Meta.',
  n2:'02 · PAUTA',h_paid:'Lo que entregan los US$ 75 mil',
  n3:'03 · PRESUPUESTO Y LEADS POR MERCADO',h_inv:'Dónde entran los US$ 75 mil',
- ch_mix:'Captación Meta por mercado (US$ 65 mil)',ch_leads:'Leads proyectados vs meta del blueprint',lg_mark:'Marca = meta de leads pagos del blueprint',
- inv_ins:'<li>US$ 5 mil de prueba en YouTube en octubre, US$ 65 mil de captación en Meta (5/oct al 20/nov, 70% frío y 30% tibio) y US$ 5 mil de retargeting en la venta (21 al 30/nov).</li><li>EE. UU. recibe el 70% de la captación porque es donde está la venta. Brasil, LATAM, Europa, India y Sudáfrica tienen presupuesto y meta propios.</li>',
+ ch_mix:'Captación Meta por mercado (US$ 56 mil)',ch_leads:'Leads proyectados vs meta del blueprint',lg_mark:'Marca = meta de leads pagos del blueprint',
+ inv_ins:'<li>US$ 56 mil de captación en Meta (5/oct al 20/nov, 70% frío y 30% tibio), US$ 5 mil de prueba en YouTube en octubre y US$ 14 mil de retargeting por capas (sección 06).</li><li>EE. UU. recibe el 65% de la captación porque es donde está la venta. Brasil, LATAM, Europa, India y Sudáfrica mantienen el mismo presupuesto, para seguir alcanzando las metas de leads.</li>',
  n4:'05 · CALENDARIO',h_cal:'Inversión semanal y leads pagos acumulados',
  ch_week:'Presupuesto por semana y leads pagos acumulados vs cadencia pagada del blueprint',
- lg_week:`<span>${SW('var(--ink)')}Meta frío</span><span>${SW('var(--red)')}Meta tibio / retargeting</span><span>${SW('var(--c4)')}YouTube (prueba)</span><span>${SW('var(--good)')}Leads pagos acumulados</span><span>${SW('var(--muted)')}Cadencia pagada del blueprint (punteado)</span>`,
- cal_ins:'<li>Octubre: ~US$ 1.170/día, sin escalar mientras las campañas aprenden.</li><li>Noviembre con rampa: US$ 1.375/día hasta el 8/nov, US$ 2.000/día desde la apertura del registro a la masterclass (9/nov) y US$ 2.700/día del 16 al 20/nov.</li><li>Venta (21 al 30/nov): US$ 500/día en retargeting, para quien visitó la página de venta, inició checkout o se registró en la masterclass.</li>',
+ lg_week:`<span>${SW('var(--ink)')}Meta frío</span><span>${SW('var(--red)')}Captación tibio</span><span>${SW('var(--c6)')}Retargeting por capas</span><span>${SW('var(--c4)')}YouTube (prueba)</span><span>${SW('var(--good)')}Leads pagos acumulados</span><span>${SW('var(--muted)')}Cadencia pagada del blueprint (punteado)</span>`,
+ cal_ins:'<li>Octubre: ~US$ 1.170/día (US$ 29 mil de captación + US$ 2,5 mil de retargeting), sin escalar mientras las campañas aprenden.</li><li>Noviembre con rampa: US$ 1.300/día hasta el 8/nov, US$ 1.900/día desde la apertura del registro a la masterclass (9/nov) y US$ 2.560/día del 16 al 20/nov (US$ 32 mil de captación + US$ 4,5 mil de retargeting).</li><li>Venta (21 al 30/nov): US$ 7 mil, solo retargeting por capas.</li>',
  n5:'06 · EJECUCIÓN',h_exec:'El rol de cada mercado',
  foot:'<span>Cómo se calcula: leads = presupuesto del mercado ÷ CPL de septiembre. YouTube: US$ 5 mil ÷ US$ 47,53 (CPL de la prueba en BF25, citado en el blueprint). Escenarios: ventas necesarias = ingreso objetivo ÷ US$ 1.775 (ticket del blueprint, rango US$ 1.750 a 1.800); leads necesarios = ventas ÷ conversión del escenario (1,50%, 1,75% y 2,09%, del blueprint). Leads proyectados = pagos + 13.900 orgánicos del blueprint. ROAS = ingresos ÷ US$ 75 mil.</span><span>CPL de septiembre: EE. UU. US$ 8,55 · Europa US$ 9,59 · Brasil US$ 3,70 · ESP US$ 3,78 · India US$ 0,74 · Sudáfrica US$ 1,57.</span>',
  scn:[['Piso','igualar Summer'],['Meta','objetivo'],['Stretch','escenario optimista']],
  sc_conv:'Conversión lead → venta',sc_sales:'Ventas necesarias',sc_need:'Leads necesarios',sc_proj:'Leads proyectados',sc_org:'Orgánicos (blueprint)',sc_paidneed:'Pagos necesarios',sc_paidproj:'Pagos proyectados',sc_cplmax:'CPL máximo Meta',sc_cplproj:'CPL proyectado Meta',sc_roas:'ROAS sobre US$ 75 mil',sc_ok:'Leads suficientes',sc_miss:n=>`Faltan ${n} leads pagos`,
- tiles:(paid,blend,tot)=>[['Inversión','US$ 75 mil','Meta US$ 65 mil · YouTube US$ 5 mil · retargeting US$ 5 mil'],['Leads pagos',paid,'Meta del blueprint: 7.500'],['CPL promedio Meta',blend,'CPL de septiembre + 20% por país'],['Leads totales',tot,'Pagos + 13.900 orgánicos del blueprint']],
+ tiles:(paid,blend,tot)=>[['Inversión','US$ 75 mil','Captación Meta US$ 56 mil · YouTube US$ 5 mil · retargeting US$ 14 mil'],['Leads pagos',paid,'Meta del blueprint: 7.500'],['CPL promedio Meta',blend,'CPL de septiembre + 20% por país'],['Leads totales',tot,'Pagos + 13.900 orgánicos del blueprint']],
  res_ins:(paid,up,tot,l15)=>`<li>Con el CPL de septiembre + 20% (CPM más alto en Black Friday), los US$ 75 mil compran <b>${paid} leads pagos</b>, ${up} por encima de los 7.500 del blueprint. Sumando el orgánico del blueprint, son ${tot} leads, por encima de los ~20–21 mil que piden los tres escenarios.</li><li>Con volumen de leads suficiente en los tres escenarios, lo que separa el piso del stretch es la conversión: masterclass, WhatsApp, correo y la oferta.</li>`,
- th_mkt:['Mercado','% captación','Presupuesto captación','Por día','Retargeting venta','CPL proyectado','Leads proyectados','Meta blueprint'],
+ th_mkt:['Mercado','% captación','Presupuesto captación','Por día','CPL proyectado','Leads proyectados','Meta blueprint'],
  yt:'YouTube (prueba)',total:'Total',
- th_week:['Semana','Fechas','Presupuesto','Por día','EE. UU. / día','Meta frío','Meta tibio','YouTube','Leads pagos','Acumulado','Blueprint (pago)'],
+ th_week:['Semana','Fechas','Presupuesto','Por día','Captación frío','Captación tibio','Retargeting','YouTube','Leads pagos','Acumulado','Blueprint (pago)'],
  remk:'retargeting',sale:'Venta',period:'5/oct–30/nov',
  wk:['5–11/oct','12–18/oct','19–25/oct','26/oct–1/nov','2–8/nov','9–15/nov','16–20/nov','21–30/nov'],
  aria_mix:'Presupuesto por mercado',aria_leads:'Leads por mercado',aria_week:'Presupuesto semanal y leads pagos acumulados',
@@ -251,18 +278,19 @@ es:{
   'SA':['Sudáfrica','Volumen con CPL bajo.',['Campaña propia con presupuesto fijo.','Presupuesto diario fijo (US$ 1.800, igual que India).']]}
 }};
 const MK=[
- {id:'EUA',sp:28031.80,ld:3279,col:'var(--red)',plan:2625,rec:45450/65000,lang:'EN'},
- {id:'Brasil',sp:1876.21,ld:507,col:'var(--c2)',plan:1125,rec:.09,lang:'PT'},
- {id:'LATAM',sp:1847.16,ld:489,col:'var(--c5)',plan:900,rec:.07,lang:'ES'},
- {id:'Europa',sp:6235.68,ld:650,col:'var(--c4)',plan:600,rec:5550/65000,lang:'EN'},
- {id:'India',sp:994.82,ld:1343,col:'var(--c3)',plan:1875,rec:1800/65000,lang:'EN'},
- {id:'SA',sp:1003.24,ld:640,col:'var(--c6)',plan:375,rec:1800/65000,lang:'EN'},
+ {id:'EUA',sp:28031.80,ld:3279,col:'var(--red)',plan:2625,rec:36450/56000,lang:'EN'},
+ {id:'Brasil',sp:1876.21,ld:507,col:'var(--c2)',plan:1125,rec:5850/56000,lang:'PT'},
+ {id:'LATAM',sp:1847.16,ld:489,col:'var(--c5)',plan:900,rec:4550/56000,lang:'ES'},
+ {id:'Europa',sp:6235.68,ld:650,col:'var(--c4)',plan:600,rec:5550/56000,lang:'EN'},
+ {id:'India',sp:994.82,ld:1343,col:'var(--c3)',plan:1875,rec:1800/56000,lang:'EN'},
+ {id:'SA',sp:1003.24,ld:640,col:'var(--c6)',plan:375,rec:1800/56000,lang:'EN'},
 ];
+const RT_O=2500/27, RT_N=4500/20;
 const WEEKS=[
- {w:'S1',days:7,b:8167,yt:1250,pp:850},{w:'S2',days:7,b:8167,yt:1250,pp:875},{w:'S3',days:7,b:8167,yt:1250,pp:875},{w:'S4',days:7,b:8375,yt:1250,pp:900},
- {w:'S5',days:7,b:9625,yt:0,pp:1450},{w:'S6',days:7,b:14000,yt:0,pp:1450},{w:'S7',days:5,b:13500,yt:0,pp:1100},{w:'V',days:10,b:5000,yt:0,pp:0,sale:true},
+ {w:'S1',days:7,b:8167,yt:1250,rt:RT_O*7,pp:850},{w:'S2',days:7,b:8167,yt:1250,rt:RT_O*7,pp:875},{w:'S3',days:7,b:8166,yt:1250,rt:RT_O*7,pp:875},{w:'S4',days:7,b:8300,yt:1250,rt:RT_O*6+RT_N,pp:900},
+ {w:'S5',days:7,b:9100,yt:0,rt:RT_N*7,pp:1450},{w:'S6',days:7,b:13300,yt:0,rt:RT_N*7,pp:1450},{w:'S7',days:5,b:12800,yt:0,rt:RT_N*5,pp:1100},{w:'V',days:10,b:7000,yt:0,rt:7000,pp:0,sale:true},
 ];
-const META_CAP=65000, YT=5000, VENDA=5000, TOTAL=75000, YT_CPL=47.53, TK=1775, ORG=13900;
+const META_CAP=56000, YT=5000, VENDA=7000, RT=14000, TOTAL=75000, YT_CPL=47.53, TK=1775, ORG=13900;
 const SCN=[{conv:.015,goal:542486},{conv:.0175,goal:650000},{conv:.0209,goal:750000}];
 let LANG='pt'; try{const v=localStorage.getItem('ov-bf-lang'); if(v==='es'||v==='pt')LANG=v}catch(e){}
 const T=()=>I18N[LANG];
@@ -300,20 +328,20 @@ function tiles(){
 function mktTable(){
   const t=T();
   $('#t-mkt').innerHTML='<thead><tr>'+t.th_mkt.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+
-  rows.map(r=>`<tr class="${r.id==='EUA'?'us':''}"><td>${dot(r.col)}${nm(r)}</td><td>${pct(r.share,1)}</td><td>${usd(r.spP)}</td><td>${usd(r.spP/47)}</td><td>${usd(VENDA*r.share)}</td><td>${usd(r.cpl,2)}</td><td>${n0(r.ldP)}</td><td>${n0(r.plan)}</td></tr>`).join('')+
-  `<tr><td>${dot('var(--c4)')}${t.yt}</td><td>—</td><td>${usd(YT)}</td><td>${usd(YT/27)}</td><td>—</td><td>${usd(YT_CPL,2)}</td><td>${n0(ytLd)}</td><td>—</td></tr>`+
-  `<tr class="total"><td>${t.total}</td><td>100%</td><td>${usd(META_CAP+YT)}</td><td>${usd((META_CAP+YT)/47)}</td><td>${usd(VENDA)}</td><td>${usd((META_CAP+YT)/paid,2)}</td><td>${n0(paid)}</td><td>7.500</td></tr></tbody>`;
+  rows.map(r=>`<tr class="${r.id==='EUA'?'us':''}"><td>${dot(r.col)}${nm(r)}</td><td>${pct(r.share,1)}</td><td>${usd(r.spP)}</td><td>${usd(r.spP/47)}</td><td>${usd(r.cpl,2)}</td><td>${n0(r.ldP)}</td><td>${n0(r.plan)}</td></tr>`).join('')+
+  `<tr><td>${dot('var(--c4)')}${t.yt}</td><td>—</td><td>${usd(YT)}</td><td>${usd(YT/27)}</td><td>${usd(YT_CPL,2)}</td><td>${n0(ytLd)}</td><td>—</td></tr>`+
+  `<tr class="total"><td>${t.total}</td><td>100%</td><td>${usd(META_CAP+YT)}</td><td>${usd((META_CAP+YT)/47)}</td><td>${usd((META_CAP+YT)/paid,2)}</td><td>${n0(paid)}</td><td>7.500</td></tr></tbody>`;
 }
 function weekChart(){
   const t=T();
-  let acc=0,accP=0;const D=WEEKS.map((w,i)=>{const meta=w.sale?0:w.b-w.yt,ld=w.sale?0:meta/blend+w.yt/YT_CPL;acc+=ld;accP+=w.pp;return {...w,lab:w.sale?t.sale:w.w,d:t.wk[i],meta,ld,acc,accP}});
+  let acc=0,accP=0;const D=WEEKS.map((w,i)=>{const meta=w.sale?0:w.b-w.yt-w.rt,ld=w.sale?0:meta/blend+w.yt/YT_CPL;acc+=ld;accP+=w.pp;return {...w,lab:w.sale?t.sale:w.w,d:t.wk[i],meta,ld,acc,accP}});
   const W=900,H=300,pl=50,pr=64,pt=18,pb=42,maxB=16000,maxL=Math.ceil(paid*1.12/2500)*2500;
   const bw=(W-pl-pr)/D.length,yl=v=>pt+(H-pt-pb)*(1-v/maxL),cx=i=>pl+bw*i+bw/2;
   let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${t.aria_week}">`;
   for(let i=0;i<=4;i++){const y=pt+(H-pt-pb)*(1-i/4);s+=`<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${pl-6}" y="${y+4}" text-anchor="end" font-size="10.5" font-family="var(--f-mono)" fill="var(--muted)">${maxB*i/4/1000}k</text><text x="${W-pr+6}" y="${y+4}" font-size="10.5" font-family="var(--f-mono)" fill="var(--good)">${n0(maxL*i/4)}</text>`}
   s+=`<text x="${pl-6}" y="${pt-6}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--f-body)">US$</text><text x="${W-pr+6}" y="${pt-6}" font-size="10" fill="var(--good)" font-family="var(--f-body)">leads</text>`;
   D.forEach((d,i)=>{const x=pl+bw*i+bw*.18,w=bw*.64;let base=H-pb;
-    const segs=d.sale?[[d.b,'var(--red)']]:[[d.meta*.7,'var(--ink)'],[d.meta*.3,'var(--red)'],[d.yt,'var(--c4)']];
+    const segs=d.sale?[[d.b,'var(--c6)']]:[[d.meta*.7,'var(--ink)'],[d.meta*.3,'var(--red)'],[d.rt,'var(--c6)'],[d.yt,'var(--c4)']];
     segs.forEach(([v,c])=>{const h=(H-pt-pb)*v/maxB;if(h>0)s+=`<rect x="${x}" y="${base-h}" width="${w}" height="${h}" fill="${c}"/>`;base-=h});
     s+=`<text x="${cx(i)}" y="${base-6}" text-anchor="middle" font-size="10.5" font-family="var(--f-mono)" fill="var(--fg)">${(d.b/1000).toLocaleString('pt-BR',{maximumFractionDigits:1})}k</text><text x="${cx(i)}" y="${H-pb+16}" text-anchor="middle" font-size="11" font-weight="600" font-family="var(--f-body)" fill="var(--fg)">${d.lab}</text><text x="${cx(i)}" y="${H-pb+30}" text-anchor="middle" font-size="9.5" font-family="var(--f-mono)" fill="var(--muted)">${d.d}</text>`});
   const L=D.filter(d=>!d.sale);
@@ -322,8 +350,8 @@ function weekChart(){
   const last=L[L.length-1];s+=`<text x="${cx(L.length-1)+10}" y="${yl(last.acc)+4}" font-size="11.5" font-weight="600" font-family="var(--f-mono)" fill="var(--good)">${n0(last.acc)}</text><text x="${cx(L.length-1)+10}" y="${yl(last.accP)+4}" font-size="11" font-family="var(--f-mono)" fill="var(--muted)">${n0(last.accP)}</text>`;
   $('#ch-week').innerHTML=s+'</svg>';
   $('#t-week').innerHTML='<thead><tr>'+t.th_week.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+
-   D.map(d=>`<tr><td>${d.lab}</td><td>${d.d}</td><td>${usd(d.b)}</td><td>${usd(d.b/d.days)}</td><td>${usd((d.sale?d.b:d.meta)*rows[0].share/d.days)}</td><td>${d.sale?'—':usd(d.meta*.7)}</td><td>${d.sale?usd(d.b)+' '+t.remk:usd(d.meta*.3)}</td><td>${d.yt?usd(d.yt):'—'}</td><td>${d.sale?'—':n0(d.ld)}</td><td>${d.sale?'—':n0(d.acc)}</td><td>${d.sale?'—':n0(d.accP)}</td></tr>`).join('')+
-   `<tr class="total"><td>${t.total}</td><td>${t.period}</td><td>${usd(TOTAL)}</td><td>${usd(TOTAL/57)}</td><td>—</td><td>${usd(META_CAP*.7)}</td><td>${usd(META_CAP*.3+VENDA)}</td><td>${usd(YT)}</td><td>${n0(paid)}</td><td>${n0(last.acc)}</td><td>7.500</td></tr></tbody>`;
+   D.map(d=>`<tr><td>${d.lab}</td><td>${d.d}</td><td>${usd(d.b)}</td><td>${usd(d.b/d.days)}</td><td>${d.sale?'—':usd(d.meta*.7)}</td><td>${d.sale?'—':usd(d.meta*.3)}</td><td>${usd(d.rt)}</td><td>${d.yt?usd(d.yt):'—'}</td><td>${d.sale?'—':n0(d.ld)}</td><td>${d.sale?'—':n0(d.acc)}</td><td>${d.sale?'—':n0(d.accP)}</td></tr>`).join('')+
+   `<tr class="total"><td>${t.total}</td><td>${t.period}</td><td>${usd(TOTAL)}</td><td>${usd(TOTAL/57)}</td><td>${usd(META_CAP*.7)}</td><td>${usd(META_CAP*.3)}</td><td>${usd(RT)}</td><td>${usd(YT)}</td><td>${n0(paid)}</td><td>${n0(last.acc)}</td><td>7.500</td></tr></tbody>`;
 }
 function barsH(el,items,fmt,aria,pr=104,pl=96){
   const W=440,rh=30,H=items.length*rh+8,max=Math.max(...items.map(i=>Math.max(i.v,i.m||0)))||1,sc=v=>(W-pl-pr)*v/max;
@@ -359,7 +387,7 @@ function cplSec(){
 
 function tempSec(){
   const t=T();
-  const P=[{f:26500*.7+YT,q:26500*.3},{f:38500*.7,q:38500*.3},{f:0,q:VENDA}];
+  const P=[{f:24000*.7+YT,q:24000*.3+2500},{f:32000*.7,q:32000*.3+4500},{f:0,q:VENDA}];
   const F=P.reduce((a,p)=>a+p.f,0),Q=P.reduce((a,p)=>a+p.q,0);
   $('#temp-tiles').innerHTML=t.temp_tiles(usd(F),usd(Q),pct(F/TOTAL,0),pct(Q/TOTAL,0)).map(([k,v,s])=>`<div class="tile"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join('');
   const W=900,rh=46,pl=170,pr=90,H=P.length*rh+6,max=40000,sc=v=>(W-pl-pr)*v/max;
@@ -375,12 +403,23 @@ function tempSec(){
    P.map((p,i)=>`<tr><td>${t.ph[i][0]}</td><td>${t.ph[i][1]}</td><td>${usd(p.f)}</td><td>${usd(p.q)}</td><td>${usd(p.f+p.q)}</td><td>${pct(p.q/(p.f+p.q),0)}</td></tr>`).join('')+
    `<tr class="total"><td>${t.total}</td><td>${t.period}</td><td>${usd(F)}</td><td>${usd(Q)}</td><td>${usd(TOTAL)}</td><td>${pct(Q/TOTAL,0)}</td></tr></tbody>`;
 }
+
+function rtSec(){
+  const t=T(),cols=['var(--c4)','var(--c2)','var(--c6)'];
+  const tot=[0,1,2].map(m=>t.caps.filter(c=>c[0]===m).reduce((a,c)=>a+c[4],0));
+  barsH('#ch-rt',t.mom.map((m,i)=>({k:m[0].split(' · ')[0],v:tot[i],c:cols[i],d:m[1]})),i=>`${usd(i.v)} · ${i.d}`,t.ch_rt,150,60);
+  $('#rt-tiles').innerHTML=t.rt_tiles.map(([k,v,s])=>`<div class="tile"><span class="k">${k}</span><span class="v">${v}</span><span class="s">${s}</span></div>`).join('');
+  let prev=-1;
+  $('#t-rt').innerHTML='<thead><tr>'+t.th_rt.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>'+
+   t.caps.map(c=>{const first=c[0]!==prev;prev=c[0];return `<tr><td>${first?`${dot(cols[c[0]])}<b>${t.mom[c[0]][0]}</b><br><span style="color:var(--muted);font-size:12px">${t.mom[c[0]][1]}</span>`:''}</td><td><b>${c[1]}</b></td><td style="text-align:left;white-space:normal;min-width:180px">${c[2]}</td><td style="text-align:left;white-space:normal;min-width:260px">${c[3]}</td><td>${usd(c[4])}</td></tr>`}).join('')+
+   `<tr class="total"><td>${t.total}</td><td></td><td></td><td></td><td>${usd(RT)}</td></tr></tbody>`;
+}
 function render(){
   const t=T();
   document.documentElement.lang=LANG==='es'?'es':'pt-BR';
   document.querySelectorAll('[data-i]').forEach(el=>el.innerHTML=t[el.dataset.i]);
   document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===LANG?'true':'false'));
-  scen();tiles();mktTable();cplSec();weekChart();tempSec();
+  scen();tiles();mktTable();cplSec();weekChart();rtSec();tempSec();
   barsH('#ch-mix',rows.map(r=>({k:nm(r),v:r.spP,c:r.col,s:r.share})),i=>`${usdK(i.v)} · ${pct(i.s,1)}`,t.aria_mix,120);
   barsH('#ch-leads',rows.map(r=>({k:nm(r),v:r.ldP,c:r.col,m:r.plan})),i=>n0(i.v),t.aria_leads);
 }
