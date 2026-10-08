@@ -30,11 +30,11 @@ NOME_CLIENTE     = "Oliver"
 LOGO_LETRA       = "OV"
 COR_ACENTO       = "#800080"
 
-# Versão dedicada exclusivamente à ação BLACK2026 — único código ativo.
+# Versão dedicada exclusivamente à ação BLACK26 (campanhas: FTF-USA-BLACK26-AFILTER-CAPT-COLD-IMG) — único código ativo.
 # Os lançamentos anteriores (CTPSEPT26 -> backup em CTPSEPT2026.html, BLACKJUL26,
 # SWING02 etc.) ficam como histórico.
 LANCAMENTO_CODS  = [
-    ("BLACK2026", "BLACK2026"),
+    ("BLACK26", "BLACK26"),
 ]
 
 # ══ GALERIA DE CRIATIVOS (Google Drive) ═══════════════
@@ -60,11 +60,18 @@ USAR_META_INVESTIMENTO = True
 META_INVEST_DATA_INICIO = "2026-10-08"
 META_INVEST_DATA_FIM    = "2026-11-20"
 META_INVEST_TOTAL       = 75000
-META_INVEST_FASES = [
-    # (label_exibido,                 inicio,       fim,          meta_em_dolar)
-    ("8 a 31 out",                    "2026-10-08", "2026-10-31", 31500),
-    ("1 a 20 nov",                    "2026-11-01", "2026-11-20", 38500),
-    ("21 a 30 nov (venda/retarget.)", "2026-11-21", "2026-11-30",  5000),
+# Fonte: black2026.html (secao 03/05). Captação Meta US$ 56k + retargeting US$ 14k + YouTube US$ 5k.
+# CPL projetado = CPL de setembro + 20%; leads projetados = verba / CPL projetado.
+META_INVEST_REGIOES = [
+    # (filtro, valor,          label_exibido,          meta_em_dolar, leads_projetados)
+    ("pais", "USA",          "ENG (USA)",              36450, 3553),
+    ("pais", "BRA",          "PT",                      5850, 1317),
+    ("pais", "LATAM",        "ESP",                     4550, 1004),
+    ("pais", "EUR",          "ENG (EUR)",               5550,  482),
+    ("pais", "IND",          "ENG (IND)",               1800, 2025),
+    ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      1800,  957),
+    ("nome", "RETARGET",     "Retargeting (capas)",    14000, None),
+    ("nome", "YOUTUBE",      "YouTube (teste)",         5000,  105),
 ]
 
 USAR_PESQUISA    = False
@@ -266,22 +273,31 @@ def subset_for_group(df, grupo):
     return df[df["lct_codes"].apply(lambda codes: grupo in codes)]
 
 def build_meta_investimento(df_meta):
-    """Cruza o gasto real com a meta total e com as fases configuradas em
-    META_INVEST_FASES, e calcula o ritmo (% do período decorrido x % já investido)."""
+    """Cruza o gasto/leads reais com as metas de META_INVEST_REGIOES (mercados por pais no
+    nome da campanha + retargeting/YouTube por trecho do nome) e calcula o ritmo
+    (% do periodo decorrido x % ja investido)."""
     if not USAR_META_INVESTIMENTO:
         return None
     grupo = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else "all"
     subset = subset_for_group(df_meta, grupo)
+    camp = subset["campaign"].astype(str).str.upper()
+    pais_series = camp.str.split("-").str[1]
+    eh_extra = camp.str.contains("RETARGET") | camp.str.contains("YOUTUBE")
 
-    regioes = []  # mesma chave que o template ja le; cada item agora e uma fase
-    for label, ini, fim, meta in META_INVEST_FASES:
-        mask = (subset["date"] >= pd.Timestamp(ini)) & (subset["date"] <= pd.Timestamp(fim))
+    regioes = []
+    for filtro, valor, label, meta, leads_proj in META_INVEST_REGIOES:
+        if filtro == "pais":
+            mask = (pais_series == valor) & ~eh_extra
+        else:
+            mask = camp.str.contains(valor)
         gasto = round(float(subset.loc[mask, "spend"].sum()), 2)
+        leads = int(subset.loc[mask, "leads"].sum()) if "leads" in subset.columns else 0
         regioes.append({
-            "pais": label, "label": label, "meta": meta,
+            "pais": valor, "label": label, "meta": meta,
             "pct_meta": round(meta/META_INVEST_TOTAL*100, 1) if META_INVEST_TOTAL else None,
             "gasto": gasto,
             "pct_atingido": round(gasto/meta*100, 1) if meta else None,
+            "leads": leads, "leads_proj": leads_proj,
         })
     total_gasto = round(float(subset["spend"].sum()), 2)
 

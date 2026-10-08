@@ -473,7 +473,7 @@ const TRANSLATIONS = {
     filtrar_origem:   'Filtrar respostas por origem',
     funil_ttl:        'Funil de Captação',
     invest_ttl:       'Meta de Investimento',
-    invest_sub:       'por fase',
+    invest_sub:       'por mercado',
     invest_total:     'Investido',
     invest_tempo:     'Período decorrido',
     invest_adiantado: 'Ritmo à frente do previsto',
@@ -596,7 +596,7 @@ const TRANSLATIONS = {
     filtrar_origem:   'Filtrar respuestas por origen',
     funil_ttl:        'Embudo de Captación',
     invest_ttl:       'Meta de Inversión',
-    invest_sub:       'por fase',
+    invest_sub:       'por mercado',
     invest_total:     'Invertido',
     invest_tempo:     'Período transcurrido',
     invest_adiantado: 'Ritmo adelantado a lo previsto',
@@ -962,6 +962,7 @@ function renderInvestCard(){
     const over=pct>=100;
     return `<div class="invest-region">
       <div class="invest-region-hd"><b>${r.label}</b><span>${fMoney(r.gasto)} / ${fMoney(r.meta)}</span></div>
+      ${r.leads_proj!=null?`<div class="invest-region-hd"><span>Leads</span><span>${fN(r.leads||0)} / ${fN(r.leads_proj)}</span></div>`:''}
       <div class="invest-bar-bg"><div class="invest-bar-fill${over?' over':''}" style="width:${Math.min(pct,100)}%"></div></div>
     </div>`;
   }).join('');
