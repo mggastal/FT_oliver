@@ -30,11 +30,11 @@ NOME_CLIENTE     = "Oliver"
 LOGO_LETRA       = "OV"
 COR_ACENTO       = "#800080"
 
-# Versão dedicada exclusivamente ao lançamento CTPSEPT26 — único código ativo.
-# Os lançamentos anteriores (BLACKJUL26, SWING02 etc.) ficam no gerador/dashboard
-# antigo, mantido como histórico (sem galeria de criativos via Drive).
+# Versão dedicada exclusivamente à ação BLACK2026 — único código ativo.
+# Os lançamentos anteriores (CTPSEPT26 -> backup em CTPSEPT2026.html, BLACKJUL26,
+# SWING02 etc.) ficam como histórico.
 LANCAMENTO_CODS  = [
-    ("CTPSEPT26", "CTPSEPT26"),
+    ("BLACK2026", "BLACK2026"),
 ]
 
 # ══ GALERIA DE CRIATIVOS (Google Drive) ═══════════════
@@ -57,17 +57,14 @@ IDIOMA_POR_PAIS = {
 # barra por região + comparação "% do período decorrido" x "% já investido".
 # "pais" = 2º token do nome da campanha (ex: FTF-USA-... -> "USA").
 USAR_META_INVESTIMENTO = True
-META_INVEST_DATA_INICIO = "2026-09-07"
-META_INVEST_DATA_FIM    = "2026-09-26"
-META_INVEST_TOTAL       = 40000
-META_INVEST_REGIOES = [
-    # (pais_na_campanha,  label_exibido,          meta_em_dolar)
-    ("USA",          "ENG (USA)",           28200),
-    ("EUR",          "ENG (EUR)",            6000),
-    ("BRA",          "PT",                   1900),
-    ("LATAM",        "ESP",                  1900),
-    ("IND",          "ENG (IND)",            1000),
-    ("SOUTH_AFRICA", "ENG (South Africa)",   1000),
+META_INVEST_DATA_INICIO = "2026-10-08"
+META_INVEST_DATA_FIM    = "2026-11-20"
+META_INVEST_TOTAL       = 75000
+META_INVEST_FASES = [
+    # (label_exibido,                 inicio,       fim,          meta_em_dolar)
+    ("8 a 31 out",                    "2026-10-08", "2026-10-31", 31500),
+    ("1 a 20 nov",                    "2026-11-01", "2026-11-20", 38500),
+    ("21 a 30 nov (venda/retarget.)", "2026-11-21", "2026-11-30",  5000),
 ]
 
 USAR_PESQUISA    = False
@@ -269,26 +266,24 @@ def subset_for_group(df, grupo):
     return df[df["lct_codes"].apply(lambda codes: grupo in codes)]
 
 def build_meta_investimento(df_meta):
-    """Cruza o gasto real (por país extraído do nome da campanha) com as metas
-    configuradas em META_INVEST_REGIOES, e calcula o ritmo (% do período
-    decorrido x % já investido)."""
+    """Cruza o gasto real com a meta total e com as fases configuradas em
+    META_INVEST_FASES, e calcula o ritmo (% do período decorrido x % já investido)."""
     if not USAR_META_INVESTIMENTO:
         return None
     grupo = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else "all"
     subset = subset_for_group(df_meta, grupo)
-    pais_series = subset["campaign"].astype(str).str.split("-").str[1].str.upper()
-    gasto_por_pais = subset.groupby(pais_series)["spend"].sum().to_dict()
 
-    regioes = []
-    for pais, label, meta in META_INVEST_REGIOES:
-        gasto = round(float(gasto_por_pais.get(pais, 0.0)), 2)
+    regioes = []  # mesma chave que o template ja le; cada item agora e uma fase
+    for label, ini, fim, meta in META_INVEST_FASES:
+        mask = (subset["date"] >= pd.Timestamp(ini)) & (subset["date"] <= pd.Timestamp(fim))
+        gasto = round(float(subset.loc[mask, "spend"].sum()), 2)
         regioes.append({
-            "pais": pais, "label": label, "meta": meta,
+            "pais": label, "label": label, "meta": meta,
             "pct_meta": round(meta/META_INVEST_TOTAL*100, 1) if META_INVEST_TOTAL else None,
             "gasto": gasto,
             "pct_atingido": round(gasto/meta*100, 1) if meta else None,
         })
-    total_gasto = round(sum(r["gasto"] for r in regioes), 2)
+    total_gasto = round(float(subset["spend"].sum()), 2)
 
     di = pd.Timestamp(META_INVEST_DATA_INICIO)
     dfim = pd.Timestamp(META_INVEST_DATA_FIM)
