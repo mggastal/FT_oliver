@@ -3,14 +3,14 @@
   "cor": "#800080",
   "letra": "OV",
   "lancamentos": [
-    "CTPSEPT26"
+    "BLACK26"
   ],
   "moeda": "USD",
   "moeda_simbolo": "$",
-  "atualizado": "06/10/2026",
+  "atualizado": "08/10/2026",
   "kpis": {
-    "spend": 40511.01,
-    "leads": 6847,
-    "cpl": 5.92
+    "spend": 0.0,
+    "leads": 0,
+    "cpl": null
   }
 }
