@@ -106,6 +106,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .invest-total-row{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:var(--muted);margin-bottom:2px;}
 .invest-total-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:600;color:var(--txt);}
 .invest-pace{font-size:10px;margin:8px 0 14px;padding:6px 8px;border-radius:6px;background:var(--surface2);}
+.invest-track{position:relative;height:12px;border-radius:6px;background:var(--surface2);margin:12px 0 30px;}
+.invest-track-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent));transition:width .6s ease;}
+.invest-mark{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--txt);}
+.invest-mark-lbl{position:absolute;top:20px;transform:translateX(-50%);font-size:9.5px;line-height:1.25;text-align:center;white-space:nowrap;color:var(--muted);}
+.invest-mark-lbl b{display:block;color:var(--txt);font-family:'DM Mono',monospace;font-weight:600;}
+.invest-end-lbl{position:absolute;top:20px;right:0;font-size:9.5px;color:var(--muted2);font-family:'DM Mono',monospace;}
+.invest-start-lbl{position:absolute;top:20px;left:0;font-size:9.5px;color:var(--muted2);font-family:'DM Mono',monospace;}
 .invest-region{margin-bottom:10px;}
 .invest-region:last-child{margin-bottom:0;}
 .invest-region-hd{display:flex;justify-content:space-between;font-size:10.5px;margin-bottom:3px;}
@@ -998,11 +1005,18 @@ function renderInvestCard(){
     </div>`;
   }).join('');
 
+  const marcosHTML=(META_INVEST.marcos||[]).map(m=>{
+    const pos=Math.min(100,m.meta/META_INVEST.total_meta*100);
+    const ok=(META_INVEST.total_gasto||0)>=m.meta;
+    return `<span class="invest-mark" style="left:${pos}%"></span><span class="invest-mark-lbl" style="left:${pos}%">${m.label} · ${m.data.split('-').reverse().slice(0,2).join('/')}<b${ok?' style="color:#059669"':''}>${fMoney(m.meta)}</b></span>`;
+  }).join('');
+
   card.innerHTML=`
     <div class="invest-title">${t('invest_ttl')}</div>
     <div class="invest-sub">${META_INVEST.data_inicio.split('-').reverse().join('/')} → ${META_INVEST.data_fim.split('-').reverse().join('/')} · ${t('invest_sub')}</div>
     <div class="invest-total-row"><span>${t('invest_total')}</span><span>${pctInv!=null?fP(pctInv):'—'}</span></div>
     <div class="invest-total-val">${fMoney(META_INVEST.total_gasto)} <span style="font-size:11px;color:var(--muted2);font-weight:400">/ ${fMoney(META_INVEST.total_meta)}</span></div>
+    <div class="invest-track"><div class="invest-track-fill" style="width:${Math.min(100,(META_INVEST.total_gasto||0)/META_INVEST.total_meta*100)}%"></div>${marcosHTML}<span class="invest-start-lbl">${fMoney(0)}</span><span class="invest-end-lbl">${fMoney(META_INVEST.total_meta)}</span></div>
     <div class="invest-pace">${paceIcon} ${t(paceKey)} — ${t('invest_tempo')}: ${pctTempo!=null?fP(pctTempo):'—'} (${META_INVEST.dias_passados}/${META_INVEST.dias_totais}d)</div>
     ${regioesHTML}`;
 }

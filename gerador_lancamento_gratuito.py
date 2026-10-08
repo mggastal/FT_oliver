@@ -62,6 +62,11 @@ META_INVEST_DATA_FIM    = "2026-11-20"
 META_INVEST_TOTAL       = 75000
 # Fonte: black2026.html (secao 03/05). Captação Meta US$ 56k + retargeting US$ 14k + YouTube US$ 5k.
 # CPL projetado = CPL de setembro + 20%; leads projetados = verba / CPL projetado.
+# Marcos na barra total (0 a META_INVEST_TOTAL). Fim de outubro = US$ 31,5k (tabela de verba por periodo).
+META_INVEST_MARCOS = [
+    # (label_exibido,        data_limite,  meta_acumulada_em_dolar)
+    ("Fim de outubro",       "2026-10-31", 31500),
+]
 META_INVEST_REGIOES = [
     # (filtro, valor,          label_exibido,          meta_em_dolar, leads_projetados)
     ("pais", "USA",          "ENG (USA)",              36450, 3553),
@@ -317,6 +322,7 @@ def build_meta_investimento(df_meta):
         "dias_passados": dias_passados,
         "pct_tempo": round(dias_passados/dias_totais*100, 1) if dias_totais else None,
         "regioes": regioes,
+        "marcos": [{"label": l, "data": d, "meta": m} for l, d, m in META_INVEST_MARCOS],
     }
 
 def calc_kpis(p):
