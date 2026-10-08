@@ -133,17 +133,9 @@ def safe(v):
     return round(float(v),2) if float(v)!=0 else None
 
 def download_thumb(url, d):
+    # Sem baixar nada: usa a URL do thumbnail do Meta direto (o gerador roda 4x/dia).
     if not url or str(url)=="nan": return ""
-    try:
-        ext=".png" if ".png" in url.lower() else ".jpg"
-        fname=hashlib.md5(url.encode()).hexdigest()[:16]+ext
-        fp=d/fname
-        if not fp.exists():
-            r=requests.get(url,timeout=10,headers={"User-Agent":"Mozilla/5.0"})
-            if r.status_code==200: fp.write_bytes(r.content)
-            else: return ""
-        return "imgs/"+fname
-    except: return ""
+    return str(url)
 
 _DRIVE_ID_RE = re.compile(r"/d/([a-zA-Z0-9_-]+)")
 
@@ -153,7 +145,10 @@ def _drive_id(link):
     return m.group(1) if m else None
 
 # Codigo na planilha: BL01_IMG01CAPTFEED / BL01_VC1CAPTSTORY / BL01_VC4CAPTREEL...
-_CRIT_COD_RE = re.compile(r"^BL(\d{2})_(IMG|VC)(\d+)CAPT(\w+)$")
+# Bloco "BL01" -> chave "01"; acao nomeada (ex: AFILTER) -> chave "AFILTER". Sufixo opcional
+# _EN/_ES/_PT indica o idioma (usado se a coluna IDIOMA estiver vazia).
+_CRIT_COD_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_(IMG|VC)(\d+)CAPT([A-Z]+)(?:_(EN|ES|PT))?$")
+_LANG_SUFIXO = {"EN":"ENG","ES":"ESP","PT":"PT"}
 
 def load_criativos():
     """Le a aba Criativos e monta 2 dicionarios de cruzamento:
@@ -179,7 +174,9 @@ def load_criativos():
         if not did: continue
         m = _CRIT_COD_RE.match(cod)
         if not m: continue
-        bl, kind, num_s, suf = m.groups()
+        bl_num, acao, kind, num_s, suf, lang_suf = m.groups()
+        bl = bl_num or acao
+        if not idioma and lang_suf: idioma = _LANG_SUFIXO[lang_suf]
         num = int(num_s)  # desconsidera zeros a esquerda (01 == 1)
         if kind == "IMG":
             img[(idioma, bl, num, suf)] = did
@@ -189,7 +186,7 @@ def load_criativos():
     print(f"     {n_ok} criativos carregados ({len(img)} imagens, {len(vid)} videos)")
     return img, vid
 
-_AD_IMG_RE = re.compile(r"^BL(\d{2})_IMG(\d+)CAPT(\w+)$")
+_AD_IMG_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_IMG(\d+)CAPT([A-Z]+)(?:_(EN|ES|PT))?$")
 _AD_VID_RE = re.compile(r"^VD(\d+)CAPT(\w+)$")
 _BL_RE     = re.compile(r"BL(\d{2})\b")
 
@@ -210,8 +207,9 @@ def criativo_do_anuncio(campaign, adset, ad, crit_img, crit_vid):
 
     m = _AD_IMG_RE.match(ad_name)
     if m:
-        bl, num_s, suf = m.groups()
-        return crit_img.get((idioma, bl, int(num_s), suf)), False
+        bl_num, acao, num_s, suf, lang_suf = m.groups()
+        if lang_suf: idioma = _LANG_SUFIXO[lang_suf]  # idioma explicito no nome do anuncio vence o pais
+        return crit_img.get((idioma, bl_num or acao, int(num_s), suf)), False
 
     m = _AD_VID_RE.match(ad_name)
     if m:
@@ -789,7 +787,7 @@ def main():
     print(f"Leads via: Action FB Pixel Complete Registration (Offsite Conversion)")
     print(f"Moeda: {MOEDA} ({MOEDA_SIMBOLO})")
     print("="*60)
-    img_dir=Path("imgs"); img_dir.mkdir(exist_ok=True)
+    img_dir=None
 
     print("\n[CRIATIVOS]")
     if USAR_CRIATIVOS:
