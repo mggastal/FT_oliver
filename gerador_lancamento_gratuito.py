@@ -70,7 +70,7 @@ META_INVEST_REGIOES = [
     ("pais", "EUR",          "ENG (EUR)",               5550,  482),
     ("pais", "IND",          "ENG (IND)",               1800, 2025),
     ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      1800,  957),
-    ("nome", "RETARGET",     "Retargeting (capas)",    14000, None),
+    ("nome", "RETARGET",     "Retargeting",            14000, None),
     # YouTube (US$ 5k, 105 leads proj.) vem do Google Ads: entra aqui quando houver a extracao
 ]
 
