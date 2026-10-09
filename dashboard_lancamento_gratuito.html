@@ -87,6 +87,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .funnel-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:16px;}
 .funnel-steps{display:flex;flex-direction:column;gap:0;}
 .funnel-row{display:flex;gap:14px;align-items:stretch;}
+.funnel-col{flex:1 1 70%;min-width:0;display:flex;flex-direction:column;gap:14px;}
+.funnel-row .funnel-col .funnel-card{flex:0 0 auto;}
 .funnel-row .funnel-card{flex:1 1 70%;margin-bottom:0;min-width:0;}
 .temp-wrap{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:8px;}
 .temp-chart{flex:0 0 200px;min-width:160px;}
@@ -121,7 +123,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .invest-bar-bg{width:100%;height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;}
 .invest-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent));transition:width .6s ease;}
 .invest-bar-fill.over{background:linear-gradient(90deg,#059669,#059669);}
-@media(max-width:820px){.funnel-row{flex-direction:column;}.funnel-row .funnel-card,.invest-card{flex:1 1 auto;}}
+@media(max-width:820px){.funnel-row{flex-direction:column;}.funnel-col,.funnel-row .funnel-card,.invest-card{flex:1 1 auto;}}
 .f-step{display:flex;flex-direction:column;}
 .f-bar{height:40px;border-radius:7px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;transition:width .4s;min-width:110px;}
 .f-bar-lbl{font-size:12px;font-weight:600;color:#fff;}
@@ -329,17 +331,19 @@ details.desk-only{display:block!important;}
       </details>
       <div class="krow k3 mb14" id="metaKpis"></div>
       <div class="funnel-row mb14" id="funnelRow">
-        <div class="funnel-card" id="funnelCardBox"><div class="funnel-title" data-i18n="funil_ttl">Funil de Captação</div><div class="funnel-steps" id="funnelSteps"></div></div>
-        <div class="invest-card" id="investCard" style="display:none"></div>
-      </div>
-      <div class="cc mb14" id="tempCard" style="display:none">
-        <div class="cc-t" data-i18n="temp_ttl">Temperatura: Quente × Frio</div>
-        <div class="cc-s" data-i18n="temp_sub">Campanhas HOT (quente) e COLD (frio) · investimento, leads e CPL</div>
-        <div class="temp-wrap">
-          <div class="temp-chart"><div class="temp-lbl" data-i18n="kpi_invest">Investimento</div><div class="cw" style="height:150px"><canvas id="chTempInv"></canvas></div></div>
-          <div class="temp-chart"><div class="temp-lbl" data-i18n="kpi_leads">Leads</div><div class="cw" style="height:150px"><canvas id="chTempLeads"></canvas></div></div>
-          <div class="temp-tbl" id="tempTable"></div>
+      <div class="funnel-col">
+          <div class="funnel-card" id="funnelCardBox"><div class="funnel-title" data-i18n="funil_ttl">Funil de Captação</div><div class="funnel-steps" id="funnelSteps"></div></div>
+          <div class="cc" id="tempCard" style="display:none;margin-bottom:0;flex:1 1 auto">
+          <div class="cc-t" data-i18n="temp_ttl">Temperatura: Quente × Frio</div>
+          <div class="cc-s" data-i18n="temp_sub">Campanhas HOT (quente) e COLD (frio) · investimento, leads e CPL</div>
+          <div class="temp-wrap">
+            <div class="temp-chart"><div class="temp-lbl" data-i18n="kpi_invest">Investimento</div><div class="cw" style="height:150px"><canvas id="chTempInv"></canvas></div></div>
+            <div class="temp-chart"><div class="temp-lbl" data-i18n="kpi_leads">Leads</div><div class="cw" style="height:150px"><canvas id="chTempLeads"></canvas></div></div>
+            <div class="temp-tbl" id="tempTable"></div>
+          </div>
         </div>
+      </div>
+        <div class="invest-card" id="investCard" style="display:none"></div>
       </div>
       <div class="cc mb14">
         <div class="cc-t" data-i18n="chart_leads_ttl">Leads Diários &amp; Investimento</div>
