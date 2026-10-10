@@ -7,10 +7,10 @@
   ],
   "moeda": "USD",
   "moeda_simbolo": "$",
-  "atualizado": "09/10/2026",
+  "atualizado": "10/10/2026",
   "kpis": {
-    "spend": 109.18,
-    "leads": 0,
-    "cpl": null
+    "spend": 256.18,
+    "leads": 23,
+    "cpl": 11.14
   }
 }
