@@ -56,6 +56,13 @@ IDIOMA_POR_PAIS = {
 # região). O card "Meta de Investimento" aparece ao lado do funil, com uma
 # barra por região + comparação "% do período decorrido" x "% já investido".
 # "pais" = 2º token do nome da campanha (ex: FTF-USA-... -> "USA").
+# ══ AÇÕES DENTRO DO LANÇAMENTO ════════════════════════
+# Mostra um card por ação (investimento, leads, CPL...) com filtro clicável.
+# A ação é lida do nome da campanha: bloco logo depois do código do lançamento.
+# Ex.: FTF-USA-BLACK26-AFILTER-CAPT-COLD-IMG -> AFILTER. Nenhuma lista a manter:
+# ação nova que subir com essa nomenclatura aparece sozinha.
+USAR_ACOES = True
+
 USAR_META_INVESTIMENTO = True
 META_INVEST_DATA_INICIO = "2026-10-08"
 META_INVEST_DATA_FIM    = "2026-11-20"
@@ -224,8 +231,11 @@ def criativo_do_anuncio(campaign, adset, ad, crit_img, crit_vid):
     if m:
         vd_num = int(m.group(1))
         mb = _BL_RE.search(campaign.upper()) or _BL_RE.search(str(adset).upper())
-        if not mb: return None, True
-        bl = mb.group(1)
+        # Campanha/conjunto sem "BL0X" no nome (ex.: FTF-BRA-CTPSEPT26-CAPT-COLD): se só
+        # existe um bloco com vídeo mapeado, é ele
+        if mb: bl = mb.group(1)
+        elif len(VD_PARA_VC) == 1: bl = next(iter(VD_PARA_VC))
+        else: return None, True
         vc_num = VD_PARA_VC.get(bl, {}).get(vd_num)
         if vc_num is None: return None, True
         return crit_vid.get((bl, vc_num)), True
@@ -771,6 +781,8 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, h
     html=replace_js_const(html,"DATA_GERACAO",     date.today().strftime("%Y-%m-%d"))
     # ← MUDANÇA: injeta a lista de códigos (antes era LANCAMENTO_COD string única)
     html=replace_js_const(html,"LANCAMENTO_CODS",  LANCAMENTO_CODS)
+    # termo de busca de cada lançamento: a "ação" é o bloco que vem logo depois dele no nome da campanha
+    html=replace_js_const(html,"ACAO_TERMOS",     dict(_LCT_TERMO_POR_LABEL) if USAR_ACOES else {})
 
     _cpl_bom   = globals().get("CPL_BOM",   5.0)
     _cpl_medio = globals().get("CPL_MEDIO", 10.0)
