@@ -547,6 +547,7 @@ const TRANSLATIONS = {
     acoes_leads:      'Leads',
     acoes_cpl:        'CPL',
     acoes_ctr:        'CTR',
+    acoes_cr:         'CR',
     acoes_conv:       'Tx. Conv.',
     acoes_camps:      'camp.',
     invest_ttl:       'Meta de Investimento',
@@ -689,6 +690,7 @@ const TRANSLATIONS = {
     acoes_leads:      'Leads',
     acoes_cpl:        'CPL',
     acoes_ctr:        'CTR',
+    acoes_cr:         'CR',
     acoes_conv:       'Tx. Conv.',
     acoes_camps:      'camp.',
     invest_ttl:       'Meta de Inversión',
@@ -1185,6 +1187,7 @@ function renderAcoes(){
     <div class="acoes-grid">`+lista.map(o=>{
       const cpl=o.ld>0?r2(o.spend/o.ld):null;
       const ctr=o.imp>0?r2(o.lc/o.imp*100):null;
+      const cr=o.lc>0?r2(o.pv/o.lc*100):null;  // connect rate: page views / cliques no link
       const cv=o.pv>0?r2(o.ld/o.pv*100):null;
       const on=acaoSel.has(o.n);
       const share=o.spend/totSp*100;
@@ -1194,6 +1197,7 @@ function renderAcoes(){
         <div class="acao-row"><span>${t('acoes_leads')}</span><b>${fN(o.ld)}</b></div>
         <div class="acao-row"><span>${t('acoes_cpl')}</span><b style="color:${cpl==null?'var(--muted)':cpl<=CPL_BOM?'#059669':cpl<=CPL_MEDIO?'#d97706':'#dc2626'}">${cpl!=null?MOEDA_SIMBOLO+cpl.toFixed(2):'—'}</b></div>
         <div class="acao-row"><span>${t('acoes_ctr')}</span><b>${fP(ctr)}</b></div>
+        <div class="acao-row"><span>${t('acoes_cr')}</span><b>${fP(cr)}</b></div>
         <div class="acao-row"><span>${t('acoes_conv')}</span><b>${fP(cv)}</b></div>
       </button>`;
     }).join('')+'</div>';
