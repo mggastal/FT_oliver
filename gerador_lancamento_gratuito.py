@@ -163,7 +163,7 @@ def _drive_id(link):
 # Codigo na planilha: BL01_IMG01CAPTFEED / BL01_VC1CAPTSTORY / BL01_VC4CAPTREEL...
 # Bloco "BL01" -> chave "01"; acao nomeada (ex: AFILTER) -> chave "AFILTER". Sufixo opcional
 # _EN/_ES/_PT indica o idioma (usado se a coluna IDIOMA estiver vazia).
-_CRIT_COD_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_(IMG|VC)(\d+)CAPT([A-Z]+)(?:_(EN|ES|PT))?$")
+_CRIT_COD_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_(IMG|VC|VD)(\d+)CAPT([A-Z]+)(?:_(EN|ES|PT))?$")
 _LANG_SUFIXO = {"EN":"ENG","ES":"ESP","PT":"PT"}
 
 def load_criativos():
@@ -204,7 +204,7 @@ def load_criativos():
 
 _AD_IMG_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_IMG(\d+)CAPT([A-Z]+)(?:_(EN|ES|PT))?$")
 _AD_VID_RE = re.compile(r"^VD(\d+)CAPT(\w+)$")
-_AD_VCN_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_VC(\d+)CAPT([A-Z]+)$")
+_AD_VCN_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_(?:VC|VD)(\d+)CAPT([A-Z]+)$")
 _BL_RE     = re.compile(r"BL(\d{2})\b")
 
 # Correspondência VD (nome do anúncio) -> VC (código na aba Criativos), confirmada pelo
