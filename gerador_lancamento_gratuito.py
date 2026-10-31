@@ -204,6 +204,7 @@ def load_criativos():
 
 _AD_IMG_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_IMG(\d+)CAPT([A-Z]+)(?:_(EN|ES|PT))?$")
 _AD_VID_RE = re.compile(r"^VD(\d+)CAPT(\w+)$")
+_AD_VCN_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_VC(\d+)CAPT([A-Z]+)$")
 _BL_RE     = re.compile(r"BL(\d{2})\b")
 
 # Correspondência VD (nome do anúncio) -> VC (código na aba Criativos), confirmada pelo
@@ -219,6 +220,13 @@ def criativo_do_anuncio(campaign, adset, ad, crit_img, crit_vid):
     partes = campaign.split("-")
     pais = partes[1] if len(partes) > 1 else None
     idioma = IDIOMA_POR_PAIS.get(pais)
+
+    # video com nome de acao (ex: LIVE21NOV_VC9CAPTFEED): sem idioma, chave (acao, numero VC)
+    mv = _AD_VCN_RE.match(ad_name)
+    if mv:
+        bl_num, acao, vc_s, _suf = mv.groups()
+        return crit_vid.get((bl_num or acao, int(vc_s))), True
+
     if not idioma: return None, False
 
     m = _AD_IMG_RE.match(ad_name)
