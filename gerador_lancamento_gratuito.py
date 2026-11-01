@@ -46,7 +46,7 @@ USAR_CRIATIVOS   = True
 
 # País (2º token do nome da campanha, ex: FTF-USA-...) -> IDIOMA da aba Criativos
 IDIOMA_POR_PAIS = {
-    "USA": "ENG", "EUR": "ENG", "IND": "ENG", "SOUTH_AFRICA": "ENG",
+    "USA": "ENG", "EUR": "ENG", "IND": "ENG", "ASIA": "ENG", "SOUTH_AFRICA": "ENG",
     "BRA": "PT",
     "LATAM": "ESP", "ESPANHA": "ESP", "ESP": "ESP",
 }
@@ -81,6 +81,7 @@ META_INVEST_REGIOES = [
     ("pais", "LATAM",        "ESP",                     4550, 1004),
     ("pais", "EUR",          "ENG (EUR)",               5550,  482),
     ("pais", "IND",          "ENG (IND)",               1800, 2025),
+    ("pais", "ASIA",         "ENG (Asia)",                 0, None),   # IND+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas; meta a definir
     ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      1800,  957),
     ("nome", "RETARGET",     "Retargeting",            14000, None),
     # YouTube (US$ 5k, 105 leads proj.) vem do Google Ads: entra aqui quando houver a extracao
@@ -310,7 +311,7 @@ def build_meta_investimento(df_meta):
     regioes = []
     for filtro, valor, label, meta, leads_proj in META_INVEST_REGIOES:
         if filtro == "pais":
-            mask = (pais_series == valor) & ~eh_extra
+            mask = pais_series.isin(valor.split("|")) & ~eh_extra
         else:
             mask = camp.str.contains(valor)
         gasto = round(float(subset.loc[mask, "spend"].sum()), 2)

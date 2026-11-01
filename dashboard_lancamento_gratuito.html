@@ -1064,7 +1064,7 @@ function renderInvestCard(){
     const pct=r.pct_atingido==null?0:r.pct_atingido;
     const over=pct>=100;
     return `<div class="invest-region">
-      <div class="invest-region-hd"><b>${r.label}</b><span>${fMoney(r.gasto)} / ${fMoney(r.meta)}</span></div>
+      <div class="invest-region-hd"><b>${r.label}</b><span>${fMoney(r.gasto)}${r.meta?' / '+fMoney(r.meta):''}</span></div>
       ${r.leads_proj!=null?`<div class="invest-region-hd"><span>Leads</span><span>${fN(r.leads||0)} / ${fN(r.leads_proj)}</span></div>`:''}
       <div class="invest-bar-bg"><div class="invest-bar-fill${over?' over':''}" style="width:${Math.min(pct,100)}%"></div></div>
     </div>`;
