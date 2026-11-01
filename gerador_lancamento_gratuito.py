@@ -80,8 +80,7 @@ META_INVEST_REGIOES = [
     ("pais", "BRA",          "PT",                      5850, 1317),
     ("pais", "LATAM",        "ESP",                     4550, 1004),
     ("pais", "EUR",          "ENG (EUR)",               5550,  482),
-    ("pais", "IND",          "ENG (IND)",               1800, 2025),
-    ("pais", "ASIA",         "ENG (Asia)",                 0, None),   # IND+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas; meta a definir
+    ("pais", "ASIA|IND",     "ENG (Asia)",              1800, 2025),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas (mesma verba da India); "IND" mantido p/ campanhas antigas
     ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      1800,  957),
     ("nome", "RETARGET",     "Retargeting",            14000, None),
     # YouTube (US$ 5k, 105 leads proj.) vem do Google Ads: entra aqui quando houver a extracao
