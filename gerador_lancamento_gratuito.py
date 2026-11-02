@@ -62,7 +62,7 @@ IDIOMA_POR_PAIS = {
 # Ex.: FTF-USA-BLACK26-AFILTER-CAPT-COLD-IMG -> AFILTER. Nenhuma lista a manter:
 # ação nova que subir com essa nomenclatura aparece sozinha.
 USAR_ACOES = True
-# Ação em destaque (vem primeiro, card grande + linha marcada na tabela). "" = sem destaque.
+# Ação em destaque (card grande no topo e primeira linha da tabela). "" = sem destaque.
 ACAO_PRINCIPAL = "LIVE21NOV"
 
 USAR_META_INVESTIMENTO = True

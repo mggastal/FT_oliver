@@ -115,9 +115,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .acao-main-kpis .acao-row{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:3px;margin-top:0;}
 .acao-main-kpis .acao-row b,.acao-main-kpis .acao-big{font-size:18px;}
 .acoes-sub{grid-column:1/-1;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2);margin-top:4px;}
-.areg tr.areg-pri td{background:color-mix(in srgb,var(--accent) 9%,var(--surface));border-bottom:2px solid var(--accent);}
-.areg tr.areg-pri td:first-child{box-shadow:inset 3px 0 0 var(--accent);padding-left:11px;font-size:12px;}
-.areg tr.areg-pri .c-cpl{font-size:14px;}
 .acao-item{position:relative;text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px 12px;transition:border-color .15s,background .15s,transform .15s;}
 .acao-item:hover{border-color:var(--accent);transform:translateY(-1px);}
 .acao-item.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surface));}
@@ -1265,7 +1262,7 @@ function renderAcaoReg(base){
       <div class="acoes-ttl">${t('areg_ttl')} <span class="acoes-hint" style="margin-left:6px">${t('areg_hint')}</span></div>
       <div class="areg-tabs">${tab('all',t('areg_total'))}${tab('quente',t('areg_quente'))}${tab('frio',t('areg_frio'))}</div>
     </div>`+(acoes.length?`<div class="areg-wrap"><table class="areg"><thead><tr><th></th>${regs.map(r=>`<th>${r.replace('_',' ')}</th>`).join('')}<th class="tc">${t('areg_total')}</th></tr></thead><tbody>
-      ${acoes.map(a=>`<tr class="${a===ACAO_PRINCIPAL?'areg-pri':acaoSel.has(a)?'sel':''}"><td>${a}</td>${regs.map(r=>cell(cel[a][r])).join('')}${cell(rT[a],'tc')}</tr>`).join('')}
+      ${acoes.map(a=>`<tr class="${acaoSel.has(a)?'sel':''}"><td>${a}</td>${regs.map(r=>cell(cel[a][r])).join('')}${cell(rT[a],'tc')}</tr>`).join('')}
       <tr class="tot"><td>${t('areg_total')}</td>${regs.map(r=>cell(cT[r])).join('')}${cell(tot,'tc')}</tr>
     </tbody></table></div>`:'<div class="cn" style="font-size:11px;padding:6px 0">—</div>');
 }
