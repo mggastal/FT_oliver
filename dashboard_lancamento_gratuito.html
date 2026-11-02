@@ -104,6 +104,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .areg .c-cpl{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
 .areg .c-sub{display:block;font-size:9px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;}
 .acoes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;}
+.acao-item.acao-pri{grid-column:1/-1;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface));padding:14px 16px;}
+.acao-item.acao-pri .acao-nm{font-size:14px;margin-bottom:10px;}
+.acao-item.acao-pri .acao-nm i{font-size:10px;}
+.acao-main-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:#fff;background:var(--accent);border-radius:4px;padding:2px 6px;margin-left:8px;vertical-align:1px;white-space:nowrap;}
+.acao-main-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px 14px;}
+.acao-main-kpis .acao-row{flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:3px;margin-top:0;}
+.acao-main-kpis .acao-row b,.acao-main-kpis .acao-big{font-size:18px;}
+.acoes-sub{grid-column:1/-1;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted2);margin-top:4px;}
+.areg tr.areg-pri td{background:color-mix(in srgb,var(--accent) 9%,var(--surface));border-bottom:2px solid var(--accent);}
+.areg tr.areg-pri td:first-child{box-shadow:inset 3px 0 0 var(--accent);padding-left:11px;font-size:12px;}
+.areg tr.areg-pri .c-cpl{font-size:14px;}
 .acao-item{position:relative;text-align:left;font:inherit;color:inherit;cursor:pointer;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px 12px;transition:border-color .15s,background .15s,transform .15s;}
 .acao-item:hover{border-color:var(--accent);transform:translateY(-1px);}
 .acao-item.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--surface));}
@@ -504,6 +515,7 @@ const DATA_GERACAO      = null;
 const META_BD           = null;
 const META_INVEST       = null;
 const ACAO_TERMOS       = {};
+const ACAO_PRINCIPAL    = "";
 const PESQUISA          = null;
 const HOTMART           = null;
 
@@ -538,6 +550,8 @@ const TRANSLATIONS = {
     acoes_ttl:        'Ações',
     acoes_hint:       'clique para filtrar todo o painel · pode marcar mais de uma',
     acoes_todas:      'Todas',
+    acoes_main:       'Evento principal',
+    acoes_lm:         'Lead magnets',
     areg_ttl:         'Ação × Região',
     areg_hint:        'CPL · leads · investimento por região',
     areg_total:       'Total',
@@ -681,6 +695,8 @@ const TRANSLATIONS = {
     acoes_ttl:        'Acciones',
     acoes_hint:       'haz clic para filtrar todo el panel · puedes marcar más de una',
     acoes_todas:      'Todas',
+    acoes_main:       'Evento principal',
+    acoes_lm:         'Lead magnets',
     areg_ttl:         'Acción × Región',
     areg_hint:        'CPL · leads · inversión por región',
     areg_total:       'Total',
@@ -1174,7 +1190,8 @@ function renderAcoes(){
     const o=ag[a]||(ag[a]={n:a,spend:0,imp:0,lc:0,pv:0,ld:0,camps:0});
     o.spend+=c.spend||0; o.imp+=c.imp||0; o.lc+=c.lc||0; o.pv+=c.pv||0; o.ld+=c.ld||0; o.camps++;
   });
-  const lista=Object.values(ag).sort((x,y)=>y.spend-x.spend);
+  // a ação principal (ACAO_PRINCIPAL, definida no gerador) vem sempre primeiro
+  const lista=Object.values(ag).sort((x,y)=>(y.n===ACAO_PRINCIPAL)-(x.n===ACAO_PRINCIPAL)||y.spend-x.spend);
   if(!lista.length){box.style.display='none';return;}
   const totSp=lista.reduce((s,o)=>s+o.spend,0)||1;
   const sel=acaoSel.size>0;
@@ -1184,21 +1201,25 @@ function renderAcoes(){
       <div class="acoes-ttl">${t('acoes_ttl')} · ${filtroAtivo} <span class="acoes-hint" style="margin-left:6px">${t('acoes_hint')}</span></div>
       <button class="acao-all${sel?'':' on'}" onclick="toggleAcao('__todas')">${t('acoes_todas')}</button>
     </div>
-    <div class="acoes-grid">`+lista.map(o=>{
+    <div class="acoes-grid">`+lista.map((o,i)=>{
       const cpl=o.ld>0?r2(o.spend/o.ld):null;
       const ctr=o.imp>0?r2(o.lc/o.imp*100):null;
       const cr=o.lc>0?r2(o.pv/o.lc*100):null;  // connect rate: page views / cliques no link
       const cv=o.pv>0?r2(o.ld/o.pv*100):null;
       const on=acaoSel.has(o.n);
       const share=o.spend/totSp*100;
-      return `<button class="acao-item${on?' on':''}${sel&&!on?' off':''}" onclick="toggleAcao('${o.n}')">
-        <div class="acao-nm"><span>${o.n}</span><i>${o.camps} ${t('acoes_camps')} · ${share.toFixed(0)}%</i></div>
+      const main=o.n===ACAO_PRINCIPAL;
+      const sub=lista[0].n===ACAO_PRINCIPAL&&i===1?`<div class="acoes-sub">${t('acoes_lm')}</div>`:'';
+      return `${sub}<button class="acao-item${main?' acao-pri':''}${on?' on':''}${sel&&!on?' off':''}" onclick="toggleAcao('${o.n}')">
+        <div class="acao-nm"><span>${o.n}${main?`<span class="acao-main-tag">${t('acoes_main')}</span>`:''}</span><i>${o.camps} ${t('acoes_camps')} · ${share.toFixed(0)}%</i></div>
+        ${main?'<div class="acao-main-kpis">':''}
         <div class="acao-row"><span>${t('acoes_invest')}</span><span class="acao-big">${mon(o.spend)}</span></div>
         <div class="acao-row"><span>${t('acoes_leads')}</span><b>${fN(o.ld)}</b></div>
         <div class="acao-row"><span>${t('acoes_cpl')}</span><b style="color:${cpl==null?'var(--muted)':cpl<=CPL_BOM?'#059669':cpl<=CPL_MEDIO?'#d97706':'#dc2626'}">${cpl!=null?MOEDA_SIMBOLO+cpl.toFixed(2):'—'}</b></div>
         <div class="acao-row"><span>${t('acoes_ctr')}</span><b>${fP(ctr)}</b></div>
         <div class="acao-row"><span>${t('acoes_cr')}</span><b>${fP(cr)}</b></div>
         <div class="acao-row"><span>${t('acoes_conv')}</span><b>${fP(cv)}</b></div>
+        ${main?'</div>':''}
       </button>`;
     }).join('')+'</div>';
 }
@@ -1222,14 +1243,14 @@ function renderAcaoReg(base){
     add((cel[a]||(cel[a]={}))[r]||(cel[a][r]={sp:0,ld:0}),c);
     add(rT[a]||(rT[a]={sp:0,ld:0}),c); add(cT[r]||(cT[r]={sp:0,ld:0}),c); add(tot,c);
   });
-  const acoes=Object.keys(rT).sort((x,y)=>ordem[y]-ordem[x]);
+  const acoes=Object.keys(rT).sort((x,y)=>(y===ACAO_PRINCIPAL)-(x===ACAO_PRINCIPAL)||ordem[y]-ordem[x]);
   if(!ACAO_TERMOS?.[filtroAtivo] || (!acoes.length && acaoRegTemp==='all')){box.style.display='none';return;}
   const regs=Object.keys(cT).sort((x,y)=>ordem[y]-ordem[x]);
   const mon=v=>MOEDA_SIMBOLO+fN(Math.round(v||0));
   const cell=(o,cls='')=>{
     if(!o||!o.sp&&!o.ld) return `<td class="${cls}"><span class="cn">—</span></td>`;
     const cpl=o.ld>0?r2(o.sp/o.ld):null;
-    return `<td class="${cls}"><span class="c-cpl ${cplCls(cpl)}">${cpl!=null?MOEDA_SIMBOLO+cpl.toFixed(2):'—'}</span><span class="c-sub">${fN(o.ld)} leads · ${mon(o.sp)}</span></td>`;
+    return `<td class="${cls}"><span class="c-cpl ${cplCls(cpl)}">${cpl!=null?MOEDA_SIMBOLO+cpl.toFixed(2):'—'}</span><span class="c-sub">${fN(o.ld)} leads</span><span class="c-sub">${mon(o.sp)}</span></td>`;
   };
   const tab=(v,lbl)=>`<button class="acao-all${acaoRegTemp===v?' on':''}" onclick="setAcaoRegTemp('${v}')">${lbl}</button>`;
   box.style.display='block';
@@ -1237,7 +1258,7 @@ function renderAcaoReg(base){
       <div class="acoes-ttl">${t('areg_ttl')} <span class="acoes-hint" style="margin-left:6px">${t('areg_hint')}</span></div>
       <div class="areg-tabs">${tab('all',t('areg_total'))}${tab('quente',t('areg_quente'))}${tab('frio',t('areg_frio'))}</div>
     </div>`+(acoes.length?`<div class="areg-wrap"><table class="areg"><thead><tr><th></th>${regs.map(r=>`<th>${r.replace('_',' ')}</th>`).join('')}<th class="tc">${t('areg_total')}</th></tr></thead><tbody>
-      ${acoes.map(a=>`<tr class="${acaoSel.has(a)?'sel':''}"><td>${a}</td>${regs.map(r=>cell(cel[a][r])).join('')}${cell(rT[a],'tc')}</tr>`).join('')}
+      ${acoes.map(a=>`<tr class="${a===ACAO_PRINCIPAL?'areg-pri':acaoSel.has(a)?'sel':''}"><td>${a}</td>${regs.map(r=>cell(cel[a][r])).join('')}${cell(rT[a],'tc')}</tr>`).join('')}
       <tr class="tot"><td>${t('areg_total')}</td>${regs.map(r=>cell(cT[r])).join('')}${cell(tot,'tc')}</tr>
     </tbody></table></div>`:'<div class="cn" style="font-size:11px;padding:6px 0">—</div>');
 }

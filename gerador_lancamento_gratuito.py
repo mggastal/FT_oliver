@@ -62,6 +62,8 @@ IDIOMA_POR_PAIS = {
 # Ex.: FTF-USA-BLACK26-AFILTER-CAPT-COLD-IMG -> AFILTER. Nenhuma lista a manter:
 # ação nova que subir com essa nomenclatura aparece sozinha.
 USAR_ACOES = True
+# Ação em destaque (vem primeiro, card grande + linha marcada na tabela). "" = sem destaque.
+ACAO_PRINCIPAL = "LIVE21NOV"
 
 USAR_META_INVESTIMENTO = True
 META_INVEST_DATA_INICIO = "2026-10-08"
@@ -791,6 +793,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, h
     html=replace_js_const(html,"LANCAMENTO_CODS",  LANCAMENTO_CODS)
     # termo de busca de cada lançamento: a "ação" é o bloco que vem logo depois dele no nome da campanha
     html=replace_js_const(html,"ACAO_TERMOS",     dict(_LCT_TERMO_POR_LABEL) if USAR_ACOES else {})
+    html=replace_js_const(html,"ACAO_PRINCIPAL",  ACAO_PRINCIPAL)
 
     _cpl_bom   = globals().get("CPL_BOM",   5.0)
     _cpl_medio = globals().get("CPL_MEDIO", 10.0)
