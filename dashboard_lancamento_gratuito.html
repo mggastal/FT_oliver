@@ -103,6 +103,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .areg .tc{border-left:1.5px solid var(--border);}
 .areg .c-cpl{font-family:'DM Mono',monospace;font-size:12px;font-weight:600;}
 .areg .c-sub{display:block;font-size:9px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;}
+.th-sort{cursor:pointer;user-select:none;white-space:nowrap;}
+.th-sort:hover{color:var(--accent);}
+.camp-fil{display:flex;gap:4px;margin:0 0 8px;padding:10px 10px 0;}
 .acoes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;}
 .acao-item.acao-pri{grid-column:1/-1;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface));padding:14px 16px;}
 .acao-item.acao-pri .acao-nm{font-size:14px;margin-bottom:10px;}
@@ -550,6 +553,8 @@ const TRANSLATIONS = {
     acoes_ttl:        'Ações',
     acoes_hint:       'clique para filtrar todo o painel · pode marcar mais de uma',
     acoes_todas:      'Todas',
+    camp_ativas:      'Ativas',
+    camp_pausadas:    'Pausadas',
     acoes_main:       'Evento principal',
     acoes_lm:         'Lead magnets',
     areg_ttl:         'Ação × Região',
@@ -695,6 +700,8 @@ const TRANSLATIONS = {
     acoes_ttl:        'Acciones',
     acoes_hint:       'haz clic para filtrar todo el panel · puedes marcar más de una',
     acoes_todas:      'Todas',
+    camp_ativas:      'Ativas',
+    camp_pausadas:    'Pausadas',
     acoes_main:       'Evento principal',
     acoes_lm:         'Lead magnets',
     areg_ttl:         'Acción × Región',
@@ -1472,9 +1479,34 @@ function getMBD(){
   return base?.['all']||META_BD['all']||null;
 }
 
+// Ordem da tabela de campanhas: ativas em cima por padrão; clique no cabeçalho reordena (de novo inverte).
+let campSort={k:'st',dir:-1}, campStatusFil='all';
+function sortCamps(k){
+  campSort=campSort.k===k?{k,dir:-campSort.dir}:{k,dir:k==='n'?1:-1};
+  buildTable('tCamps',getMT()?.camps,t('col_camp'));
+}
+function setCampStatusFil(v){campStatusFil=v;buildTable('tCamps',getMT()?.camps,t('col_camp'));}
 function buildTable(elId,data,mainCol){
   if(!data?.length){document.getElementById(elId).innerHTML=`<div style="padding:12px;color:var(--muted);font-size:12px">${t('sem_dados')}</div>`;return;}
   const mt=getMT();
+  // período por data não traz status: completa pelo status atual da campanha
+  const stMap={}; (META_TABLES?.[filtroAtivo]?.all?.camps||[]).forEach(c=>{stMap[c.n]=c.status;});
+  const isAt=r=>String(r.status||'').toUpperCase()==='ACTIVE';
+  const comSt=data.map(r=>r.status?r:{...r,status:stMap[r.n]||''});
+  const nAt=comSt.filter(isAt).length;
+  const chip=(v,l)=>`<button class="acao-all${campStatusFil===v?' on':''}" onclick="setCampStatusFil('${v}')">${l}</button>`;
+  const filtros=`<div class="camp-fil">${chip('all',`${t('todas')} (${comSt.length})`)}${chip('on',`${t('camp_ativas')} (${nAt})`)}${chip('off',`${t('camp_pausadas')} (${comSt.length-nAt})`)}</div>`;
+  const {k:sk,dir:sd}=campSort;
+  data=comSt.filter(r=>campStatusFil==='all'||(campStatusFil==='on')===isAt(r)).sort((a,b)=>{
+    if(sk==='st') return (isAt(a)-isAt(b))*sd;
+    if(sk==='n') return String(a.n).localeCompare(String(b.n))*sd;
+    const va=a[sk],vb=b[sk];
+    if(va==null) return vb==null?0:1;   // sem valor vai sempre para o fim
+    if(vb==null) return -1;
+    return (va-vb)*sd;
+  });
+  if(!data.length){document.getElementById(elId).innerHTML=filtros+`<div style="padding:12px;color:var(--muted);font-size:12px">${t('sem_dados')}</div>`;return;}
+  const seta=k=>sk===k?(sd>0?' ▲':' ▼'):'';
 
   const COLS=[
     {k:'spend',l:t('col_invest'),f:fR},
@@ -1486,7 +1518,7 @@ function buildTable(elId,data,mainCol){
     {k:'cpl',l:t('col_cpl'),f:fR,cls2:cplCls},
     {k:'cpm',l:t('col_cpm'),f:fR},
   ];
-  const head='<tr><th></th><th>'+mainCol+'</th>'+COLS.map(c=>'<th class="num">'+c.l+'</th>').join('')+'</tr>';
+  const head=`<tr><th class="th-sort" style="text-align:center" onclick="sortCamps('st')" title="${t('camp_ativas')} / ${t('camp_pausadas')}"><span class="status-dot active" style="margin:0"></span></th><th class="th-sort" onclick="sortCamps('n')">${mainCol}${seta('n')}</th>`+COLS.map(c=>`<th class="num th-sort" onclick="sortCamps('${c.k}')">${c.l}${seta(c.k)}</th>`).join('')+'</tr>';
 
   let rows='';
   data.forEach((r,i)=>{
@@ -1518,7 +1550,7 @@ function buildTable(elId,data,mainCol){
     <col style="width:27%">
     ${COLS.map(()=>'<col style="width:7%">').join('')}
   </colgroup>`;
-  document.getElementById(elId).innerHTML=`<table style="min-width:800px;table-layout:fixed;width:100%">
+  document.getElementById(elId).innerHTML=filtros+`<table style="min-width:800px;table-layout:fixed;width:100%">
     ${COLGROUP}
     <thead>${head}</thead><tbody>${rows}</tbody>
     <tfoot>
