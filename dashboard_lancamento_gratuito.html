@@ -943,6 +943,7 @@ function setLang(lang, btn){
   document.querySelectorAll('.lang-bar .pb').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   applyI18n();
+  ajustarPaddingContent();
   // Re-renderizar tudo para atualizar textos gerados por t() no JS
   renderMeta();
   renderDiario();
@@ -2428,7 +2429,6 @@ function cpChips(id,tipo,sel,ops){
 function renderCripub(){
   if(!CRIPUB||!CRIPUB.rows) return;
   const isCri=cpViewSel==='cri';
-  document.getElementById('page-cripub').style.setProperty('--cp-top',document.querySelector('.topbar').offsetHeight+'px');
   // Ações: principal primeiro, depois por investimento. Regiões: só as da ação escolhida.
   const gastoAcao={}, gastoReg={};
   CRIPUB.rows.forEach(r=>{
@@ -2545,7 +2545,6 @@ function cpToggleRow(i){
   renderCripub();
 }
 if(CRIPUB&&CRIPUB.rows) document.getElementById('sbCripub').style.display='';
-window.addEventListener('resize',()=>{if(document.getElementById('page-cripub').classList.contains('active')) renderCripub();});
 
 // ═══ NAVEGAÇÃO ═══
 function goPage(p,btn){
@@ -2553,6 +2552,7 @@ function goPage(p,btn){
   document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   if(btn) btn.classList.add('active');
+  window.scrollTo(0,0);
   const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),vendas:t('nav_vendas'),cripub:t('nav_cripub')};
   document.getElementById('pageTitle').textContent=titles[p]||p;
   if(p==='meta')     renderMeta();
@@ -2561,6 +2561,7 @@ function goPage(p,btn){
   if(p==='vendas')       renderVendas();
   if(p==='cripub')       renderCripub();
   applyI18n();
+  ajustarPaddingContent();
   setTimeout(()=>{Object.values({...CH,...PC}).forEach(c=>{try{c.resize();}catch(e){}});},80);
   if(window.innerWidth<=768) closeSb();
 }
@@ -2586,13 +2587,18 @@ function ajustarPaddingContent(){
   const ct=document.querySelector('.content');
   if(tb&&ct){
     const h=tb.getBoundingClientRect().height;
-    if(h>0) ct.style.paddingTop=(h+10)+'px';
+    if(h>0){
+      ct.style.paddingTop=(h+10)+'px';
+      document.documentElement.style.setProperty('--cp-top',h+'px');
+    }
   }
 }
 ajustarPaddingContent();
 document.addEventListener('DOMContentLoaded', ajustarPaddingContent);
 window.addEventListener('load', ajustarPaddingContent);
 window.addEventListener('resize', ajustarPaddingContent);
+// o topo muda de altura com o título da aba e o idioma, não só ao redimensionar
+if(window.ResizeObserver) new ResizeObserver(ajustarPaddingContent).observe(document.querySelector('.topbar'));
 
 // ═══ INIT ═══
 (function(){
