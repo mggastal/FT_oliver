@@ -299,7 +299,9 @@ details.desk-only{display:block!important;}
   .daily-side{flex-direction:row;gap:12px;border-right:none;border-bottom:1px solid var(--border);}
 }
 /* CRIATIVOS & PÚBLICOS */
-.cp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+/* filtros fixos logo abaixo do topo; #page-cripub usa overflow clip nos pais p/ o sticky funcionar */
+.cp-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px -22px 10px;padding:8px 22px;position:sticky;top:var(--cp-top,80px);z-index:90;background:var(--bg);}
+.main:has(#page-cripub.active),.main:has(#page-cripub.active) .content{overflow-x:clip;}
 .cp-toggle{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;box-shadow:var(--sh);}
 .cp-toggle button{border:none;background:transparent;padding:6px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;}
 .cp-toggle button.on{background:var(--accent);color:#fff;}
@@ -2426,6 +2428,7 @@ function cpChips(id,tipo,sel,ops){
 function renderCripub(){
   if(!CRIPUB||!CRIPUB.rows) return;
   const isCri=cpViewSel==='cri';
+  document.getElementById('page-cripub').style.setProperty('--cp-top',document.querySelector('.topbar').offsetHeight+'px');
   // Ações: principal primeiro, depois por investimento. Regiões: só as da ação escolhida.
   const gastoAcao={}, gastoReg={};
   CRIPUB.rows.forEach(r=>{
@@ -2542,6 +2545,7 @@ function cpToggleRow(i){
   renderCripub();
 }
 if(CRIPUB&&CRIPUB.rows) document.getElementById('sbCripub').style.display='';
+window.addEventListener('resize',()=>{if(document.getElementById('page-cripub').classList.contains('active')) renderCripub();});
 
 // ═══ NAVEGAÇÃO ═══
 function goPage(p,btn){
