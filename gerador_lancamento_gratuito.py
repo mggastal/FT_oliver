@@ -749,6 +749,47 @@ def pesquisa_process(df, total_leads):
     return {"total":len(df),"total_leads":int(total_leads),"graficos":graficos,"filtros":filtros,"rows":rows,"perguntas":PERGUNTAS}
 
 # ══ INJEÇÃO ════════════════════════════════════════════
+# ══ CRIATIVOS & PÚBLICOS (por ação) ═════════════════════
+def build_cripub(df, crit_img, crit_vid):
+    """Base diária no nível anúncio das campanhas do lançamento; o front agrega por
+    criativo/público respeitando período, ação, região e temperatura.
+      combos: [regiao, temp, publico, criativo, thumb, driveId, isVideo, status, acao]
+      rows:   [day_idx, combo_idx, spend, imp, link_clicks, page_view, leads]"""
+    if not USAR_ACOES: return None
+    sub=df[df["lct_codes"].apply(bool)]
+    if sub.empty: return None
+    _,_,ad_status=build_status_maps(sub)
+    thumb_url={}
+    if "thumb" in sub.columns:
+        for _,r in sub[sub["thumb"].notna()&(sub["thumb"].astype(str)!="nan")].iterrows():
+            thumb_url.setdefault((str(r["campaign"]),str(r["adset"]),str(r["ad"])),str(r["thumb"]))
+    agg=sub.groupby(["date","campaign","adset","ad"]).agg(
+        spend=("spend","sum"),impressions=("impressions","sum"),link_clicks=("link_clicks","sum"),
+        page_view=("page_view","sum"),leads=("leads","sum")).reset_index()
+    combos=[]; combo_idx={}; days=[]; day_idx={}; rows=[]
+    for _,r in agg.sort_values("date").iterrows():
+        sp=round(float(r["spend"]),2); imp=int(r["impressions"]); ld=int(r["leads"])
+        if sp==0 and imp==0 and ld==0: continue
+        k=(str(r["campaign"]),str(r["adset"]),str(r["ad"]))
+        if k not in combo_idx:
+            partes=k[0].split("-")
+            regiao=partes[1] if len(partes)>1 else ""
+            mt=re.search(r"-(HOT|COLD)(-|$)",k[0].upper())
+            # mesmo público em regiões diferentes: tira o prefixo da região e o sufixo -IMG
+            pub=re.sub(rf"^{re.escape(regiao)}-","",k[1].strip(),flags=re.I)
+            pub=re.sub(r"-IMG$","",pub,flags=re.I)
+            did,is_video=criativo_do_anuncio(k[0],k[1],k[2],crit_img or {},crit_vid or {})
+            termo=_LCT_TERMO_POR_LABEL[matched_codes(k[0])[0]]
+            ma=re.search(rf"{re.escape(termo.upper())}-([A-Z0-9_]+)",k[0].upper())
+            combo_idx[k]=len(combos)
+            combos.append([regiao,mt.group(1) if mt else "",pub,k[2].strip(),
+                           "" if did else thumb_url.get(k,""),did or "",bool(is_video),ad_status.get(k,""),
+                           ma.group(1) if ma else ""])
+        d=r["date"].strftime("%d/%m/%y")
+        if d not in day_idx: day_idx[d]=len(days); days.append(d)
+        rows.append([day_idx[d],combo_idx[k],sp,imp,int(r["link_clicks"]),int(r["page_view"]),ld])
+    return {"days":days,"combos":combos,"rows":rows}
+
 def replace_js_const(html, name, value):
     replacement = f"const {name} = {json.dumps(value, ensure_ascii=False)};"
     pattern_start = re.compile(rf"const {name}\s*=\s*")
@@ -777,7 +818,7 @@ def replace_js_const(html, name, value):
     html = html[:start] + replacement + html[end:]
     return html
 
-def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, hotmart, meta_inv=None):
+def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, hotmart, meta_inv=None, cripub=None):
     html=Path(tpl).read_text(encoding="utf-8")
     html=replace_js_const(html,"META_KPIS",       meta_k)
     html=replace_js_const(html,"META_DAILY",       meta_d)
@@ -794,6 +835,7 @@ def inject_all(tpl, meta_k, meta_d, meta_dc, meta_raw_c, meta_t, meta_bd, pes, h
     # termo de busca de cada lançamento: a "ação" é o bloco que vem logo depois dele no nome da campanha
     html=replace_js_const(html,"ACAO_TERMOS",     dict(_LCT_TERMO_POR_LABEL) if USAR_ACOES else {})
     html=replace_js_const(html,"ACAO_PRINCIPAL",  ACAO_PRINCIPAL)
+    html=replace_js_const(html,"CRIPUB",          cripub)
 
     _cpl_bom   = globals().get("CPL_BOM",   5.0)
     _cpl_medio = globals().get("CPL_MEDIO", 10.0)
@@ -845,6 +887,8 @@ def main():
     m_t=meta_tables(df_meta,img_dir,crit_img,crit_vid)
     m_bd=meta_breakdowns(df_meta)
     m_inv=build_meta_investimento(df_meta)
+    cripub=build_cripub(df_meta,crit_img,crit_vid)
+    if cripub: print(f"  ✓ Criativos & Públicos: {len(cripub['combos'])} veiculações | {len(cripub['rows'])} linhas")
     # ← MUDANÇA: total_leads usa o primeiro código (ou "all" se não houver nenhum) só para o log
     primeiro_grupo = LANCAMENTO_CODS[0] if LANCAMENTO_CODS else "all"
     total_leads=m_k[primeiro_grupo]["leads"]
@@ -869,7 +913,7 @@ def main():
     print("\n[HTML]")
     if not Path(TEMPLATE_FILE).exists():
         print(f"  ERRO: {TEMPLATE_FILE} não encontrado"); return
-    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,hotmart,m_inv)
+    html=inject_all(TEMPLATE_FILE,m_k,m_d,m_dc,m_raw,m_t,m_bd,pes,hotmart,m_inv,cripub=cripub)
     Path(OUTPUT_FILE).write_text(html,encoding="utf-8")
     print(f"  ✓ {OUTPUT_FILE} ({len(html)//1024}KB)")
 

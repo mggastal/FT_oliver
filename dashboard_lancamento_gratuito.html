@@ -298,6 +298,33 @@ details.desk-only{display:block!important;}
   .seg-card{overflow-x:auto!important;}
   .daily-side{flex-direction:row;gap:12px;border-right:none;border-bottom:1px solid var(--border);}
 }
+/* CRIATIVOS & PÚBLICOS */
+.cp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.cp-toggle{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;box-shadow:var(--sh);}
+.cp-toggle button{border:none;background:transparent;padding:6px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;}
+.cp-toggle button.on{background:var(--accent);color:#fff;}
+.cp-note{font-size:11px;color:var(--muted);margin-bottom:12px;}
+.cp-sub{font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;text-transform:none;letter-spacing:0;}
+.cp-best{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;}
+.cp-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:var(--sh);position:relative;}
+.cp-card.pub{padding-top:26px;}
+.cp-rank{position:absolute;top:6px;left:6px;z-index:2;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.cp-card .status-dot{position:absolute;top:8px;right:6px;width:10px;height:10px;z-index:2;margin:0;border:2px solid var(--surface);}
+.cp-name{font-size:12px;font-weight:700;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cp-th{width:44px;height:55px;border-radius:5px;overflow:hidden;background:var(--surface2);position:relative;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted2);}
+.cp-th img{width:100%;height:100%;object-fit:cover;}
+.cp-th .cv-play{font-size:10px;}
+#cpTbl th{cursor:pointer;user-select:none;white-space:nowrap;}
+#cpTbl tbody tr.cp-row{cursor:pointer;}
+#cpTbl tfoot td{font-size:inherit;padding:8px 10px;}
+#cpTbl>table>tfoot>tr>td.num{font-size:11px;font-family:'DM Mono',monospace;}
+#cpTbl td.cp-n{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:11px;}
+.cp-det>td{background:var(--surface2);}
+.cp-det-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;white-space:normal;}
+.cp-det table{width:100%;border-collapse:collapse;}
+.cp-det-ttl{font-size:10px;color:var(--muted2);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+@media(max-width:900px){.cp-det-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){.cp-best{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body>
@@ -313,6 +340,7 @@ details.desk-only{display:block!important;}
     <button class="sb-item active" onclick="goPage('meta',this)"><span class="ico">🎯</span><span data-i18n="nav_meta">Meta Ads</span></button>
     <button class="sb-item" onclick="goPage('diario',this)"><span class="ico">📈</span><span data-i18n="nav_diario">Métricas Diárias</span></button>
     <button class="sb-item" id="sbPesquisa" onclick="goPage('pesquisa',this)"><span class="ico">🔍</span><span data-i18n="nav_pesquisa">Pesquisa</span></button>
+    <button class="sb-item" id="sbCripub" style="display:none" onclick="goPage('cripub',this)"><span class="ico">🎬</span><span data-i18n="nav_cripub">Criativos &amp; Públicos</span></button>
     <div id="sbVendasGroup" style="display:none">
       <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1.5px;padding:12px 10px 4px">Vendas</div>
       <button class="sb-item" onclick="goPage('vendas',this)"><span class="ico">💰</span><span data-i18n="nav_vendas">Visão Geral</span></button>
@@ -421,6 +449,26 @@ details.desk-only{display:block!important;}
       <div id="dailyCharts"></div>
     </div>
 
+    <!-- CRIATIVOS & PÚBLICOS -->
+    <div class="page-section" id="page-cripub">
+      <div class="cp-bar">
+        <div class="cp-toggle" id="cpView"></div>
+        <div class="cp-toggle" id="cpAcao"></div>
+        <div class="cp-toggle" id="cpReg"></div>
+        <div class="cp-toggle" id="cpTemp"></div>
+      </div>
+      <div class="cp-note" id="cpNote"></div>
+      <div class="krow k4 mb14" id="cpKpis"></div>
+      <div class="section">
+        <div class="sec-hd"><span data-i18n="cp_melhores">Melhores CPL</span> <span class="cp-sub" id="cpBestSub"></span></div>
+        <div class="cp-best" id="cpBest"></div>
+      </div>
+      <div class="section">
+        <div class="sec-hd"><span id="cpTblTtl"></span> <span class="cp-sub" data-i18n="cp_tbl_sub">clique no cabeçalho p/ ordenar · clique na linha p/ abrir</span></div>
+        <div class="tc" id="cpTbl"></div>
+      </div>
+    </div>
+
     <!-- PESQUISA -->
     <div class="page-section" id="page-pesquisa">
       <div class="krow pes-kpis" id="pesKpis"></div>
@@ -516,6 +564,7 @@ const META_BD           = null;
 const META_INVEST       = null;
 const ACAO_TERMOS       = {};
 const ACAO_PRINCIPAL    = "";
+const CRIPUB            = null;
 const PESQUISA          = null;
 const HOTMART           = null;
 
@@ -651,6 +700,25 @@ const TRANSLATIONS = {
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
     // Vendas
+    nav_cripub:       'Criativos & Públicos',
+    cp_criativos:     'Criativos',
+    cp_publicos:      'Públicos',
+    cp_criativo:      'Criativo',
+    cp_publico:       'Público',
+    cp_todas:         'Todas',
+    cp_quente:        'Quente',
+    cp_frio:          'Frio',
+    cp_melhores:      'Melhores CPL',
+    cp_min_leads:     'mín. {n} leads',
+    cp_tbl_sub:       'clique no cabeçalho p/ ordenar · clique na linha p/ abrir',
+    cp_tbl_cri:       'Performance por Criativo',
+    cp_tbl_pub:       'Performance por Público',
+    cp_com_invest:    'com investimento no período',
+    cp_pct_inv:       '% Invest.',
+    cp_por_pub:       'Por público',
+    cp_por_cri:       'Por criativo',
+    cp_por_reg:       'Por região',
+    cp_nota_mix:      'Em "Todas" o CPL mistura regiões com custos muito diferentes. Para comparar criativos e públicos, filtre uma região.',
     nav_vendas:       'Vendas',
     nav_vendas_lista: 'Vendas Diárias',
     v_titulo_lista:   'Vendas Diárias',
@@ -788,6 +856,25 @@ const TRANSLATIONS = {
     seg_col_leads:    'Leads',
     seg_col_cpl:      'CPL',
     // Vendas
+    nav_cripub:       'Creativos & Públicos',
+    cp_criativos:     'Creativos',
+    cp_publicos:      'Públicos',
+    cp_criativo:      'Creativo',
+    cp_publico:       'Público',
+    cp_todas:         'Todas',
+    cp_quente:        'Caliente',
+    cp_frio:          'Frío',
+    cp_melhores:      'Mejores CPL',
+    cp_min_leads:     'mín. {n} leads',
+    cp_tbl_sub:       'clic en el encabezado p/ ordenar · clic en la fila p/ abrir',
+    cp_tbl_cri:       'Rendimiento por Creativo',
+    cp_tbl_pub:       'Rendimiento por Público',
+    cp_com_invest:    'con inversión en el período',
+    cp_pct_inv:       '% Inv.',
+    cp_por_pub:       'Por público',
+    cp_por_cri:       'Por creativo',
+    cp_por_reg:       'Por región',
+    cp_nota_mix:      'En "Todas" el CPL mezcla regiones con costos muy diferentes. Para comparar creativos y públicos, filtra una región.',
     nav_vendas:       'Ventas',
     nav_vendas_lista: 'Ventas Diarias',
     v_titulo_lista:   'Ventas Diarias',
@@ -836,7 +923,7 @@ function applyI18n(){
     el.textContent=t(key);
   });
   // Atualiza título da página e topbar
-  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),vendas:t('nav_vendas')};
+  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),vendas:t('nav_vendas'),cripub:t('nav_cripub')};
   const activeP=document.querySelector('.page-section.active')?.id?.replace('page-','');
   if(activeP && titles[activeP]) document.getElementById('pageTitle').textContent=titles[activeP];
   // Atualiza themeLabel baseado no tema atual
@@ -858,6 +945,7 @@ function setLang(lang, btn){
   renderMeta();
   renderDiario();
   if(PESQUISA) renderPesquisa();
+  renderCripub();
   if(HOTMART&&HOTMART!==false){ renderVendas(); }
   setTimeout(()=>{Object.values({...CH,...PC}).forEach(c=>{try{c.resize();}catch(e){}});},60);
 }
@@ -2267,9 +2355,193 @@ function rerenderActive(){
   if(p==='diario')       renderDiario();
   if(p==='pesquisa')     renderPesquisa();
   if(p==='vendas')       renderVendas();
+  if(p==='cripub')       renderCripub();
   applyI18n();
   setTimeout(()=>{Object.values({...CH,...PC}).forEach(c=>{try{c.resize();}catch(e){}});},60);
 }
+
+// ═══ CRIATIVOS & PÚBLICOS ═══
+let cpViewSel='cri', cpAcaoSel=ACAO_PRINCIPAL||'all', cpRegSel='all', cpTempSel='all', cpSort={k:'ld',dir:-1}, cpOpen=new Set(), cpList=[], _cpDays=null;
+const cpEsc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+function setCp(tipo,v){
+  if(tipo==='view'){cpViewSel=v;cpOpen=new Set();}
+  if(tipo==='acao') {cpAcaoSel=v;cpOpen=new Set();}
+  if(tipo==='reg') cpRegSel=v;
+  if(tipo==='temp') cpTempSel=v;
+  renderCripub();
+}
+function cpDiasOk(){
+  if(!_cpDays) _cpDays=CRIPUB.days.map(parseDayStr);
+  const hoje=getHoje();
+  const fim=new Date(hoje); if(periodDays===1) fim.setDate(fim.getDate()-1); fim.setHours(23,59,59,999);
+  const ini=new Date(fim); ini.setDate(ini.getDate()-(periodDays===1?0:periodDays-1)); ini.setHours(0,0,0,0);
+  return _cpDays.map(dt=>{
+    if(periodDays>0 && (dt<ini||dt>fim)) return false;
+    if(dateI&&dt<dateI) return false;
+    if(dateF&&dt>dateF) return false;
+    return true;
+  });
+}
+function cpNew(n){return {n,sp:0,imp:0,lc:0,pv:0,ld:0,cmb:{},active:false,sub:{},subR:{}};}
+function cpAdd(o,r){o.sp+=r[2];o.imp+=r[3];o.lc+=r[4];o.pv+=r[5];o.ld+=r[6];}
+function cpCalc(o){
+  o.sp=r2(o.sp);
+  o.ctr=o.imp>0?r2(o.lc/o.imp*100):null; o.cr=o.lc>0?r2(o.pv/o.lc*100):null;
+  o.tx_cv=o.pv>0?r2(o.ld/o.pv*100):null; o.cpl=o.ld>0?r2(o.sp/o.ld):null;
+  o.cpm=o.imp>0?r2(o.sp/o.imp*1000):null;
+  return o;
+}
+function cpMelhorCombo(o){
+  let best=null,bs=-1;
+  for(const [ci,sp] of Object.entries(o.cmb)){ const c=CRIPUB.combos[ci]; if((c[4]||c[5])&&sp>bs){bs=sp;best=c;} }
+  return best;
+}
+function cpThumb(o,w,h){
+  const c=cpMelhorCombo(o), st=w?` style="width:${w}px;height:${h}px"`:'';
+  if(!c) return `<div class="cp-th"${st}>🖼️</div>`;
+  const img=criativoImgHTML({driveId:c[5],isVideo:c[6],thumb:c[4]});
+  const click=c[5]?` data-n="${cpEsc(o.n)}" onclick="event.stopPropagation();abrirCriativo('${c[5]}',this.dataset.n)"`:'';
+  return `<div class="cp-th cv-wrap"${st}${click}>${img}</div>`;
+}
+function cpAgregar(){
+  const ok=cpDiasOk(), map={}, isCri=cpViewSel==='cri';
+  for(const r of CRIPUB.rows){
+    if(!ok[r[0]]) continue;
+    const c=CRIPUB.combos[r[1]];
+    if(cpAcaoSel!=='all'&&c[8]!==cpAcaoSel) continue;
+    if(cpRegSel!=='all'&&c[0]!==cpRegSel) continue;
+    if(cpTempSel!=='all'&&c[1]!==cpTempSel) continue;
+    const key=isCri?c[3]:c[2], subK=isCri?c[2]:c[3];
+    const o=map[key]||(map[key]=cpNew(key));
+    cpAdd(o,r); o.cmb[r[1]]=(o.cmb[r[1]]||0)+r[2];
+    if(String(c[7]).toUpperCase()==='ACTIVE') o.active=true;
+    const s=o.sub[subK]||(o.sub[subK]=cpNew(subK)); cpAdd(s,r); s.cmb[r[1]]=(s.cmb[r[1]]||0)+r[2];
+    const g=o.subR[c[0]]||(o.subR[c[0]]=cpNew(c[0])); cpAdd(g,r);
+  }
+  return Object.values(map).filter(o=>o.sp>0||o.ld>0).map(cpCalc);
+}
+function cpChips(id,tipo,sel,ops){
+  document.getElementById(id).innerHTML=ops.map(([v,l])=>`<button class="${sel===v?'on':''}" onclick="setCp('${tipo}','${v}')">${cpEsc(l)}</button>`).join('');
+}
+function renderCripub(){
+  if(!CRIPUB||!CRIPUB.rows) return;
+  const isCri=cpViewSel==='cri';
+  // Ações: principal primeiro, depois por investimento. Regiões: só as da ação escolhida.
+  const gastoAcao={}, gastoReg={};
+  CRIPUB.rows.forEach(r=>{
+    const c=CRIPUB.combos[r[1]];
+    gastoAcao[c[8]]=(gastoAcao[c[8]]||0)+r[2];
+    if(cpAcaoSel==='all'||c[8]===cpAcaoSel) gastoReg[c[0]]=(gastoReg[c[0]]||0)+r[2];
+  });
+  const acoes=Object.keys(gastoAcao).filter(Boolean).sort((a,b)=>(b===ACAO_PRINCIPAL)-(a===ACAO_PRINCIPAL)||gastoAcao[b]-gastoAcao[a]);
+  const regs=Object.keys(gastoReg).sort((a,b)=>gastoReg[b]-gastoReg[a]);
+  if(cpRegSel!=='all'&&!regs.includes(cpRegSel)) cpRegSel='all';
+  cpChips('cpAcao','acao',cpAcaoSel,[['all',t('cp_todas')],...acoes.map(a=>[a,a])]);
+  cpChips('cpView','view',cpViewSel,[['cri',t('cp_criativos')],['pub',t('cp_publicos')]]);
+  cpChips('cpReg','reg',cpRegSel,[['all',t('cp_todas')],...regs.map(g=>[g,g])]);
+  cpChips('cpTemp','temp',cpTempSel,[['all',t('cp_todas')],['HOT',t('cp_quente')],['COLD',t('cp_frio')]]);
+  document.getElementById('cpNote').textContent=cpRegSel==='all'?t('cp_nota_mix'):'';
+  const all=cpAgregar();
+
+  const tot=cpNew('tot'); all.forEach(o=>cpAdd(tot,[0,0,o.sp,o.imp,o.lc,o.pv,o.ld])); cpCalc(tot);
+  const cplCor=tot.cpl!=null?(tot.cpl<=CPL_BOM?'#059669':tot.cpl<=CPL_MEDIO?'#d97706':'#dc2626'):'var(--muted)';
+  document.getElementById('cpKpis').innerHTML=`
+    <div class="kpi" style="--kc:var(--accent)"><div class="kpi-lbl">${t(isCri?'cp_criativos':'cp_publicos')}</div><div class="kpi-val" style="color:var(--text)">${fN(all.length)}</div><div class="kpi-sub">${t('cp_com_invest')}</div></div>
+    <div class="kpi" style="--kc:#334155"><div class="kpi-lbl">${t('kpi_invest')}</div><div class="kpi-val" style="font-size:16px;color:var(--text)">${fR(tot.sp)}</div><div class="kpi-sub">Meta Ads</div></div>
+    <div class="kpi" style="--kc:#3b82f6"><div class="kpi-lbl">${t('kpi_leads')}</div><div class="kpi-val" style="color:var(--text)">${fN(tot.ld)}</div><div class="kpi-sub">${t('kpi_cap')}</div></div>
+    <div class="kpi" style="--kc:${cplCor}"><div class="kpi-lbl">${t('kpi_cpl')}</div><div class="kpi-val" style="color:${cplCor}">${fR(tot.cpl)}</div><div class="kpi-sub">${t('kpi_cpl_sub')}</div></div>`;
+
+  // Melhores CPL: mínimo de leads p/ não premiar amostra pequena
+  const minLd=Math.max(3,Math.ceil(tot.ld*0.01));
+  let cand=all.filter(o=>o.cpl!=null&&o.ld>=minLd);
+  if(!cand.length) cand=all.filter(o=>o.cpl!=null);
+  cand=[...cand].sort((a,b)=>a.cpl-b.cpl).slice(0,6);
+  document.getElementById('cpBestSub').textContent='· '+t('cp_min_leads').replace('{n}',minLd);
+  document.getElementById('cpBest').innerHTML=cand.length?cand.map((o,i)=>{
+    const c=cpMelhorCombo(o);
+    const img=isCri&&c?`<div class="ad-img cv-wrap"${c[5]?` data-n="${cpEsc(o.n)}" onclick="abrirCriativo('${c[5]}',this.dataset.n)" style="cursor:pointer"`:''}>${criativoImgHTML({driveId:c[5],isVideo:c[6],thumb:c[4]})}</div>`:'';
+    return `<div class="cp-card${isCri?'':' pub'}"><span class="cp-rank">#${i+1}</span>
+      ${o.active?'<span class="status-dot active" data-tip="ACTIVE"></span>':''}${img}
+      <div class="ad-info"><div class="cp-name" title="${cpEsc(o.n)}">${cpEsc(o.n)}</div>
+        <div class="ad-stats">
+          <div><div class="as-l">${t('ad_cpl')}</div><div class="as-v ${cplCls(o.cpl)}">${fR(o.cpl)}</div></div>
+          <div><div class="as-l">${t('ad_leads')}</div><div class="as-v">${fN(o.ld)}</div></div>
+          <div><div class="as-l">${t('ad_ctr')}</div><div class="as-v">${fP(o.ctr)}</div></div>
+          <div><div class="as-l">${t('ad_invest')}</div><div class="as-v">${fR(o.sp)}</div></div>
+        </div></div></div>`;
+  }).join(''):`<div style="color:var(--muted);font-size:12px;padding:8px">${t('sem_dados')}</div>`;
+
+  document.getElementById('cpTblTtl').textContent=t(isCri?'cp_tbl_cri':'cp_tbl_pub');
+  all.forEach(o=>o.pct=tot.sp>0?r2(o.sp/tot.sp*100):null);
+  const {k,dir}=cpSort;
+  cpList=all.sort((a,b)=>{
+    if(k==='n') return dir*a.n.localeCompare(b.n,'pt',{numeric:true});
+    const va=a[k],vb=b[k];
+    if(va==null&&vb==null) return 0; if(va==null) return 1; if(vb==null) return -1;
+    return dir*(va-vb);
+  });
+  const COLS=[
+    {k:'sp',l:t('col_invest'),f:fR},
+    {k:'pct',l:t('cp_pct_inv'),f:fP,cls:'cn'},
+    {k:'imp',l:t('col_impr'),f:fN,cls:'cn'},
+    {k:'lc',l:t('col_cliques'),f:fN,cls:'cn'},
+    {k:'pv',l:'PV',f:fN,cls:'cn'},
+    {k:'ld',l:t('col_leads'),f:fN,b:1},
+    {k:'ctr',l:'CTR',f:fP,c2:v=>funnelCls(v,CTR_BOM,CTR_MEDIO).cls},
+    {k:'cr',l:'CR',f:fP,c2:v=>funnelCls(v,CR_BOM,CR_MEDIO).cls},
+    {k:'tx_cv',l:'Tx.Conv',f:fP,c2:v=>funnelCls(v,TX_CONV_BOM,TX_CONV_MEDIO).cls},
+    {k:'cpl',l:t('col_cpl'),f:fR,c2:cplCls},
+    {k:'cpm',l:t('col_cpm'),f:fR,c2:cpmCls},
+  ];
+  const seta=c=>cpSort.k===c?(cpSort.dir<0?' ▼':' ▲'):'';
+  const th=(c,l,num=true)=>`<th class="${num?'num':''}" onclick="cpSortBy('${c}')">${l}${seta(c)}</th>`;
+  const head=`<tr><th style="width:${isCri?56:8}px"></th>${th('n',t(isCri?'cp_criativo':'cp_publico'),false)}${COLS.map(c=>th(c.k,c.l)).join('')}</tr>`;
+  const rows=cpList.map((o,i)=>{
+    const open=cpOpen.has(o.n), seta2=`<span style="color:var(--muted2);font-size:10px">${open?'▼':'▶'}</span>`;
+    return `<tr class="cp-row" onclick="cpToggleRow(${i})">
+      <td>${isCri?cpThumb(o):seta2}</td>
+      <td class="cp-n" title="${cpEsc(o.n)}">${isCri?seta2+' ':''}${statusDot(o.active?'ACTIVE':'PAUSED')}${cpEsc(o.n)}</td>
+      ${COLS.map(c=>`<td class="num ${c.cls||''} ${c.c2?c.c2(o[c.k]):''}"${c.b?' style="font-weight:700"':''}>${c.f(o[c.k])}</td>`).join('')}
+    </tr>${open?`<tr class="cp-det"><td colspan="${COLS.length+2}" style="padding:8px 12px 12px">${cpDetalhe(o,isCri)}</td></tr>`:''}`;
+  }).join('');
+  const foot=`<tr style="background:var(--surface2);font-weight:700;border-top:2px solid var(--border)"><td></td>
+    <td style="font-size:10px;padding:8px 10px;color:var(--muted2);text-transform:uppercase">${t('col_total')}</td>
+    <td class="num">${fR(tot.sp)}</td><td class="num cn">100%</td>
+    <td class="num cn">${fN(tot.imp)}</td><td class="num cn">${fN(tot.lc)}</td><td class="num cn">${fN(tot.pv)}</td>
+    <td class="num">${fN(tot.ld)}</td>
+    <td class="num ${funnelCls(tot.ctr,CTR_BOM,CTR_MEDIO).cls}">${fP(tot.ctr)}</td>
+    <td class="num ${funnelCls(tot.cr,CR_BOM,CR_MEDIO).cls}">${fP(tot.cr)}</td>
+    <td class="num ${funnelCls(tot.tx_cv,TX_CONV_BOM,TX_CONV_MEDIO).cls}">${fP(tot.tx_cv)}</td>
+    <td class="num ${cplCls(tot.cpl)}">${fR(tot.cpl)}</td><td class="num">${fR(tot.cpm)}</td></tr>`;
+  document.getElementById('cpTbl').innerHTML=cpList.length
+    ?`<table><thead>${head}</thead><tbody>${rows}</tbody><tfoot>${foot}</tfoot></table>`
+    :`<div style="padding:12px;color:var(--muted);font-size:12px">${t('sem_dados')}</div>`;
+}
+function cpDetalhe(o,isCri){
+  function mini(ttl,obj,comThumb){
+    const arr=Object.values(obj).map(cpCalc).filter(s=>s.sp>0||s.ld>0).sort((a,b)=>b.ld-a.ld||b.sp-a.sp);
+    return `<div style="min-width:0;overflow-x:auto"><div class="cp-det-ttl">${ttl}</div>
+      <table><thead><tr><th></th><th class="num">${t('col_invest')}</th><th class="num">${t('col_leads')}</th><th class="num">CTR</th><th class="num">CR</th><th class="num">Tx.Conv</th><th class="num">${t('col_cpl')}</th></tr></thead><tbody>${
+      arr.map(s=>`<tr><td title="${cpEsc(s.n)}" style="font-size:11px;font-weight:600">${comThumb?`<span style="display:inline-flex;vertical-align:middle;margin-right:6px">${cpThumb(s,28,35)}</span>`:''}${cpEsc(s.n)}</td>
+        <td class="num">${fR(s.sp)}</td><td class="num" style="font-weight:700">${fN(s.ld)}</td>
+        <td class="num ${funnelCls(s.ctr,CTR_BOM,CTR_MEDIO).cls}">${fP(s.ctr)}</td>
+        <td class="num ${funnelCls(s.cr,CR_BOM,CR_MEDIO).cls}">${fP(s.cr)}</td>
+        <td class="num ${funnelCls(s.tx_cv,TX_CONV_BOM,TX_CONV_MEDIO).cls}">${fP(s.tx_cv)}</td>
+        <td class="num ${cplCls(s.cpl)}">${fR(s.cpl)}</td></tr>`).join('')}</tbody></table></div>`;
+  }
+  return `<div class="cp-det-grid">${mini(t(isCri?'cp_por_pub':'cp_por_cri'),o.sub,!isCri)}${mini(t('cp_por_reg'),o.subR,false)}</div>`;
+}
+function cpSortBy(k){
+  if(cpSort.k===k) cpSort.dir*=-1;
+  else cpSort={k,dir:(k==='cpl'||k==='cpm'||k==='n')?1:-1};
+  renderCripub();
+}
+function cpToggleRow(i){
+  const n=cpList[i]?.n; if(n==null) return;
+  cpOpen.has(n)?cpOpen.delete(n):cpOpen.add(n);
+  renderCripub();
+}
+if(CRIPUB&&CRIPUB.rows) document.getElementById('sbCripub').style.display='';
 
 // ═══ NAVEGAÇÃO ═══
 function goPage(p,btn){
@@ -2277,12 +2549,13 @@ function goPage(p,btn){
   document.querySelectorAll('.sb-item').forEach(e=>e.classList.remove('active'));
   document.getElementById('page-'+p).classList.add('active');
   if(btn) btn.classList.add('active');
-  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),vendas:t('nav_vendas')};
+  const titles={meta:t('nav_meta'),diario:t('nav_diario'),pesquisa:t('nav_pesquisa'),vendas:t('nav_vendas'),cripub:t('nav_cripub')};
   document.getElementById('pageTitle').textContent=titles[p]||p;
   if(p==='meta')     renderMeta();
   if(p==='diario')   renderDiario();
   if(p==='pesquisa')    renderPesquisa();
   if(p==='vendas')       renderVendas();
+  if(p==='cripub')       renderCripub();
   applyI18n();
   setTimeout(()=>{Object.values({...CH,...PC}).forEach(c=>{try{c.resize();}catch(e){}});},80);
   if(window.innerWidth<=768) closeSb();
