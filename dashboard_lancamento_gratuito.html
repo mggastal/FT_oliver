@@ -105,7 +105,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .areg .c-sub{display:block;font-size:9px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;}
 .th-sort{cursor:pointer;user-select:none;white-space:nowrap;}
 .th-sort:hover{color:var(--accent);}
-.camp-fil{display:flex;gap:4px;margin:0 0 8px;padding:10px 10px 0;}
+.camp-fil{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 8px;padding:10px 10px 0;}
+.camp-fil.camp-fil-pais{margin-bottom:0;}
 .acoes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;}
 .acao-item.acao-pri{grid-column:1/-1;border:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface));padding:14px 16px;}
 .acao-item.acao-pri .acao-nm{font-size:14px;margin-bottom:10px;}
@@ -603,6 +604,7 @@ const TRANSLATIONS = {
     acoes_todas:      'Todas',
     camp_ativas:      'Ativas',
     camp_pausadas:    'Pausadas',
+    camp_paises_todos:'Todos os países',
     acoes_main:       'Evento principal',
     acoes_lm:         'Lead magnets',
     areg_ttl:         'Ação × Região',
@@ -769,6 +771,7 @@ const TRANSLATIONS = {
     acoes_todas:      'Todas',
     camp_ativas:      'Ativas',
     camp_pausadas:    'Pausadas',
+    camp_paises_todos:'Todos los países',
     acoes_main:       'Evento principal',
     acoes_lm:         'Lead magnets',
     areg_ttl:         'Acción × Región',
@@ -1568,22 +1571,31 @@ function getMBD(){
 }
 
 // Ordem da tabela de campanhas: ativas em cima por padrão; clique no cabeçalho reordena (de novo inverte).
-let campSort={k:'st',dir:-1}, campStatusFil='all';
+let campSort={k:'st',dir:-1}, campStatusFil='all', campPaisFil='all';
 function sortCamps(k){
   campSort=campSort.k===k?{k,dir:-campSort.dir}:{k,dir:k==='n'?1:-1};
   buildTable('tCamps',getMT()?.camps,t('col_camp'));
 }
 function setCampStatusFil(v){campStatusFil=v;buildTable('tCamps',getMT()?.camps,t('col_camp'));}
+function setCampPaisFil(v){campPaisFil=v;buildTable('tCamps',getMT()?.camps,t('col_camp'));}
 function buildTable(elId,data,mainCol){
   if(!data?.length){document.getElementById(elId).innerHTML=`<div style="padding:12px;color:var(--muted);font-size:12px">${t('sem_dados')}</div>`;return;}
   const mt=getMT();
   // período por data não traz status: completa pelo status atual da campanha
   const stMap={}; (META_TABLES?.[filtroAtivo]?.all?.camps||[]).forEach(c=>{stMap[c.n]=c.status;});
   const isAt=r=>String(r.status||'').toUpperCase()==='ACTIVE';
-  const comSt=data.map(r=>r.status?r:{...r,status:stMap[r.n]||''});
+  const todas=data.map(r=>r.status?r:{...r,status:stMap[r.n]||''});
+  // país = 2º bloco do nome da campanha (FTF-USA-...); chips só na tabela de campanhas, ordenados por investimento
+  const paisDe=r=>String(r.n||'').split('-')[1]?.toUpperCase()||'';
+  const paisSp={}; todas.forEach(r=>{const p=paisDe(r); if(p) paisSp[p]=(paisSp[p]||0)+(+r.spend||0);});
+  const paises=elId==='tCamps'?Object.keys(paisSp).sort((x,y)=>paisSp[y]-paisSp[x]):[];
+  if(campPaisFil!=='all' && !paises.includes(campPaisFil)) campPaisFil='all';
+  const comSt=campPaisFil==='all'?todas:todas.filter(r=>paisDe(r)===campPaisFil);
   const nAt=comSt.filter(isAt).length;
   const chip=(v,l)=>`<button class="acao-all${campStatusFil===v?' on':''}" onclick="setCampStatusFil('${v}')">${l}</button>`;
-  const filtros=`<div class="camp-fil">${chip('all',`${t('todas')} (${comSt.length})`)}${chip('on',`${t('camp_ativas')} (${nAt})`)}${chip('off',`${t('camp_pausadas')} (${comSt.length-nAt})`)}</div>`;
+  const chipP=(v,l)=>`<button class="acao-all${campPaisFil===v?' on':''}" onclick="setCampPaisFil('${v}')">${l}</button>`;
+  const filtrosPais=paises.length>1?`<div class="camp-fil camp-fil-pais">${chipP('all',`${t('camp_paises_todos')} (${todas.length})`)}${paises.map(p=>chipP(p,`${p} (${todas.filter(r=>paisDe(r)===p).length})`)).join('')}</div>`:'';
+  const filtros=filtrosPais+`<div class="camp-fil">${chip('all',`${t('todas')} (${comSt.length})`)}${chip('on',`${t('camp_ativas')} (${nAt})`)}${chip('off',`${t('camp_pausadas')} (${comSt.length-nAt})`)}</div>`;
   const {k:sk,dir:sd}=campSort;
   data=comSt.filter(r=>campStatusFil==='all'||(campStatusFil==='on')===isAt(r)).sort((a,b)=>{
     if(sk==='st') return (isAt(a)-isAt(b))*sd;
