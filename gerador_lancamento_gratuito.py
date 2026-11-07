@@ -78,14 +78,14 @@ META_INVEST_MARCOS = [
 ]
 META_INVEST_REGIOES = [
     # (filtro, valor,          label_exibido,          meta_em_dolar, leads_projetados)
-    # Meta = captacao + parte do retargeting (US$ 14k rateados proporcionalmente: x1,25). Remarketing
+    # Meta = captacao + parte do retargeting (US$ 14k rateados: USA fica com ~US$ 45k e o resto proporcional a captacao). Remarketing
     # (RETARGET/RMKT) conta no pais da campanha. leads_projetados = so captacao (inalterado).
-    ("pais", "USA",          "ENG (USA)",              45562.5, 3553),
-    ("pais", "BRA",          "PT",                      7312.5, 1317),
-    ("pais", "LATAM",        "ESP",                     5687.5, 1004),
-    ("pais", "EUR",          "ENG (EUR)",               6937.5,  482),
-    ("pais", "ASIA|IND",     "ENG (Asia)",              2250, 2025),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas (mesma verba da India); "IND" mantido p/ campanhas antigas
-    ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      2250,  957),
+    ("pais", "USA",          "ENG (USA)",              45000, 3553),
+    ("pais", "BRA",          "PT",                       7500, 1317),
+    ("pais", "LATAM",        "ESP",                      5800, 1004),
+    ("pais", "EUR",          "ENG (EUR)",                7100,  482),
+    ("pais", "ASIA|IND",     "ENG (Asia)",              2300, 2025),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas (mesma verba da India); "IND" mantido p/ campanhas antigas
+    ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      2300,  957),
     # YouTube (US$ 5k, 105 leads proj.) vem do Google Ads: entra aqui quando houver a extracao
 ]
 
