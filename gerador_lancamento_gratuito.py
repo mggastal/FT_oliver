@@ -84,7 +84,7 @@ META_INVEST_REGIOES = [
     ("pais", "EUR",          "ENG (EUR)",               5550,  482),
     ("pais", "ASIA|IND",     "ENG (Asia)",              1800, 2025),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas (mesma verba da India); "IND" mantido p/ campanhas antigas
     ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      1800,  957),
-    ("nome", "RETARGET",     "Retargeting",            14000, None),
+    ("nome", "RETARGET|RMKT", "Retargeting",           14000, None),   # RMKTCAPT (remarketing) entra aqui
     # YouTube (US$ 5k, 105 leads proj.) vem do Google Ads: entra aqui quando houver a extracao
 ]
 
@@ -307,7 +307,7 @@ def build_meta_investimento(df_meta):
     subset = subset_for_group(df_meta, grupo)
     camp = subset["campaign"].astype(str).str.upper()
     pais_series = camp.str.split("-").str[1]
-    eh_extra = camp.str.contains("RETARGET") | camp.str.contains("YOUTUBE")
+    eh_extra = camp.str.contains("RETARGET|RMKT|YOUTUBE")
 
     regioes = []
     for filtro, valor, label, meta, leads_proj in META_INVEST_REGIOES:
