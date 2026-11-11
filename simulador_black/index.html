@@ -189,8 +189,8 @@ const REG=[
 ];
 const GRP=[{k:'ENG',n:'ENG',meta:18700,org:3603},{k:'ESP',n:'ESP',meta:2000,org:587},{k:'PT',n:'PT',meta:2000,org:123}];
 const DEF={budget:75000,spent:35669.78,days:10,adj:15,rmk:0,rmkUsed:0};
-const KEY='simBlack26v7';
-const PROP_OUT=[null,2030,1030,0,1500,1275];
+const KEY='simBlack26v8';
+const PROP_OUT=[null,1030,1030,0,2000,1775];
 const PROP=()=>{const o=PROP_OUT.slice(1).reduce((a,b)=>a+b,0);return [Math.max(0,remaining()-o),...PROP_OUT.slice(1)]};
 const $=id=>document.getElementById(id);
 const fmtI=n=>Math.round(n).toLocaleString('pt-BR');
