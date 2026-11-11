@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Simulador de Leads BLACK26</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: uma coluna de ferramenta; premissas no topo, tabela por região, resultado com a conta dos orgânicos */
+:root{
+  --bg:#f5f6f8; --surface:#ffffff; --fg:#17202b; --muted:#5f6b7a; --line:#dde2e8;
+  --accent:#1f5fd1; --accent-soft:#e6eefc; --good:#147a4b; --good-soft:#e3f4ea; --bad:#c62f2f; --warn:#a4580c; --warn-soft:#fbefe1;
+  --sans:"DM Sans",system-ui,-apple-system,Segoe UI,sans-serif; --mono:"DM Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161d; --surface:#18202a; --fg:#e7ecf2; --muted:#93a0b0; --line:#2a3542;
+  --accent:#6f9cf0; --accent-soft:#1c2b44; --good:#5cc895; --good-soft:#15302a; --bad:#f07070; --warn:#f0a95c; --warn-soft:#3a2a17; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161d; --surface:#18202a; --fg:#e7ecf2; --muted:#93a0b0; --line:#2a3542;
+  --accent:#6f9cf0; --accent-soft:#1c2b44; --good:#5cc895; --good-soft:#15302a; --bad:#f07070; --warn:#f0a95c; --warn-soft:#3a2a17; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:14px;line-height:1.45;
+  padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1360px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+.wrap>*{min-width:0}
+h1{font-size:24px;font-weight:700;margin:0;text-wrap:balance}
+h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 12px}
+.sub{color:var(--muted);margin:4px 0 0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.bgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:14px;row-gap:14px}
+.bgrid label{display:grid;grid-template-rows:subgrid;grid-row:span 3;gap:6px}
+.bgrid label>span:first-child{align-self:end}
+@media (max-width:900px){.bgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:480px){.bgrid{grid-template-columns:minmax(0,1fr)}}
+label{display:grid;gap:5px;font-size:12px;color:var(--muted);font-weight:500}
+input{font:500 15px var(--mono);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%;min-width:0;font-variant-numeric:tabular-nums}
+input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.hint{font-size:11px;color:var(--muted);font-weight:400}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:640px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+th:first-child,td:first-child{text-align:left}
+td input{width:100px;padding:6px 8px;font-size:14px;text-align:right}
+tfoot td{font-weight:700;border-bottom:none}
+.num{font-family:var(--mono)}
+.row-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+button{font:600 12px var(--sans);border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px}
+.pill.ok{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:4px}
+.kpi .l{font-size:12px;color:var(--muted);font-weight:500}
+.kpi .v{font:500 24px var(--mono);font-variant-numeric:tabular-nums}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.dcard{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:3px}
+.dcard .l{font-size:12px;color:var(--muted);font-weight:500}
+.dcard .v{font:500 20px var(--mono);font-variant-numeric:tabular-nums}
+.dcard .d{font-size:11px;color:var(--muted)}
+.dcard.tot{background:var(--accent-soft);border-color:var(--accent)}
+.dcard.tot .v{color:var(--accent)}
+.kpi .d{font-size:12px;color:var(--muted)}
+.kpi.hero{border-color:var(--accent);background:var(--accent-soft)}
+.kpi.hero .v{color:var(--accent);font-size:30px}
+.eq{display:grid;gap:6px;font-variant-numeric:tabular-nums;max-width:680px}
+.eq div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding-bottom:5px}
+.eq div:last-child{border-bottom:none;font-weight:700;padding-top:4px}
+.eq span:last-child{font-family:var(--mono);white-space:nowrap}
+.warnline{color:var(--warn);font-size:12px}
+.slider{display:flex;gap:10px;align-items:center}
+.slider input[type=range]{padding:0;border:none;background:none}
+.range{position:relative;padding-block:6px}
+.range::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--fg);opacity:.55;border-radius:1px;pointer-events:none}
+.range input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;background:var(--line);cursor:pointer;display:block}
+.range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--surface);border:2px solid var(--thumb,var(--fg));box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.range input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--surface);border:2px solid var(--thumb,var(--fg))}
+.scale{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--muted);margin-top:4px}
+.scale span:nth-child(2){color:var(--fg)}
+.slider output{font:500 14px var(--mono);min-width:56px;text-align:right}
+footer{font-size:12px;color:var(--muted);display:flex;gap:12px;align-items:flex-end;justify-content:space-between}
+#secret{border:none;background:none;padding:2px 4px;color:var(--muted);opacity:.25;font:500 12px var(--mono);border-radius:4px;flex:none}
+#secret:hover,#secret:focus-visible{opacity:.8;color:var(--muted)}
+#dailyPanel{border-style:dashed}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.lang{display:flex;gap:6px}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div style="min-width:0;flex:1"><h1>Simulador de Leads BLACK26</h1>
+    <p class="sub">Oliver Velez · projeção da captação paga por região e quantos leads orgânicos faltam para a meta de cada idioma. Todos os campos são editáveis.</p></div>
+    <div class="lang"><button type="button" id="lPT" class="on">PT</button><button type="button" id="lES">ES</button></div>
+  </header>
+
+  <section class="panel">
+    <h2>Orçamento e prazo</h2>
+    <div class="bgrid">
+      <label for="budget"><span>Orçamento total (US$)</span><input id="budget" inputmode="decimal"><span class="hint">Meta Ads</span></label>
+      <label for="spent"><span>Já investido em captação (US$)</span><input id="spent" inputmode="decimal"><span class="hint">Sem remarketing · dash em 11/11, 08h56</span></label>
+      <label for="days"><span>Dias restantes de captação</span><input id="days" inputmode="numeric"><span class="hint">Até a live de 21/11</span></label>
+      <label for="rmk"><span>Total de investimento destinado para remarketing (até 30/nov)</span><input id="rmk" inputmode="decimal"><span class="hint">Separado da captação</span></label>
+      <label for="rmkUsed"><span>Remarketing já usado (US$)</span><input id="rmkUsed" inputmode="decimal"><span class="hint"></span></label>
+    </div>
+    <div class="eq" id="eqBud" style="margin-top:14px"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Captação paga por região</h2>
+    <div class="row-actions">
+      <span class="hint">CPL base:</span>
+      <button type="button" id="cpl3" class="on">Últimos 3 dias (08 a 10/11)</button>
+    </div>
+    <div class="slider" style="margin-bottom:12px">
+      <label for="adj" style="flex:1">Ajuste geral de CPL (ex.: leilão mais caro na Black)
+        <div class="range"><input type="range" id="adj" min="-50" max="50" step="5" value="0"></div>
+        <div class="scale"><span>-50%</span><span>0%</span><span>+50%</span></div>
+      </label>
+      <output id="adjOut">0%</output>
+    </div>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Região</th><th>Já captados (lead magnets + LIVE)</th><th>Investimento restante (US$)</th><th>% do restante</th><th>CPL (US$)</th><th>CPL com ajuste</th><th>Leads projetados</th><th>Pagos no final</th></tr></thead>
+        <tbody id="rows"></tbody>
+        <tfoot><tr><td>Total</td><td class="num" id="tPaid"></td><td class="num" id="tInv"></td><td class="num" id="tPct"></td><td></td><td class="num" id="tCpl"></td><td class="num" id="tLeads"></td><td class="num" id="tFinal"></td></tr></tfoot>
+      </table>
+    </div>
+    <p class="warnline" id="allocWarn" hidden></p>
+  </section>
+
+  <section class="kpis">
+    <div class="kpi"><span class="l">Meta total de leads</span><span class="v" id="kMeta"></span><span class="d">ENG + ESP + PT</span></div>
+    <div class="kpi"><span class="l">Leads pagos projetados (final)</span><span class="v" id="kPaid"></span><span class="d" id="kPaidD"></span></div>
+    <div class="kpi"><span class="l">Investimento diário necessário</span><span class="v" id="kDaily"></span><span class="d" id="kDailyD"></span></div>
+    <div class="kpi hero"><span class="l">Leads orgânicos que faltam</span><span class="v" id="kOrg"></span><span class="d" id="kOrgD"></span></div>
+  </section>
+
+  <section class="panel">
+    <h2>Meta por idioma e orgânicos necessários</h2>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>Idioma</th><th>Meta de leads</th><th>Pagos no final</th><th>Pago cobre</th><th>Orgânicos necessários</th><th>Orgânicos já captados</th><th>Orgânicos que faltam</th></tr></thead>
+        <tbody id="grows"></tbody>
+        <tfoot><tr><td>Total</td><td class="num" id="gMeta"></td><td class="num" id="gPaid"></td><td class="num" id="gCov"></td><td class="num" id="gNeed"></td><td class="num" id="gOrg"></td><td class="num" id="gFalta"></td></tr></tfoot>
+      </table>
+    </div>
+    <p class="hint" style="margin:10px 0 0">ENG = Estados Unidos + Ásia + Europa + África do Sul · ESP = LATAM · PT = Brasil</p>
+  </section>
+
+  <section class="panel">
+    <h2>Para bater a meta só com pago</h2>
+    <div class="eq" id="eq2"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Investimento diário restante por país</h2>
+    <div class="dgrid" id="dcards"></div>
+  </section>
+
+  <section class="panel" id="dailyPanel" hidden>
+    <h2>Investimento diário por região (uso interno)</h2>
+    <div class="tbl">
+      <table style="min-width:520px">
+        <thead><tr><th>Região</th><th>Investimento restante (US$)</th><th>Dias</th><th>Diário (US$)</th><th>Leads/dia esperados</th></tr></thead>
+        <tbody id="drows"></tbody>
+        <tfoot><tr><td>Total</td><td class="num" id="dInv"></td><td class="num" id="dDays"></td><td class="num" id="dDay"></td><td class="num" id="dLd"></td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <footer>CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 11/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 75.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.<button type="button" id="secret" aria-label="Detalhe interno">··</button></footer>
+</div>
+
+<script>
+const REG=[
+  {k:'USA',n:'Estados Unidos',g:'ENG',paid:4056,c3:10.96,cA:7.52,mix:5196.15},
+  {k:'ASIA',n:'Ásia',g:'ENG',paid:1198,c3:0.78,cA:0.64,mix:206.74},
+  {k:'EUR',n:'Europa',g:'ENG',paid:425,c3:14.94,cA:9.63,mix:403.42},
+  {k:'SA',n:'África do Sul',g:'ENG',paid:54,c3:2.37,cA:2.37,mix:0},
+  {k:'LATAM',n:'LATAM',g:'ESP',paid:1733,c3:2.50,cA:1.71,mix:207.09},
+  {k:'BRA',n:'Brasil',g:'PT',paid:2324,c3:3.44,cA:2.97,mix:237.30},
+];
+const GRP=[{k:'ENG',n:'ENG',meta:18700},{k:'ESP',n:'ESP',meta:2000},{k:'PT',n:'PT',meta:2000}];
+const DEF={budget:75000,spent:35669.78,days:10,adj:0,rmk:14000,rmkUsed:606.90};
+const KEY='simBlack26v6';
+const PROP_OUT=[null,1000,1000,0,700,250];
+const PROP=()=>{const o=PROP_OUT.slice(1).reduce((a,b)=>a+b,0);return [Math.max(0,remaining()-o),...PROP_OUT.slice(1)]};
+const $=id=>document.getElementById(id);
+const fmtI=n=>Math.round(n).toLocaleString('pt-BR');
+const fmtM=n=>'US$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const parse=v=>{v=String(v).trim().replace(/\s|US\$/g,'');if(!v)return 0;
+  if(v.includes(','))v=v.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(v))v=v.replace(/\./g,'');
+  return parseFloat(v)||0};
+const show=(n,dec)=>dec?n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):Math.round(n).toLocaleString('pt-BR');
+const pct=x=>(x*100).toFixed(1).replace('.',',')+'%';
+
+let st;try{st=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){st=null}
+if(!st)st={...DEF,base:'c3'};
+
+const tb=$('rows');
+REG.forEach((r,i)=>{const tr=document.createElement('tr');
+  tr.innerHTML=`<td><span data-reg="${i}">${r.n}</span> <span class="hint">${r.g}</span></td><td><input id="pd${i}" inputmode="numeric"></td><td><input id="inv${i}" inputmode="decimal"></td><td class="num" id="pct${i}"></td><td><input id="cpl${i}" inputmode="decimal"></td><td class="num" id="cadj${i}"></td><td class="num" id="ld${i}"></td><td class="num" id="fin${i}"></td>`;
+  tb.appendChild(tr)});
+const gb=$('grows');
+GRP.forEach((g,j)=>{const tr=document.createElement('tr');
+  tr.innerHTML=`<td>${g.n}</td><td><input id="gm${j}" inputmode="numeric"></td><td class="num" id="gp${j}"></td><td class="num" id="gc${j}"></td><td class="num" id="gn${j}"></td><td><input id="go${j}" inputmode="numeric"></td><td class="num" id="gf${j}"></td>`;
+  gb.appendChild(tr)});
+
+function remaining(){return Math.max(0,parse($('budget').value)-parse($('rmk').value)-parse($('spent').value))}
+function distMix(){const tot=REG.reduce((a,r)=>a+r.mix,0),rem=remaining();REG.forEach((r,i)=>$('inv'+i).value=show(rem*r.mix/tot,true))}
+function setBase(b){st.base=b;REG.forEach((r,i)=>$('cpl'+i).value=show(r[b],true))}
+
+['budget','spent','days','rmk','rmkUsed'].forEach(k=>$(k).value=show(st[k]??DEF[k],k!=='days'));
+$('adj').value=st.adj||0;
+REG.forEach((r,i)=>$('pd'+i).value=st.pd?st.pd[i]:show(r.paid));
+if(st.inv)REG.forEach((r,i)=>$('inv'+i).value=st.inv[i]);else REG.forEach((r,i)=>$('inv'+i).value=show(PROP()[i],true));
+if(st.cpl){REG.forEach((r,i)=>$('cpl'+i).value=st.cpl[i])}else setBase('c3');
+GRP.forEach((g,j)=>{$('gm'+j).value=st.gm?st.gm[j]:show(g.meta);$('go'+j).value=st.go?st.go[j]:'0'});
+
+function calc(){
+  const budget=parse($('budget').value),spent=parse($('spent').value),days=Math.max(1,parse($('days').value)),adj=+$('adj').value;
+  $('adjOut').textContent=(adj>0?'+':'')+adj+'%';
+  {const pos=(adj+50),col=adj>0?'var(--bad)':adj<0?'var(--good)':'var(--fg)',el=$('adj');
+   el.style.background=adj===0?'var(--line)':`linear-gradient(to right,var(--line) ${Math.min(pos,50)}%,${col} ${Math.min(pos,50)}%,${col} ${Math.max(pos,50)}%,var(--line) ${Math.max(pos,50)}%)`;
+   el.style.setProperty('--thumb',col);$('adjOut').style.color=col}
+  let tInv=0,tLd=0,tPaid=0;const gPaid={};
+  REG.forEach((r,i)=>{const pd=parse($('pd'+i).value),inv=parse($('inv'+i).value),c=parse($('cpl'+i).value)*(1+adj/100),ld=c>0?inv/c:0;
+    tInv+=inv;tLd+=ld;tPaid+=pd;gPaid[r.g]=(gPaid[r.g]||0)+pd+ld;
+    $('cadj'+i).textContent=c?show(c,true):'-';$('ld'+i).textContent=fmtI(ld);$('fin'+i).textContent=fmtI(pd+ld)});
+  REG.forEach((r,i)=>{const inv=parse($('inv'+i).value);$('pct'+i).textContent=tInv?pct(inv/tInv):'-'});
+  const rmk=parse($('rmk').value),rmkUsed=parse($('rmkUsed').value),capSpent=spent;
+  const rem=remaining(),cplP=tLd?tInv/tLd:0;
+  $('eqBud').innerHTML=`<div><span>${L('Orçamento total','Presupuesto total')}</span><span>${fmtM(budget)}</span></div>
+    <div><span>(−) ${L('Remarketing até 30/nov','Remarketing hasta el 30/nov')} (${L('já usado','ya usado')} ${fmtM(rmkUsed)} · ${L('restam','quedan')} ${fmtM(Math.max(0,rmk-rmkUsed))})</span><span>${fmtM(rmk)}</span></div>
+    <div><span>(−) ${L('Captação já investida (sem remarketing)','Captación ya invertida (sin remarketing)')}</span><span>${fmtM(capSpent)}</span></div>
+    <div><span>(=) ${L('Restante para captação no Meta','Restante para captación en Meta')}</span><span>${fmtM(rem)}</span></div>`;
+  $('tPaid').textContent=fmtI(tPaid);$('tInv').textContent=show(tInv,true);$('tPct').textContent=tInv?'100%':'-';
+  $('tCpl').textContent=cplP?show(cplP,true):'-';$('tLeads').textContent=fmtI(tLd);$('tFinal').textContent=fmtI(tPaid+tLd);
+  const diff=tInv-rem,aw=$('allocWarn');
+  if(Math.abs(diff)>1){aw.hidden=false;aw.textContent=diff>0?L(`O investimento por região passa ${fmtM(diff)} do orçamento restante (${fmtM(rem)}).`,`La inversión por región supera en ${fmtM(diff)} el presupuesto restante (${fmtM(rem)}).`):L(`Ainda faltam ${fmtM(-diff)} do orçamento restante (${fmtM(rem)}) para distribuir.`,`Faltan distribuir ${fmtM(-diff)} del presupuesto restante (${fmtM(rem)}).`)}else aw.hidden=true;
+
+  {let h='',tl=0;REG.forEach((r,i)=>{const inv=parse($('inv'+i).value),c=parse($('cpl'+i).value)*(1+adj/100),dd=inv/days,ld=c>0?dd/c:0;tl+=ld;
+    h+=`<tr><td>${LANG==='es'?REG_ES[i]:r.n}</td><td class="num">${show(inv,true)}</td><td class="num">${fmtI(days)}</td><td class="num"><b>${show(dd,true)}</b></td><td class="num">${show(ld,true)}</td></tr>`});
+   $('drows').innerHTML=h;
+   $('dcards').innerHTML=REG.map((r,i)=>{const inv=parse($('inv'+i).value);return `<div class="dcard"><span class="l">${LANG==='es'?REG_ES[i]:r.n}</span><span class="v">${fmtM(inv/days)}</span><span class="d">${L('por dia','por día')} · ${fmtM(inv)} ${L('em','en')} ${fmtI(days)} ${L('dias','días')}</span></div>`}).join('')
+     +`<div class="dcard tot"><span class="l">Total</span><span class="v">${fmtM(tInv/days)}</span><span class="d">${L('por dia','por día')} · ${fmtM(tInv)} ${L('em','en')} ${fmtI(days)} ${L('dias','días')}</span></div>`;$('dInv').textContent=show(tInv,true);$('dDays').textContent=fmtI(days);$('dDay').textContent=show(tInv/days,true);$('dLd').textContent=show(tl,true)}
+  let M=0,P=0,N=0,O=0,F=0;
+  GRP.forEach((g,j)=>{const m=parse($('gm'+j).value),p=gPaid[g.k]||0,need=Math.max(0,m-p),o=parse($('go'+j).value),f=Math.max(0,need-o);
+    M+=m;P+=p;N+=need;O+=o;F+=f;
+    $('gp'+j).textContent=fmtI(p);$('gn'+j).textContent=fmtI(need);$('gf'+j).textContent=fmtI(f);
+    $('gc'+j).innerHTML=m?`<span class="pill ${p>=m?'ok':'warn'}">${pct(Math.min(p/m,9.99))}</span>`:'-'});
+  $('gMeta').textContent=fmtI(M);$('gPaid').textContent=fmtI(P);$('gCov').textContent=M?pct(P/M):'-';$('gNeed').textContent=fmtI(N);$('gOrg').textContent=fmtI(O);$('gFalta').textContent=fmtI(F);
+
+  $('kMeta').textContent=fmtI(M);
+  $('kPaid').textContent=fmtI(tPaid+tLd);$('kPaidD').textContent=L(`${fmtI(tPaid)} já captados + ${fmtI(tLd)} projetados · CPL ${fmtM(cplP)}`,`${fmtI(tPaid)} ya captados + ${fmtI(tLd)} proyectados · CPL ${fmtM(cplP)}`);
+  $('kDaily').textContent=fmtM(tInv/days);$('kDailyD').textContent=L(`${fmtM(tInv)} em ${fmtI(days)} dias`,`${fmtM(tInv)} en ${fmtI(days)} días`);
+  $('kOrg').textContent=fmtI(F);$('kOrgD').textContent=L(`${fmtI(N)} necessários${O?` − ${fmtI(O)} já captados`:''}`,`${fmtI(N)} necesarios${O?` − ${fmtI(O)} ya captados`:''}`);
+
+  const need=Math.max(0,M-tPaid),cplNeed=need?rem/need:0;
+  $('eq2').innerHTML=`<div><span>${L('Leads pagos que faltam para a meta total','Leads pagados que faltan para la meta total')}</span><span>${fmtI(need)}</span></div>
+    <div><span>${L('CPL máximo com o orçamento restante','CPL máximo con el presupuesto restante')} (${fmtM(rem)})</span><span>${fmtM(cplNeed)}</span></div>
+    <div><span>${L('Investimento necessário no CPL projetado','Inversión necesaria con el CPL proyectado')} (${fmtM(cplP)})</span><span>${fmtM(need*cplP)}</span></div>`;
+
+  try{localStorage.setItem(KEY,JSON.stringify({budget,spent,days,adj,rmk,rmkUsed,base:st.base,
+    pd:REG.map((r,i)=>$('pd'+i).value),inv:REG.map((r,i)=>$('inv'+i).value),cpl:REG.map((r,i)=>$('cpl'+i).value),
+    gm:GRP.map((g,j)=>$('gm'+j).value),go:GRP.map((g,j)=>$('go'+j).value)}))}catch(e){}
+}
+
+const ES={
+ 'Simulador de Leads BLACK26':'Simulador de Leads BLACK26',
+ 'Oliver Velez · projeção da captação paga por região e quantos leads orgânicos faltam para a meta de cada idioma. Todos os campos são editáveis.':'Oliver Velez · proyección de la captación pagada por región y cuántos leads orgánicos faltan para la meta de cada idioma. Todos los campos son editables.',
+ 'Orçamento e prazo':'Presupuesto y plazo','Orçamento total (US$)':'Presupuesto total (US$)','Já investido em captação (US$)':'Ya invertido en captación (US$)',
+ 'Sem remarketing · dash em 11/11, 08h56':'Sin remarketing · dashboard al 11/11, 08:56','Dias restantes de captação':'Días restantes de captación','Até a live de 21/11':'Hasta el live del 21/11',
+ 'Captação paga por região':'Captación pagada por región','CPL base:':'CPL base:','Últimos 3 dias (08 a 10/11)':'Últimos 3 días (08 al 10/11)',
+ 'Acumulado LIVE21NOV':'Acumulado LIVE21NOV','Investimento:':'Inversión:','Distribuir pelo mix atual':'Distribuir según el mix actual','Proposta (11/11)':'Propuesta (11/11)',
+ 'Ajuste geral de CPL (ex.: leilão mais caro na Black)':'Ajuste general de CPL (ej.: subasta más cara en Black Friday)',
+ 'Região':'Región','Já captados (lead magnets + LIVE)':'Ya captados (lead magnets + LIVE)','Investimento restante (US$)':'Inversión restante (US$)',
+ '% do restante':'% del restante','CPL com ajuste':'CPL con ajuste','Leads projetados':'Leads proyectados','Pagos no final':'Pagados al final',
+ 'Meta total de leads':'Meta total de leads','Leads pagos projetados (final)':'Leads pagados proyectados (final)',
+ 'Investimento diário necessário':'Inversión diaria necesaria','Leads orgânicos que faltam':'Leads orgánicos que faltan',
+ 'Meta por idioma e orgânicos necessários':'Meta por idioma y orgánicos necesarios','Idioma':'Idioma','Meta de leads':'Meta de leads',
+ 'Investimento diário por região (uso interno)':'Inversión diaria por región (uso interno)','Dias':'Días','Diário (US$)':'Diario (US$)','Leads/dia esperados':'Leads/día esperados','YouTube, fora do Meta (US$)':'YouTube, fuera de Meta (US$)','Verba do Google Ads':'Presupuesto de Google Ads','Total de investimento destinado para remarketing (até 30/nov)':'Inversión total destinada a remarketing (hasta el 30/nov)','Meta Ads':'Meta Ads','Separado da captação':'Separado de la captación','Remarketing já usado (US$)':'Remarketing ya usado (US$)','Campanhas RMKTCAPT (USA + EUR)':'Campañas RMKTCAPT (USA + EUR)','Investimento diário restante por país':'Inversión diaria restante por país','Pago cobre':'Pagado cubre','Orgânicos necessários':'Orgánicos necesarios','Orgânicos já captados':'Orgánicos ya captados','Orgânicos que faltam':'Orgánicos que faltan',
+ 'ENG = Estados Unidos + Ásia + Europa + África do Sul · ESP = LATAM · PT = Brasil':'ENG = Estados Unidos + Asia + Europa + Sudáfrica · ESP = LATAM · PT = Brasil',
+ 'Para bater a meta só com pago':'Para alcanzar la meta solo con pagado',
+ 'CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 11/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 75.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.':'Los CPL de partida y la inversión realizada vienen del dashboard de Oliver (Meta Ads, FB Pixel Complete Registration), actualizado el 11/11/2026. Las metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) y el presupuesto de US$ 75.000 se pueden cambiar arriba. Los valores ingresados quedan guardados solo en este navegador.'
+};
+const REG_ES=['Estados Unidos','Asia','Europa','Sudáfrica','LATAM','Brasil'];
+let LANG='pt';
+const L=(pt,es)=>LANG==='es'?es:pt;
+const tnodes=[];
+(function(){const w=document.createTreeWalker(document.querySelector('.wrap'),NodeFilter.SHOW_TEXT);let n;
+  while(n=w.nextNode()){const t=n.nodeValue.trim();if(t&&ES[t]!==undefined)tnodes.push([n,n.nodeValue,n.nodeValue.replace(t,ES[t])])}})();
+function setLang(l){LANG=l;document.documentElement.lang=l==='es'?'es':'pt-BR';
+  tnodes.forEach(([n,pt,es])=>n.nodeValue=l==='es'?es:pt);
+  document.querySelectorAll('[data-reg]').forEach(e=>{const i=+e.dataset.reg;e.textContent=l==='es'?REG_ES[i]:REG[i].n});
+  document.title=l==='es'?'Simulador de Leads BLACK26':'Simulador de Leads BLACK26';
+  $('lPT').classList.toggle('on',l==='pt');$('lES').classList.toggle('on',l==='es');
+  try{localStorage.setItem('simLang',l)}catch(e){}
+  calc()}
+$('lPT').onclick=()=>{setLang('pt');if(location.hash==='#es')history.replaceState(null,'',' ')};
+$('lES').onclick=()=>{setLang('es');location.hash='es'};
+document.addEventListener('input',calc);
+$('cpl3').onclick=()=>{setBase('c3');calc()};
+$('secret').onclick=()=>{const d=$('dailyPanel');d.hidden=!d.hidden;if(!d.hidden)d.scrollIntoView({behavior:'smooth'})};
+let _l='pt';try{_l=localStorage.getItem('simLang')||'pt'}catch(e){}
+if(location.hash==='#es')_l='es';
+setLang(_l);
+</script>
+
+
+</body>
+</html>
