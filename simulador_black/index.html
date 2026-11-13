@@ -104,7 +104,7 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
     <h2>Orçamento e prazo</h2>
     <div class="bgrid">
       <label for="budget"><span>Orçamento total (US$)</span><input id="budget" inputmode="decimal"><span class="hint">Meta Ads</span></label>
-      <label for="spent"><span>Já investido em captação (US$)</span><input id="spent" inputmode="decimal"><span class="hint">Sem remarketing · dash em 11/11, 08h56</span></label>
+      <label for="spent"><span>Já investido em captação (US$)</span><input id="spent" inputmode="decimal"><span class="hint">Sem remarketing · dash até 12/11</span></label>
       <label for="days"><span>Dias restantes de captação</span><input id="days" inputmode="numeric"><span class="hint">Até a live de 21/11</span></label>
       <label for="rmk"><span>Total de investimento destinado para remarketing (até 30/nov)</span><input id="rmk" inputmode="decimal"><span class="hint">Separado da captação</span></label>
       <label for="rmkUsed"><span>Remarketing já usado (US$)</span><input id="rmkUsed" inputmode="decimal"><span class="hint"></span></label>
@@ -175,7 +175,7 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
     </div>
   </section>
 
-  <footer>CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 11/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 75.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.<button type="button" id="secret" aria-label="Detalhe interno">··</button></footer>
+  <footer>CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 13/11/2026 (dados até 12/11). Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 75.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.<button type="button" id="secret" aria-label="Detalhe interno">··</button></footer>
 </div>
 
 <script>
@@ -188,9 +188,9 @@ const REG=[
   {k:'BRA',n:'Brasil',g:'PT',paid:1727,c3:1.34,cA:2.97,mix:237.30},
 ];
 const GRP=[{k:'ENG',n:'ENG',meta:18700,org:3603},{k:'ESP',n:'ESP',meta:2000,org:587},{k:'PT',n:'PT',meta:2000,org:123}];
-const DEF={budget:75000,spent:35669.78,days:10,adj:15,rmk:0,rmkUsed:0};
-const KEY='simBlack26v8';
-const PROP_OUT=[null,1030,1030,0,2000,1775];
+const DEF={budget:75000,spent:41695.16,days:8,adj:15,rmk:5000,rmkUsed:888.68};
+const KEY='simBlack26v9';
+const PROP_OUT=[null,841.99,185.08,0,891.11,943.29];
 const PROP=()=>{const o=PROP_OUT.slice(1).reduce((a,b)=>a+b,0);return [Math.max(0,remaining()-o),...PROP_OUT.slice(1)]};
 const $=id=>document.getElementById(id);
 const fmtI=n=>Math.round(n).toLocaleString('pt-BR');
@@ -277,7 +277,7 @@ const ES={
  'Simulador de Leads BLACK26':'Simulador de Leads BLACK26',
  'Oliver Velez · projeção da captação paga por região e quantos leads orgânicos faltam para a meta de cada idioma. Todos os campos são editáveis.':'Oliver Velez · proyección de la captación pagada por región y cuántos leads orgánicos faltan para la meta de cada idioma. Todos los campos son editables.',
  'Orçamento e prazo':'Presupuesto y plazo','Orçamento total (US$)':'Presupuesto total (US$)','Já investido em captação (US$)':'Ya invertido en captación (US$)',
- 'Sem remarketing · dash em 11/11, 08h56':'Sin remarketing · dashboard al 11/11, 08:56','Dias restantes de captação':'Días restantes de captación','Até a live de 21/11':'Hasta el live del 21/11',
+ 'Sem remarketing · dash até 12/11':'Sin remarketing · dashboard hasta el 12/11','Dias restantes de captação':'Días restantes de captación','Até a live de 21/11':'Hasta el live del 21/11',
  'Captação paga por região':'Captación pagada por región','CPL base:':'CPL base:','Últimos 3 dias (08 a 10/11)':'Últimos 3 días (08 al 10/11)',
  'Acumulado LIVE21NOV':'Acumulado LIVE21NOV','Investimento:':'Inversión:','Distribuir pelo mix atual':'Distribuir según el mix actual','Proposta (11/11)':'Propuesta (11/11)',
  'Ajuste geral de CPL (ex.: leilão mais caro na Black)':'Ajuste general de CPL (ej.: subasta más cara en Black Friday)',
@@ -289,7 +289,7 @@ const ES={
  'Investimento diário por região (uso interno)':'Inversión diaria por región (uso interno)','Dias':'Días','Diário (US$)':'Diario (US$)','Leads/dia esperados':'Leads/día esperados','YouTube, fora do Meta (US$)':'YouTube, fuera de Meta (US$)','Verba do Google Ads':'Presupuesto de Google Ads','Total de investimento destinado para remarketing (até 30/nov)':'Inversión total destinada a remarketing (hasta el 30/nov)','Meta Ads':'Meta Ads','Separado da captação':'Separado de la captación','Remarketing já usado (US$)':'Remarketing ya usado (US$)','Campanhas RMKTCAPT (USA + EUR)':'Campañas RMKTCAPT (USA + EUR)','Investimento diário restante por país':'Inversión diaria restante por país','Pago cobre':'Pagado cubre','Orgânicos necessários':'Orgánicos necesarios','Orgânicos já captados':'Orgánicos ya captados','Orgânicos que faltam':'Orgánicos que faltan',
  'ENG = Estados Unidos + Ásia + Europa + África do Sul · ESP = LATAM · PT = Brasil':'ENG = Estados Unidos + Asia + Europa + Sudáfrica · ESP = LATAM · PT = Brasil',
  'Para bater a meta só com pago':'Para alcanzar la meta solo con pagado',
- 'CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 11/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 75.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.':'Los CPL de partida y la inversión realizada vienen del dashboard de Oliver (Meta Ads, FB Pixel Complete Registration), actualizado el 11/11/2026. Las metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) y el presupuesto de US$ 75.000 se pueden cambiar arriba. Los valores ingresados quedan guardados solo en este navegador.'
+ 'CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 13/11/2026 (dados até 12/11). Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 75.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.':'Los CPL de partida y la inversión realizada vienen del dashboard de Oliver (Meta Ads, FB Pixel Complete Registration), actualizado el 13/11/2026 (datos hasta el 12/11). Las metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) y el presupuesto de US$ 75.000 se pueden cambiar arriba. Los valores ingresados quedan guardados solo en este navegador.'
 };
 const REG_ES=['Estados Unidos','Asia','Europa','Sudáfrica','LATAM','Brasil'];
 let LANG='pt';

@@ -69,7 +69,7 @@ USAR_META_INVESTIMENTO = True
 META_INVEST_DATA_INICIO = "2026-10-08"
 META_INVEST_DATA_FIM    = "2026-11-20"
 META_INVEST_TOTAL       = 75000
-# Fonte: black2026.html (secao 03/05). Captação Meta US$ 56k + retargeting US$ 14k + YouTube US$ 5k.
+# Fonte: reuniao 11/11 + simulador_black. Captação Meta US$ 70k + remarketing US$ 5k (YouTube saiu, verba somada ao Meta).
 # CPL projetado = CPL de setembro + 20%; leads projetados = verba / CPL projetado.
 # Marcos na barra total (0 a META_INVEST_TOTAL). Fim de outubro = US$ 31,5k (tabela de verba por periodo).
 META_INVEST_MARCOS = [
@@ -78,15 +78,17 @@ META_INVEST_MARCOS = [
 ]
 META_INVEST_REGIOES = [
     # (filtro, valor,          label_exibido,          meta_em_dolar, leads_projetados)
-    # Meta = captacao + parte do retargeting (US$ 14k rateados: USA fica com ~US$ 45k e o resto proporcional a captacao). Remarketing
-    # (RETARGET/RMKT) conta no pais da campanha. leads_projetados = so captacao (inalterado).
-    ("pais", "USA",          "ENG (USA)",              45000, 3553),
-    ("pais", "BRA",          "PT",                       7500, 1317),
-    ("pais", "LATAM",        "ESP",                      5800, 1004),
-    ("pais", "EUR",          "ENG (EUR)",                7100,  482),
-    ("pais", "ASIA|IND",     "ENG (Asia)",              2300, 2025),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas (mesma verba da India); "IND" mantido p/ campanhas antigas
-    ("pais", "SOUTH_AFRICA", "ENG (South Africa)",      2300,  957),
-    # YouTube (US$ 5k, 105 leads proj.) vem do Google Ads: entra aqui quando houver a extracao
+    # Metas pos-reuniao de 11/11 (simulador_black, atualizado 13/11): US$ 70k de captacao + US$ 5k de remarketing.
+    # Meta por pais = captacao ja investida ate 10/11 + verba restante definida na reuniao (USA fica com o restante dos 70k).
+    # Remarketing (RMKT/RETARGET) agora e um item proprio e NAO entra no pais da campanha.
+    # leads_projetados = None (as projecoes do plano antigo nao valem mais).
+    ("pais", "USA",          "ENG (USA)",              57660, None),
+    ("pais", "BRA",          "PT",                      3620, None),
+    ("pais", "LATAM",        "ESP",                     3420, None),
+    ("pais", "EUR",          "ENG (EUR)",               3370, None),
+    ("pais", "ASIA|IND",     "ENG (Asia)",              1800, None),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas; "IND" mantido p/ campanhas antigas
+    ("pais", "SOUTH_AFRICA", "ENG (South Africa)",       130, None),
+    ("camp", "RMKT|RETARGET", "Remarketing",            5000, None),
 ]
 
 USAR_PESQUISA    = False
@@ -308,7 +310,7 @@ def build_meta_investimento(df_meta):
     subset = subset_for_group(df_meta, grupo)
     camp = subset["campaign"].astype(str).str.upper()
     pais_series = camp.str.split("-").str[1]
-    eh_extra = camp.str.contains("YOUTUBE")
+    eh_extra = camp.str.contains("YOUTUBE|RMKT|RETARGET")
 
     regioes = []
     for filtro, valor, label, meta, leads_proj in META_INVEST_REGIOES:
