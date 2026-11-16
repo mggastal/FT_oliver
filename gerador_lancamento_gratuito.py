@@ -79,16 +79,17 @@ META_INVEST_MARCOS = [
 META_INVEST_REGIOES = [
     # (filtro, valor,          label_exibido,          meta_em_dolar, leads_projetados)
     # Metas pos-reuniao de 11/11 (simulador_black, atualizado 13/11): US$ 70k de captacao + US$ 5k de remarketing.
-    # Meta por pais = captacao ja investida ate 10/11 + verba restante definida na reuniao (USA fica com o restante dos 70k).
-    # Remarketing (RMKT/RETARGET) agora e um item proprio e NAO entra no pais da campanha.
+    # Meta por pais = captacao ja investida ate 10/11 (incl. RMKTCAPT) + verba restante definida na reuniao (USA fica com o restante dos 70k).
+    # Remarketing de captacao (RMKTCAPT) conta no pais da campanha (faz parte dos 70k).
+    # Item "Remarketing" (US$ 5k) = campanhas de vendas pos-live (RMKT/RETARGET sem CAPT); NAO entra no pais.
     # leads_projetados = None (as projecoes do plano antigo nao valem mais).
-    ("pais", "USA",          "ENG (USA)",              57660, None),
+    ("pais", "USA",          "ENG (USA)",              57530, None),
     ("pais", "BRA",          "PT",                      3620, None),
     ("pais", "LATAM",        "ESP",                     3420, None),
-    ("pais", "EUR",          "ENG (EUR)",               3370, None),
+    ("pais", "EUR",          "ENG (EUR)",               3500, None),
     ("pais", "ASIA|IND",     "ENG (Asia)",              1800, None),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas; "IND" mantido p/ campanhas antigas
     ("pais", "SOUTH_AFRICA", "ENG (South Africa)",       130, None),
-    ("camp", "RMKT|RETARGET", "Remarketing",            5000, None),
+    ("camp", r"RMKT(?!CAPT)|RETARGET", "Remarketing (vendas pós-live)", 5000, None),
 ]
 
 USAR_PESQUISA    = False
@@ -310,7 +311,7 @@ def build_meta_investimento(df_meta):
     subset = subset_for_group(df_meta, grupo)
     camp = subset["campaign"].astype(str).str.upper()
     pais_series = camp.str.split("-").str[1]
-    eh_extra = camp.str.contains("YOUTUBE|RMKT|RETARGET")
+    eh_extra = camp.str.contains(r"YOUTUBE|RMKT(?!CAPT)|RETARGET")
 
     regioes = []
     for filtro, valor, label, meta, leads_proj in META_INVEST_REGIOES:
