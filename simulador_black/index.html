@@ -256,12 +256,12 @@ function calc(){
     M+=m;P+=p;N+=need;O+=o;F+=f;
     $('gp'+j).textContent=fmtI(p);$('gn'+j).textContent=fmtI(need);$('gf'+j).textContent=fmtI(f);
     $('gc'+j).innerHTML=m?`<span class="pill ${p>=m?'ok':'warn'}">${pct(Math.min(p/m,9.99))}</span>`:'-'});
-  $('gMeta').textContent=fmtI(M);$('gPaid').textContent=fmtI(P);$('gCov').textContent=M?pct(P/M):'-';$('gNeed').textContent=fmtI(N);$('gOrg').textContent=fmtI(O);$('gFalta').textContent=fmtI(F);
+  $('gMeta').textContent=fmtI(M);$('gPaid').textContent=fmtI(P);$('gCov').textContent=M?pct(P/M):'-';N=Math.max(0,M-P);F=Math.max(0,N-O);$('gNeed').textContent=fmtI(N);$('gOrg').textContent=fmtI(O);$('gFalta').textContent=fmtI(F);
 
   $('kMeta').textContent=fmtI(M);
   $('kPaid').textContent=fmtI(tPaid+tLd);$('kPaidD').textContent=L(`${fmtI(tPaid)} já captados + ${fmtI(tLd)} projetados · CPL ${fmtM(cplP)}`,`${fmtI(tPaid)} ya captados + ${fmtI(tLd)} proyectados · CPL ${fmtM(cplP)}`);
   $('kDaily').textContent=fmtM(tInv/days);$('kDailyD').textContent=L(`${fmtM(tInv)} em ${fmtI(days)} dias`,`${fmtM(tInv)} en ${fmtI(days)} días`);
-  $('kOrg').textContent=fmtI(F);$('kOrgD').textContent=L(`${fmtI(N)} necessários${O?` − ${fmtI(O)} já captados`:''}`,`${fmtI(N)} necesarios${O?` − ${fmtI(O)} ya captados`:''}`);
+  $('kOrg').textContent=fmtI(F);$('kOrgD').textContent=L(`meta ${fmtI(M)} − ${fmtI(P)} pagos − ${fmtI(O)} orgânicos já captados`,`meta ${fmtI(M)} − ${fmtI(P)} pagados − ${fmtI(O)} orgánicos ya captados`);
 
   const need=Math.max(0,M-tPaid),cplNeed=need?rem/need:0;
   $('eq2').innerHTML=`<div><span>${L('Leads pagos que faltam para a meta total','Leads pagados que faltan para la meta total')}</span><span>${fmtI(need)}</span></div>
