@@ -197,9 +197,9 @@ const REG=[
   {k:'LATAM',n:'LATAM',g:'ESP',paid:1202,c3:2.62,cA:1.71,mix:207.09},
   {k:'BRA',n:'Brasil',g:'PT',paid:1970,c3:1.62,cA:2.97,mix:237.30},
 ];
-const GRP=[{k:'ENG',n:'ENG',meta:18700,org:5467},{k:'ESP',n:'ESP',meta:2000,org:777},{k:'PT',n:'PT',meta:2000,org:212}];
+const GRP=[{k:'ENG',n:'ENG',meta:18700,org:5067},{k:'ESP',n:'ESP',meta:2000,org:737},{k:'PT',n:'PT',meta:2000,org:196}];
 const DEF={budget:75000,spent:60675,days:4,adj:0,rmk:5000,rmkUsed:0};
-const KEY='simBlack26v12';
+const KEY='simBlack26v13';
 const PROP_OUT=[null,300,50,0,300,420];
 const PROP=()=>{const o=PROP_OUT.slice(1).reduce((a,b)=>a+b,0);return [Math.max(0,remaining()-o),...PROP_OUT.slice(1)]};
 const $=id=>document.getElementById(id);
@@ -307,7 +307,7 @@ const REG_ES=['Estados Unidos','Asia','Europa','Sudáfrica','LATAM','Brasil'];
 // ── Evolução a cada atualização (alimentar 1 linha por atualização) ──
 const HIST=[
   {d:'16/11',dias:5,cpl:{USA:12.50,ASIA:0.63,EUR:9.56,LATAM:2.61,BRA:1.60},cplMed:6.76,paid:{USA:3423,ASIA:2157,EUR:343,SA:56,LATAM:1142,BRA:1920},org:{ENG:4600,ESP:671,PT:188},pagosFinal:11300,orgFalta:5941,verba:15263.88},
-  {d:'17/11',dias:4,cpl:{USA:13.63,ASIA:0.58,EUR:9.56,LATAM:2.62,BRA:1.62},cplMed:6.21,paid:{USA:3604,ASIA:2554,EUR:343,SA:56,LATAM:1202,BRA:1970},org:{ENG:5467,ESP:777,PT:212},pagosFinal:11231,orgFalta:5013,verba:9325},
+  {d:'17/11',dias:4,cpl:{USA:13.63,ASIA:0.58,EUR:9.56,LATAM:2.62,BRA:1.62},cplMed:6.21,paid:{USA:3604,ASIA:2554,EUR:343,SA:56,LATAM:1202,BRA:1970},org:{ENG:5067,ESP:737,PT:196},pagosFinal:11231,orgFalta:5469,verba:9325},
 ];
 const META_EVO=22700;
 function renderEvo(){
