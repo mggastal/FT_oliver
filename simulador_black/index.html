@@ -137,6 +137,8 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
 
   <section class="kpis">
     <div class="kpi"><span class="l">Meta total de leads</span><span class="v" id="kMeta"></span><span class="d">ENG + ESP + PT</span></div>
+    <div class="kpi"><span class="l">Leads já captados hoje</span><span class="v" id="kNow"></span><span class="d" id="kNowD"></span></div>
+    <div class="kpi"><span class="l">Faltam para a meta hoje</span><span class="v" id="kGap"></span><span class="d" id="kGapD"></span></div>
     <div class="kpi"><span class="l">Leads pagos projetados (final)</span><span class="v" id="kPaid"></span><span class="d" id="kPaidD"></span></div>
     <div class="kpi"><span class="l">Investimento diário necessário</span><span class="v" id="kDaily"></span><span class="d" id="kDailyD"></span></div>
     <div class="kpi hero"><span class="l">Leads orgânicos que faltam</span><span class="v" id="kOrg"></span><span class="d" id="kOrgD"></span></div>
@@ -259,6 +261,8 @@ function calc(){
   $('gMeta').textContent=fmtI(M);$('gPaid').textContent=fmtI(P);$('gCov').textContent=M?pct(P/M):'-';N=Math.max(0,M-P);F=Math.max(0,N-O);$('gNeed').textContent=fmtI(N);$('gOrg').textContent=fmtI(O);$('gFalta').textContent=fmtI(F);
 
   $('kMeta').textContent=fmtI(M);
+  {const now=tPaid+O,gap=Math.max(0,M-now);$('kNow').textContent=fmtI(now);$('kNowD').textContent=L(`${fmtI(tPaid)} pagos + ${fmtI(O)} orgânicos · ${M?pct(now/M):'-'} da meta`,`${fmtI(tPaid)} pagados + ${fmtI(O)} orgánicos · ${M?pct(now/M):'-'} de la meta`);
+   $('kGap').textContent=fmtI(gap);$('kGapD').textContent=L(`meta ${fmtI(M)} − ${fmtI(now)} já captados (sem projeção)`,`meta ${fmtI(M)} − ${fmtI(now)} ya captados (sin proyección)`);}
   $('kPaid').textContent=fmtI(tPaid+tLd);$('kPaidD').textContent=L(`${fmtI(tPaid)} já captados + ${fmtI(tLd)} projetados · CPL ${fmtM(cplP)}`,`${fmtI(tPaid)} ya captados + ${fmtI(tLd)} proyectados · CPL ${fmtM(cplP)}`);
   $('kDaily').textContent=fmtM(tInv/days);$('kDailyD').textContent=L(`${fmtM(tInv)} em ${fmtI(days)} dias`,`${fmtM(tInv)} en ${fmtI(days)} días`);
   $('kOrg').textContent=fmtI(F);$('kOrgD').textContent=L(`meta ${fmtI(M)} − ${fmtI(P)} pagos − ${fmtI(O)} orgânicos já captados`,`meta ${fmtI(M)} − ${fmtI(P)} pagados − ${fmtI(O)} orgánicos ya captados`);
@@ -283,7 +287,7 @@ const ES={
  'Ajuste geral de CPL (ex.: leilão mais caro na Black)':'Ajuste general de CPL (ej.: subasta más cara en Black Friday)',
  'Região':'Región','Já captados (lead magnets + LIVE)':'Ya captados (lead magnets + LIVE)','Investimento restante (US$)':'Inversión restante (US$)',
  '% do restante':'% del restante','CPL com ajuste':'CPL con ajuste','Leads projetados':'Leads proyectados','Pagos no final':'Pagados al final',
- 'Meta total de leads':'Meta total de leads','Leads pagos projetados (final)':'Leads pagados proyectados (final)',
+ 'Meta total de leads':'Meta total de leads','Leads já captados hoje':'Leads ya captados hoy','Faltam para a meta hoje':'Faltan para la meta hoy','Leads pagos projetados (final)':'Leads pagados proyectados (final)',
  'Investimento diário necessário':'Inversión diaria necesaria','Leads orgânicos que faltam':'Leads orgánicos que faltan',
  'Meta por idioma e orgânicos necessários':'Meta por idioma y orgánicos necesarios','Idioma':'Idioma','Meta de leads':'Meta de leads',
  'Investimento diário por região (uso interno)':'Inversión diaria por región (uso interno)','Dias':'Días','Diário (US$)':'Diario (US$)','Leads/dia esperados':'Leads/día esperados','YouTube, fora do Meta (US$)':'YouTube, fuera de Meta (US$)','Verba do Google Ads':'Presupuesto de Google Ads','Total de investimento destinado para remarketing (até 30/nov)':'Inversión total destinada a remarketing (hasta el 30/nov)','Meta Ads':'Meta Ads','Campanhas de vendas pós-live':'Campañas de ventas post-live','Remarketing já usado (US$)':'Remarketing ya usado (US$)','Campanhas RMKTCAPT (USA + EUR)':'Campañas RMKTCAPT (USA + EUR)','Investimento diário restante por país':'Inversión diaria restante por país','Pago cobre':'Pagado cubre','Orgânicos necessários':'Orgánicos necesarios','Orgânicos já captados':'Orgánicos ya captados','Orgânicos que faltam':'Orgánicos que faltan',
