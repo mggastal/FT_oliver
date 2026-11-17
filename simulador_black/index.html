@@ -65,6 +65,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .dcard .d{font-size:11px;color:var(--muted)}
 .dcard.tot{background:var(--accent-soft);border-color:var(--accent)}
 .dcard.tot .v{color:var(--accent)}
+.evo-t{margin-bottom:18px;overflow-x:auto}.evo-t:last-child{margin-bottom:0}.evo-t h3{font-size:12.5px;font-weight:600;margin:0 0 6px;color:var(--fg)}
+.evo-t table{min-width:0}.evo-t td,.evo-t th{text-align:right;white-space:nowrap}.evo-t td:first-child,.evo-t th:first-child{text-align:left}
+.evo-t tr.tot td{font-weight:700}.up{color:var(--bad,#c0392b)}.dn{color:var(--good,#1f8a4c)}
 .kpi .d{font-size:12px;color:var(--muted)}
 .kpi.hero{border-color:var(--accent);background:var(--accent-soft)}
 .kpi.hero .v{color:var(--accent);font-size:30px}
@@ -164,6 +167,11 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
   <section class="panel">
     <h2>Investimento diário restante por país</h2>
     <div class="dgrid" id="dcards"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Evolução a cada atualização</h2>
+    <div id="evo"></div>
   </section>
 
   <section class="panel" id="dailyPanel" hidden>
@@ -287,7 +295,7 @@ const ES={
  'Ajuste geral de CPL (ex.: leilão mais caro na Black)':'Ajuste general de CPL (ej.: subasta más cara en Black Friday)',
  'Região':'Región','Já captados (lead magnets + LIVE)':'Ya captados (lead magnets + LIVE)','Investimento restante (US$)':'Inversión restante (US$)',
  '% do restante':'% del restante','CPL com ajuste':'CPL con ajuste','Leads projetados':'Leads proyectados','Pagos no final':'Pagados al final',
- 'Meta total de leads':'Meta total de leads','Leads já captados hoje':'Leads ya captados hoy','Faltam para a meta hoje':'Faltan para la meta hoy','Leads pagos projetados (final)':'Leads pagados proyectados (final)',
+ 'Meta total de leads':'Meta total de leads','Evolução a cada atualização':'Evolución en cada actualización','Leads já captados hoje':'Leads ya captados hoy','Faltam para a meta hoje':'Faltan para la meta hoy','Leads pagos projetados (final)':'Leads pagados proyectados (final)',
  'Investimento diário necessário':'Inversión diaria necesaria','Leads orgânicos que faltam':'Leads orgánicos que faltan',
  'Meta por idioma e orgânicos necessários':'Meta por idioma y orgánicos necesarios','Idioma':'Idioma','Meta de leads':'Meta de leads',
  'Investimento diário por região (uso interno)':'Inversión diaria por región (uso interno)','Dias':'Días','Diário (US$)':'Diario (US$)','Leads/dia esperados':'Leads/día esperados','YouTube, fora do Meta (US$)':'YouTube, fuera de Meta (US$)','Verba do Google Ads':'Presupuesto de Google Ads','Total de investimento destinado para remarketing (até 30/nov)':'Inversión total destinada a remarketing (hasta el 30/nov)','Meta Ads':'Meta Ads','Campanhas de vendas pós-live':'Campañas de ventas post-live','Remarketing já usado (US$)':'Remarketing ya usado (US$)','Campanhas RMKTCAPT (USA + EUR)':'Campañas RMKTCAPT (USA + EUR)','Investimento diário restante por país':'Inversión diaria restante por país','Pago cobre':'Pagado cubre','Orgânicos necessários':'Orgánicos necesarios','Orgânicos já captados':'Orgánicos ya captados','Orgânicos que faltam':'Orgánicos que faltan',
@@ -296,6 +304,40 @@ const ES={
  'CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 17/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 75.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.':'Los CPL de partida y la inversión realizada vienen del dashboard de Oliver (Meta Ads, FB Pixel Complete Registration), actualizado el 17/11/2026. Las metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) y el presupuesto de US$ 75.000 se pueden cambiar arriba. Los valores ingresados quedan guardados solo en este navegador.'
 };
 const REG_ES=['Estados Unidos','Asia','Europa','Sudáfrica','LATAM','Brasil'];
+// ── Evolução a cada atualização (alimentar 1 linha por atualização) ──
+const HIST=[
+  {d:'16/11',dias:5,cpl:{USA:12.50,ASIA:0.63,EUR:9.56,LATAM:2.61,BRA:1.60},cplMed:6.76,paid:{USA:3423,ASIA:2157,EUR:343,SA:56,LATAM:1142,BRA:1920},org:{ENG:4600,ESP:671,PT:188},pagosFinal:11300,orgFalta:5941,verba:15263.88},
+  {d:'17/11',dias:4,cpl:{USA:13.63,ASIA:0.58,EUR:9.56,LATAM:2.62,BRA:1.62},cplMed:6.21,paid:{USA:3604,ASIA:2554,EUR:343,SA:56,LATAM:1202,BRA:1970},org:{ENG:5467,ESP:777,PT:212},pagosFinal:11231,orgFalta:5013,verba:9325},
+];
+const META_EVO=22700;
+function renderEvo(){
+  const H=HIST,n=H.length,nm=k=>{const i=REG.findIndex(r=>r.k===k);return i<0?k:(LANG==='es'?REG_ES[i]:REG[i].n)};
+  const fI2=v=>Math.round(v).toLocaleString('pt-BR'),fM2=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const vP=(a,b,inv)=>{if(b==null||!b)return '–';const p=(a/b-1)*100;if(Math.abs(p)<0.05)return L('igual','igual');const bad=inv?p<0:p>0;return `<span class="${bad?'up':'dn'}">${p>0?'+':''}${p.toFixed(1).replace('.',',')}%</span>`};
+  const vD=(a,b,goodUp)=>{if(b==null)return '–';const d=a-b;if(!d)return '0';const good=goodUp?d>0:d<0;return `<span class="${good?'dn':'up'}">${d>0?'+':''}${fI2(d)}</span>`};
+  const head=(t)=>`<thead><tr><th>${t}</th>${H.map(h=>`<th>${h.d}</th>`).join('')}<th>${L('Variação','Variación')}</th></tr></thead>`;
+  const row=(lab,vals,fmt,varf,cls)=>`<tr${cls?` class="${cls}"`:''}><td>${lab}</td>${vals.map(v=>`<td class="num">${v==null?'–':fmt(v)}</td>`).join('')}<td class="num">${n>1?varf(vals[n-1],vals[n-2]):'–'}</td></tr>`;
+  const tbl=(t,h,body)=>`<div class="evo-t"><h3>${t}</h3><table>${head(h)}<tbody>${body}</tbody></table></div>`;
+  const regs=['USA','ASIA','EUR','SA','LATAM','BRA'];
+  const cplB=regs.filter(k=>H.some(h=>h.cpl[k]!=null)).map(k=>row(nm(k),H.map(h=>h.cpl[k]),fM2,(a,b)=>vP(a,b))).join('')+row(L('Média projetada','Promedio proyectado'),H.map(h=>h.cplMed),fM2,(a,b)=>vP(a,b),'tot');
+  const pt=H.map(h=>regs.reduce((s,k)=>s+(h.paid[k]||0),0));
+  const paidB=regs.map(k=>row(nm(k),H.map(h=>h.paid[k]),fI2,(a,b)=>vD(a,b,true))).join('')+row('Total',pt,fI2,(a,b)=>vD(a,b,true),'tot');
+  const ot=H.map(h=>h.org.ENG+h.org.ESP+h.org.PT);
+  const orgB=['ENG','ESP','PT'].map(k=>row(k,H.map(h=>h.org[k]),fI2,(a,b)=>vD(a,b,true))).join('')+row('Total',ot,fI2,(a,b)=>vD(a,b,true),'tot');
+  const cap=H.map((h,i)=>pt[i]+ot[i]);
+  const resB=row(L('Leads já captados (pago + orgânico)','Leads ya captados (pagado + orgánico)'),cap,fI2,(a,b)=>vD(a,b,true))
+    +row(L('Faltam para a meta hoje','Faltan para la meta hoy'),cap.map(c=>Math.max(0,META_EVO-c)),fI2,(a,b)=>vD(a,b,false))
+    +row(L('Pagos no final (projeção)','Pagados al final (proyección)'),H.map(h=>h.pagosFinal),fI2,(a,b)=>vD(a,b,true))
+    +row(L('Orgânicos que faltam (com projeção)','Orgánicos que faltan (con proyección)'),H.map(h=>h.orgFalta),fI2,(a,b)=>vD(a,b,false))
+    +row(L('Verba restante para captação (US$)','Presupuesto restante para captación (US$)'),H.map(h=>h.verba),fM2,(a,b)=>{const d=a-b;return `${d>0?'+':''}${fM2(d)}`})
+    +row(L('Dias restantes','Días restantes'),H.map(h=>h.dias),fI2,()=>'');
+  $('evo').innerHTML=
+    tbl(L('Resumo','Resumen'),L('Indicador','Indicador'),resB)+
+    tbl('CPL (US$)',L('Região','Región'),cplB)+
+    tbl(L('Leads pagos já captados','Leads pagados ya captados'),L('Região','Región'),paidB)+
+    tbl(L('Leads orgânicos já captados','Leads orgánicos ya captados'),L('Idioma','Idioma'),orgB);
+}
+
 let LANG='pt';
 const L=(pt,es)=>LANG==='es'?es:pt;
 const tnodes=[];
@@ -307,7 +349,7 @@ function setLang(l){LANG=l;document.documentElement.lang=l==='es'?'es':'pt-BR';
   document.title=l==='es'?'Simulador de Leads BLACK26':'Simulador de Leads BLACK26';
   $('lPT').classList.toggle('on',l==='pt');$('lES').classList.toggle('on',l==='es');
   try{localStorage.setItem('simLang',l)}catch(e){}
-  calc()}
+  calc();renderEvo()}
 $('lPT').onclick=()=>{setLang('pt');if(location.hash==='#es')history.replaceState(null,'',' ')};
 $('lES').onclick=()=>{setLang('es');location.hash='es'};
 document.addEventListener('input',calc);
