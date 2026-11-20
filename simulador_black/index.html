@@ -107,7 +107,7 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
     <h2>Orçamento e prazo</h2>
     <div class="bgrid">
       <label for="budget"><span>Orçamento total (US$)</span><input id="budget" inputmode="decimal"><span class="hint">Meta Ads</span></label>
-      <label for="spent"><span>Já investido em captação (US$)</span><input id="spent" inputmode="decimal"><span class="hint">Inclui remarketing de captação · dash em 19/11</span></label>
+      <label for="spent"><span>Já investido em captação (US$)</span><input id="spent" inputmode="decimal"><span class="hint">Inclui remarketing de captação · dash em 20/11</span></label>
       <label for="days"><span>Dias restantes de captação</span><input id="days" inputmode="numeric"><span class="hint">Até a live de 21/11</span></label>
       <label for="rmk"><span>Total de investimento destinado para remarketing (até 30/nov)</span><input id="rmk" inputmode="decimal"><span class="hint">Campanhas de vendas pós-live</span></label>
       <label for="rmkUsed"><span>Remarketing já usado (US$)</span><input id="rmkUsed" inputmode="decimal"><span class="hint"></span></label>
@@ -119,7 +119,7 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
     <h2>Captação paga por região</h2>
     <div class="row-actions">
       <span class="hint">CPL base:</span>
-      <button type="button" id="cpl3" class="on">CPL atual (19/11)</button>
+      <button type="button" id="cpl3" class="on">CPL atual (20/11)</button>
     </div>
     <div class="slider" style="margin-bottom:12px">
       <label for="adj" style="flex:1">Ajuste geral de CPL (ex.: leilão mais caro na Black)
@@ -185,22 +185,22 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
     </div>
   </section>
 
-  <footer>CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 19/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 83.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.<button type="button" id="secret" aria-label="Detalhe interno">··</button></footer>
+  <footer>CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 20/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 83.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.<button type="button" id="secret" aria-label="Detalhe interno">··</button></footer>
 </div>
 
 <script>
 const REG=[
-  {k:'USA',n:'Estados Unidos',g:'ENG',paid:3826,c3:14.72,cA:7.52,mix:5196.15},
-  {k:'ASIA',n:'Ásia',g:'ENG',paid:3704,c3:0.45,cA:0.64,mix:206.74},
+  {k:'USA',n:'Estados Unidos',g:'ENG',paid:3935,c3:14.99,cA:7.52,mix:5196.15},
+  {k:'ASIA',n:'Ásia',g:'ENG',paid:4144,c3:0.43,cA:0.64,mix:206.74},
   {k:'EUR',n:'Europa',g:'ENG',paid:350,c3:10.20,cA:9.63,mix:403.42},
   {k:'SA',n:'África do Sul',g:'ENG',paid:56,c3:2.32,cA:2.37,mix:0},
-  {k:'LATAM',n:'LATAM',g:'ESP',paid:1295,c3:2.64,cA:1.71,mix:207.09},
-  {k:'BRA',n:'Brasil',g:'PT',paid:2013,c3:1.72,cA:2.97,mix:237.30},
+  {k:'LATAM',n:'LATAM',g:'ESP',paid:1332,c3:2.65,cA:1.71,mix:207.09},
+  {k:'BRA',n:'Brasil',g:'PT',paid:2099,c3:1.71,cA:2.97,mix:237.30},
 ];
-const GRP=[{k:'ENG',n:'ENG',meta:18700,org:5585},{k:'ESP',n:'ESP',meta:2000,org:795},{k:'PT',n:'PT',meta:2000,org:215}];
-const DEF={budget:83000,spent:68755.48,days:2,adj:0,rmk:5000,rmkUsed:0};
-const KEY='simBlack26v15';
-const PROP_OUT=[null,300,389,0,500,550];
+const GRP=[{k:'ENG',n:'ENG',meta:18700,org:5641},{k:'ESP',n:'ESP',meta:2000,org:801},{k:'PT',n:'PT',meta:2000,org:222}];
+const DEF={budget:83000,spent:72273.78,days:2,adj:0,rmk:5000,rmkUsed:0};
+const KEY='simBlack26v16';
+const PROP_OUT=[null,200,240,0,390,390];
 const PROP=()=>{const o=PROP_OUT.slice(1).reduce((a,b)=>a+b,0);return [Math.max(0,remaining()-o),...PROP_OUT.slice(1)]};
 const $=id=>document.getElementById(id);
 const fmtI=n=>Math.round(n).toLocaleString('pt-BR');
@@ -289,8 +289,8 @@ const ES={
  'Simulador de Leads BLACK26':'Simulador de Leads BLACK26',
  'Oliver Velez · projeção da captação paga por região e quantos leads orgânicos faltam para a meta de cada idioma. Todos os campos são editáveis.':'Oliver Velez · proyección de la captación pagada por región y cuántos leads orgánicos faltan para la meta de cada idioma. Todos los campos son editables.',
  'Orçamento e prazo':'Presupuesto y plazo','Orçamento total (US$)':'Presupuesto total (US$)','Já investido em captação (US$)':'Ya invertido en captación (US$)',
- 'Inclui remarketing de captação · dash em 19/11':'Incluye remarketing de captación · dashboard al 19/11','Dias restantes de captação':'Días restantes de captación','Até a live de 21/11':'Hasta el live del 21/11',
- 'Captação paga por região':'Captación pagada por región','CPL base:':'CPL base:','CPL atual (19/11)':'CPL actual (19/11)',
+ 'Inclui remarketing de captação · dash em 20/11':'Incluye remarketing de captación · dashboard al 20/11','Dias restantes de captação':'Días restantes de captación','Até a live de 21/11':'Hasta el live del 21/11',
+ 'Captação paga por região':'Captación pagada por región','CPL base:':'CPL base:','CPL atual (20/11)':'CPL actual (20/11)',
  'Acumulado LIVE21NOV':'Acumulado LIVE21NOV','Investimento:':'Inversión:','Distribuir pelo mix atual':'Distribuir según el mix actual','Proposta (11/11)':'Propuesta (11/11)',
  'Ajuste geral de CPL (ex.: leilão mais caro na Black)':'Ajuste general de CPL (ej.: subasta más cara en Black Friday)',
  'Região':'Región','Já captados (lead magnets + LIVE)':'Ya captados (lead magnets + LIVE)','Investimento restante (US$)':'Inversión restante (US$)',
@@ -301,7 +301,7 @@ const ES={
  'Investimento diário por região (uso interno)':'Inversión diaria por región (uso interno)','Dias':'Días','Diário (US$)':'Diario (US$)','Leads/dia esperados':'Leads/día esperados','YouTube, fora do Meta (US$)':'YouTube, fuera de Meta (US$)','Verba do Google Ads':'Presupuesto de Google Ads','Total de investimento destinado para remarketing (até 30/nov)':'Inversión total destinada a remarketing (hasta el 30/nov)','Meta Ads':'Meta Ads','Campanhas de vendas pós-live':'Campañas de ventas post-live','Remarketing já usado (US$)':'Remarketing ya usado (US$)','Campanhas RMKTCAPT (USA + EUR)':'Campañas RMKTCAPT (USA + EUR)','Investimento diário restante por país':'Inversión diaria restante por país','Pago cobre':'Pagado cubre','Orgânicos necessários':'Orgánicos necesarios','Orgânicos já captados':'Orgánicos ya captados','Orgânicos que faltam':'Orgánicos que faltan',
  'ENG = Estados Unidos + Ásia + Europa + África do Sul · ESP = LATAM · PT = Brasil':'ENG = Estados Unidos + Asia + Europa + Sudáfrica · ESP = LATAM · PT = Brasil',
  'Para bater a meta só com pago':'Para alcanzar la meta solo con pagado',
- 'CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 19/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 83.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.':'Los CPL de partida y la inversión realizada vienen del dashboard de Oliver (Meta Ads, FB Pixel Complete Registration), actualizado el 19/11/2026. Las metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) y el presupuesto de US$ 83.000 se pueden cambiar arriba. Los valores ingresados quedan guardados solo en este navegador.'
+ 'CPLs de partida e investimento já realizado vêm do dash do Oliver (Meta Ads, FB Pixel Complete Registration), atualizado em 20/11/2026. Metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) e orçamento de US$ 83.000 podem ser alterados acima. Os valores digitados ficam salvos só neste navegador.':'Los CPL de partida y la inversión realizada vienen del dashboard de Oliver (Meta Ads, FB Pixel Complete Registration), actualizado el 20/11/2026. Las metas por idioma (ENG 18.700, ESP 2.000, PT 2.000) y el presupuesto de US$ 83.000 se pueden cambiar arriba. Los valores ingresados quedan guardados solo en este navegador.'
 };
 const REG_ES=['Estados Unidos','Asia','Europa','Sudáfrica','LATAM','Brasil'];
 // ── Evolução a cada atualização (alimentar 1 linha por atualização) ──
@@ -310,6 +310,7 @@ const HIST=[
   {d:'17/11',dias:4,cpl:{USA:13.63,ASIA:0.58,EUR:9.56,LATAM:2.62,BRA:1.62},cplMed:6.21,paid:{USA:3604,ASIA:2554,EUR:343,SA:56,LATAM:1202,BRA:1970},org:{ENG:5067,ESP:737,PT:196},pagosFinal:11231,orgFalta:5469,verba:9325},
   {d:'18/11',dias:3,cpl:{USA:14.38,ASIA:0.48,EUR:10.20,LATAM:2.65,BRA:1.67},cplMed:5.83,paid:{USA:3735,ASIA:3195,EUR:348,SA:56,LATAM:1247,BRA:2013},org:{ENG:5287,ESP:757,PT:210},pagosFinal:11324,orgFalta:5122,verba:4255},
   {d:'19/11',dias:2,cpl:{USA:14.72,ASIA:0.45,EUR:10.20,LATAM:2.64,BRA:1.72},cplMed:5.36,paid:{USA:3826,ASIA:3704,EUR:350,SA:56,LATAM:1295,BRA:2013},org:{ENG:5585,ESP:795,PT:215},pagosFinal:12968,orgFalta:3137,verba:9244.52},
+  {d:'20/11',dias:2,cpl:{USA:14.99,ASIA:0.43,EUR:10.20,LATAM:2.65,BRA:1.71},cplMed:4.92,paid:{USA:3935,ASIA:4144,EUR:350,SA:56,LATAM:1332,BRA:2099},org:{ENG:5641,ESP:801,PT:222},pagosFinal:13080,orgFalta:2956,verba:5726.22},
 ];
 const META_EVO=22700;
 function renderEvo(){
