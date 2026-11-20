@@ -198,8 +198,8 @@ const REG=[
   {k:'BRA',n:'Brasil',g:'PT',paid:2099,c3:1.71,cA:2.97,mix:237.30},
 ];
 const GRP=[{k:'ENG',n:'ENG',meta:18700,org:5641},{k:'ESP',n:'ESP',meta:2000,org:801},{k:'PT',n:'PT',meta:2000,org:222}];
-const DEF={budget:83000,spent:72273.78,days:2,adj:0,rmk:5000,rmkUsed:0};
-const KEY='simBlack26v16';
+const DEF={budget:83000,spent:72273.78,days:1,adj:0,rmk:5000,rmkUsed:0};
+const KEY='simBlack26v17';
 const PROP_OUT=[null,200,240,0,390,390];
 const PROP=()=>{const o=PROP_OUT.slice(1).reduce((a,b)=>a+b,0);return [Math.max(0,remaining()-o),...PROP_OUT.slice(1)]};
 const $=id=>document.getElementById(id);
@@ -310,7 +310,7 @@ const HIST=[
   {d:'17/11',dias:4,cpl:{USA:13.63,ASIA:0.58,EUR:9.56,LATAM:2.62,BRA:1.62},cplMed:6.21,paid:{USA:3604,ASIA:2554,EUR:343,SA:56,LATAM:1202,BRA:1970},org:{ENG:5067,ESP:737,PT:196},pagosFinal:11231,orgFalta:5469,verba:9325},
   {d:'18/11',dias:3,cpl:{USA:14.38,ASIA:0.48,EUR:10.20,LATAM:2.65,BRA:1.67},cplMed:5.83,paid:{USA:3735,ASIA:3195,EUR:348,SA:56,LATAM:1247,BRA:2013},org:{ENG:5287,ESP:757,PT:210},pagosFinal:11324,orgFalta:5122,verba:4255},
   {d:'19/11',dias:2,cpl:{USA:14.72,ASIA:0.45,EUR:10.20,LATAM:2.64,BRA:1.72},cplMed:5.36,paid:{USA:3826,ASIA:3704,EUR:350,SA:56,LATAM:1295,BRA:2013},org:{ENG:5585,ESP:795,PT:215},pagosFinal:12968,orgFalta:3137,verba:9244.52},
-  {d:'20/11',dias:2,cpl:{USA:14.99,ASIA:0.43,EUR:10.20,LATAM:2.65,BRA:1.71},cplMed:4.92,paid:{USA:3935,ASIA:4144,EUR:350,SA:56,LATAM:1332,BRA:2099},org:{ENG:5641,ESP:801,PT:222},pagosFinal:13080,orgFalta:2956,verba:5726.22},
+  {d:'20/11',dias:1,cpl:{USA:14.99,ASIA:0.43,EUR:10.20,LATAM:2.65,BRA:1.71},cplMed:4.92,paid:{USA:3935,ASIA:4144,EUR:350,SA:56,LATAM:1332,BRA:2099},org:{ENG:5641,ESP:801,PT:222},pagosFinal:13080,orgFalta:2956,verba:5726.22},
 ];
 const META_EVO=22700;
 function renderEvo(){
