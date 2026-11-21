@@ -90,7 +90,7 @@ META_INVEST_REGIOES = [
     ("pais", "EUR",          "ENG (EUR)",               3500, None),
     ("pais", "ASIA|IND",     "ENG (Asia)",              1800, None),   # Asia = India+Israel+Singapura+Arabia Saudita+EAU+Malasia+Filipinas; "IND" mantido p/ campanhas antigas
     ("pais", "SOUTH_AFRICA", "ENG (South Africa)",       130, None),
-    ("camp", r"RMKT(?!CAPT)|RETARGET", "Remarketing (vendas pós-live)", 5000, None),
+    ("camp", r"RMKT(?!CAPT)|RETARGET|BLACK26-VENDA", "Vendas e remarketing (pós-live)", 5000, None),   # campanhas FTF-ENG/POR/ESP-BLACK26-VENDA entram aqui
 ]
 
 USAR_PESQUISA    = False
@@ -333,7 +333,7 @@ def build_meta_investimento(df_meta):
     subset = subset_for_group(df_meta, grupo)
     camp = subset["campaign"].astype(str).str.upper()
     pais_series = camp.str.split("-").str[1]
-    eh_extra = camp.str.contains(r"YOUTUBE|RMKT(?!CAPT)|RETARGET")
+    eh_extra = camp.str.contains(r"YOUTUBE|RMKT(?!CAPT)|RETARGET|BLACK26-VENDA")
 
     regioes = []
     for filtro, valor, label, meta, leads_proj in META_INVEST_REGIOES:
