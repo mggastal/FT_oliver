@@ -47,8 +47,9 @@ USAR_CRIATIVOS   = True
 # País (2º token do nome da campanha, ex: FTF-USA-...) -> IDIOMA da aba Criativos
 IDIOMA_POR_PAIS = {
     "USA": "ENG", "EUR": "ENG", "IND": "ENG", "ASIA": "ENG", "SOUTH_AFRICA": "ENG",
-    "BRA": "PT",
+    "BRA": "PT", "POR": "PT",
     "LATAM": "ESP", "ESPANHA": "ESP", "ESP": "ESP",
+    "ENG": "ENG",   # campanhas de venda: o 2o token e a lingua, nao o pais
 }
 
 # ══ META DE INVESTIMENTO POR REGIÃO ═══════════════════
@@ -171,6 +172,9 @@ def _drive_id(link):
 # _EN/_ES/_PT indica o idioma (usado se a coluna IDIOMA estiver vazia).
 _CRIT_COD_RE = re.compile(r"^(?:BL(\d{2})|([A-Z][A-Z0-9]*))_(IMG|VC|VD)(\d+)CAPT([A-Z]+)(?:_(EN|ES|PT))?$")
 _LANG_SUFIXO = {"EN":"ENG","ES":"ESP","PT":"PT"}
+# Venda (campanha por lingua): IMG01VENDAFEED_EN, VD01VENDASTORY_PT. Video multi-idioma pode ter
+# IDIOMA = ALL (ou o mesmo link nas 3 linguas); a busca tenta a lingua da campanha e depois ALL.
+_VENDA_RE = re.compile(r"^(IMG|VD)(\d+)VENDA(FEED|STORY)(?:_(EN|ES|PT))?$")
 
 def load_criativos():
     """Le a aba Criativos e monta 2 dicionarios de cruzamento:
@@ -194,6 +198,15 @@ def load_criativos():
         link = r.get("Link", "")
         did = _drive_id(link)
         if not did: continue
+        mv_ = _VENDA_RE.match(cod)
+        if mv_:
+            kind_, num_s_, suf_, lang_ = mv_.groups()
+            idi_ = idioma or (_LANG_SUFIXO[lang_] if lang_ else "ALL")
+            if idi_ == "ALL" and kind_ == "IMG": continue  # imagem precisa de idioma
+            if kind_ == "IMG": img[(idi_, "VENDA", int(num_s_), suf_)] = did
+            else: vid[("VENDA", int(num_s_), idi_)] = did
+            n_ok += 1
+            continue
         m = _CRIT_COD_RE.match(cod)
         if not m: continue
         bl_num, acao, kind, num_s, suf, lang_suf = m.groups()
@@ -226,6 +239,15 @@ def criativo_do_anuncio(campaign, adset, ad, crit_img, crit_vid):
     partes = campaign.split("-")
     pais = partes[1] if len(partes) > 1 else None
     idioma = IDIOMA_POR_PAIS.get(pais)
+
+    # venda (ex: VD01VENDAFEED_EN, IMG01VENDASTORY_PT): lingua do sufixo, senao a da campanha
+    mva = _VENDA_RE.match(ad_name)
+    if mva:
+        kind_, num_s_, suf_, lang_ = mva.groups()
+        idi_ = _LANG_SUFIXO[lang_] if lang_ else idioma
+        if kind_ == "IMG":
+            return (crit_img.get((idi_, "VENDA", int(num_s_), suf_)) if idi_ else None), False
+        return (crit_vid.get(("VENDA", int(num_s_), idi_)) or crit_vid.get(("VENDA", int(num_s_), "ALL"))), True
 
     # video com nome de acao (ex: LIVE21NOV_VC9CAPTFEED): sem idioma, chave (acao, numero VC)
     mv = _AD_VCN_RE.match(ad_name)
